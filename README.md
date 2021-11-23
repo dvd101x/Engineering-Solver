@@ -7,7 +7,7 @@ A tool for doing numerical calculations fast. It includes units, thermodynamic p
 
 ## Quick start
 
-Open this repl (Engineering-Solver)[https://replit.com/@dvd101x/Engineering-Solver]
+Open this repl [Engineering-Solver](https://replit.com/@dvd101x/Engineering-Solver)
 
 Write a few statements like:
 
