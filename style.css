@@ -1,0 +1,100 @@
+body {
+		margin: 0;
+		padding: 0;
+		background-color: #ececec;
+	}
+
+	#WorkArea {
+		top: 40px;
+		height: 90%;
+	}
+
+	#INPUT {
+    position: absolute;
+		left: 0;
+		width: 60%;
+		height: inherit;
+		top: inherit;
+	}
+
+	#OUTPUT {
+		position: absolute;
+		left: 60%;
+		width: 40%;
+		height: inherit;
+		top: inherit;
+	}
+
+	#topMenu {
+		height: 40px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+	}
+
+	#tabs {
+		display: inline;
+		font-size: 11pt;
+	}
+
+	#tabs input {
+		display: none;
+	}
+
+	/* hide radio buttons */
+	#tabs input+label {
+		display: inline-block
+	}
+
+	/* show labels in line */
+	#tabs input~.tab {
+		display: none
+	}
+
+	/* hide contents */
+
+	#tabs input+label {
+		/* box with rounded corner */
+		border: 1px solid #ececec;
+		background: #ececec;
+		margin: 4px 2px;
+		padding: 4px 10px;
+		border-radius: 12px;
+		position: relative;
+		top: 1px;
+		font-family: Arial, sans-serif;
+    font-weight: bold;
+	}
+
+	#tabs input:checked+label {
+		/* white background for selected tab */
+		background: #FFF;
+    border: 1px solid #ccc;
+	}
+
+	#tabs input:hover+label {
+		background-color: #ddd;
+	}
+
+  fieldset{
+    border:0;
+    margin:0;
+    padding:0
+  }
+
+	#input~.tab {
+		/* grey line between tab and contents */
+		border-top: 1px solid #999;
+		padding: 12px;
+	}
+
+	#samples {
+		float: right;
+		font-size: 10pt;
+    margin: 4px 2px;
+		padding: 4px 10px;
+		font-size: 12pt;
+	}
+
+  #samples button{
+    border-radius: 12 px;
+    font-weight: bolder;
+  }
