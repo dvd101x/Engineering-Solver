@@ -12,12 +12,11 @@ A tool for doing numerical calculations fast. It includes units, thermodynamic p
 Open this repl [Engineering-Solver](https://replit.com/@dvd101x/Engineering-Solver)
 
 Write a few statements like:
-
+```
 2+2
-
 3 m to mm
-
 3 m + 2 in to mm
+```
 
 Then add a few samples from the right menu
 
