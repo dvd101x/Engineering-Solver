@@ -52,8 +52,8 @@ Work with calculations, variables, arrays, objects and others on a quick an inst
 * [ ] Tabs (rename, reorder, open and close) like caret
 
 # Maybe
-* [ ] Copy mathjs command line
-* [ ] Copy jupyter lite interface
+* [ ] Emulate mathjs command line
+* [ ] Emulate jupyter lite interface
 * [ ] js folders
 * [ ] Better styling with grid
 
