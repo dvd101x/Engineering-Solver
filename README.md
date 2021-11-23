@@ -5,7 +5,7 @@ Engineering Solver helps to do calculations with units and thermodynamic propert
 
 A tool for doing numerical calculations fast. It includes units, thermodynamic properties and many more.
 
-![MainFigure](Engineering-Calculator.jpg)
+[![MainFigure](Engineering-Calculator.jpg)](https://replit.com/@dvd101x/Engineering-Solver)
 
 ## Quick start
 
