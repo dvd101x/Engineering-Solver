@@ -49,14 +49,13 @@ Work with calculations, variables, arrays, objects and others on a quick an inst
   * [ ] Commented samples
   * [ ] More samples
   * [ ] Split samples in selection groups
-* [ ] Think about a notebook interface, where the editor is only on the current cell, with buttons for calculate all, calculate this and previous, calculate this and after.
+* [ ] Notebook interface (like jupyter lite, mathnotepad or wolfram)
 * [ ] Some help files
 * [ ] Implement for cycles
-* [ ] Tabs (rename, reorder, open and close) like caret
+* [ ] Tabs (rename, reorder, open and close) like caret editor
 
 # Maybe
-* [ ] Emulate mathjs command line
-* [ ] Emulate jupyter lite interface
+* [ ] Emulate mathjs command line functions
 * [ ] js folders
 * [ ] Better styling with grid
 
