@@ -4,12 +4,10 @@ importScripts("https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.5.1/math.js",'coo
 
 math.import({props, HAprops,phase})
 
-const firstResponse = {
-  mathResult: "Type on the input to get results or \ninsert samples with the top menu. \nThis wokrs by using mathjs.org, coolprop.org and ace.c9.io",
-  err : null
-}
+const firstResponse =
+    "Type on the input to get results or \ninsert samples with the top menu. \nThis wokrs by using mathjs.org, coolprop.org and ace.c9.io";
 
-postMessage(JSON.stringify(firstResponse))
+postMessage(firstResponse);
 
 onmessage = function (oEvent) {
     let output_lines = [];
@@ -23,8 +21,5 @@ onmessage = function (oEvent) {
         }
     }
 
-    // build a response
-    const response = { mathResult: output_lines.join('\n') }
-
-    postMessage(JSON.stringify(response))
+    postMessage(output_lines.join('\n'));
 };
