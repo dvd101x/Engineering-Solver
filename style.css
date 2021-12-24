@@ -41,12 +41,12 @@ body {
 
 /* hide radio buttons */
 #tabs input+label {
-	display: inline-block
+	display: inline-block;
 }
 
 /* show labels in line */
 #tabs input~.tab {
-	display: none
+	display: none;
 }
 
 /* hide contents */
@@ -74,10 +74,10 @@ body {
 	background-color: #ddd;
 }
 
-fieldset{
-	border:0;
-	margin:0;
-	padding:0
+fieldset {
+	border: 0;
+	margin: 0;
+	padding: 0;
 }
 
 #input~.tab {
@@ -94,7 +94,7 @@ fieldset{
 	font-size: 12pt;
 }
 
-#samples button{
+#samples button {
 	border-radius: 12 px;
 	font-weight: bolder;
 }
