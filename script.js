@@ -8,7 +8,7 @@ const listOfSessions = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9 }
 //["080708","3772ff","df2935","cad2c5","e6e8e6"]
 var sessions = {}
 
-ace.config.set('basePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12')
+ace.config.set('basePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13')
 
 var EditSession = require("ace/edit_session").EditSession;
 var UndoManager = require("ace/undomanager").UndoManager;
