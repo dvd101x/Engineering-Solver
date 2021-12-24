@@ -12,6 +12,7 @@ const firstResponse = {
 postMessage(JSON.stringify(firstResponse))
 
 onmessage = function (oEvent) {
+    let err = '';
     const YFXinput = oEvent.data.split('\n')
     try {
         let output_lines = [];
