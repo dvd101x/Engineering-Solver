@@ -13,22 +13,25 @@ postMessage(JSON.stringify(firstResponse))
 
 onmessage = function (oEvent) {
     let err = '';
+    let output_lines = [];
     const YFXinput = oEvent.data.split('\n')
     try {
-        let output_lines = [];
         let scope = {};
         for (const line of YFXinput) {
             output_lines.push(math.evaluate(line, scope));
         }
-        YFXoutput = output_lines.join('\n')
     } catch (e) {
-        YFXoutput=null,
         err = e
     }
+
     // build a response
-    const response = {
-        mathResult: YFXoutput,
-        err: err.toString()
+    let response;
+    if (!err) {
+        YFXoutput = output_lines.join('\n')
+        response = { mathResult: YFXoutput }
+    } else {
+        response = { err: err.toString() }
     }
+
     postMessage(JSON.stringify(response))
 };
