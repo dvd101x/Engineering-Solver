@@ -14,11 +14,13 @@ onmessage = function (oEvent) {
     let scope = {};
 
     for (const line of oEvent.data.split('\n')) {
+        let output;
         try {
-            output_lines.push(math.evaluate(line, scope));
+            output = math.evaluate(line, scope);
         } catch (e) {
-            output_lines.push(e);
+            output = e;
         }
+        output_lines.push(output);
     }
 
     postMessage(output_lines.join('\n'));
