@@ -46,7 +46,7 @@ editor.setSession(sessions[tabIDs.value]);
 var results = ace.edit("OUTPUT");
 results.setTheme("ace/theme/chrome");
 results.setReadOnly(true);
-results.session.setMode("ace/mode/Text");
+results.session.setMode("ace/mode/text");
 
 var numberOfLines = editor.session.getLength();
 
