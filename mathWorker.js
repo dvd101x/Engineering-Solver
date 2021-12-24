@@ -14,7 +14,12 @@ postMessage(JSON.stringify(firstResponse))
 onmessage = function (oEvent) {
     const YFXinput = oEvent.data.split('\n')
     try {
-        YFXoutput = math.evaluate(YFXinput).join('\n')
+        let output_lines = [];
+        let scope = {};
+        for (const line of YFXinput) {
+            output_lines.push(math.evaluate(line, scope));
+        }
+        YFXoutput = output_lines.join('\n')
     } catch (e) {
         YFXoutput=null,
         err = e
