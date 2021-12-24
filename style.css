@@ -25,7 +25,7 @@ body {
 	top: inherit;
 }
 
-#topMenu {
+[name=topBar] {
 	height: 40px;
 	font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
