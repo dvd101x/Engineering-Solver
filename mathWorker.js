@@ -12,7 +12,6 @@ const firstResponse = {
 postMessage(JSON.stringify(firstResponse))
 
 onmessage = function (oEvent) {
-    let err = '';
     let output_lines = [];
     let scope = {};
 
@@ -20,17 +19,12 @@ onmessage = function (oEvent) {
         try {
             output_lines.push(math.evaluate(line, scope));
         } catch (e) {
-            err = e
+            output_lines.push(e);
         }
     }
 
     // build a response
-    let response;
-    if (!err) {
-        response = { mathResult: output_lines.join('\n') }
-    } else {
-        response = { err: err.toString() }
-    }
+    const response = { mathResult: output_lines.join('\n') }
 
     postMessage(JSON.stringify(response))
 };

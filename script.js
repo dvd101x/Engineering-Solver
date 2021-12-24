@@ -55,13 +55,8 @@ var mathWorker = new Worker("mathWorker.js");
 mathWorker.onmessage = function (oEvent) {
   const callback = JSON.parse(oEvent.data)
   mathResults = callback.mathResult
-  if (mathResults != null) {
-    results.setValue(mathResults)
-  }
-  else {
-    results.setValue(callback.err)
-  }
-  if (mathResults != null || numberOfLines != editor.session.getLength()) {
+  results.setValue(mathResults)
+  if (numberOfLines != editor.session.getLength()) {
     saveSession(tabIDs.value)
   }
   numberOfLines = editor.session.getLength();
