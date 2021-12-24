@@ -14,10 +14,9 @@ postMessage(JSON.stringify(firstResponse))
 onmessage = function (oEvent) {
     let err = '';
     let output_lines = [];
-    const YFXinput = oEvent.data.split('\n')
     try {
         let scope = {};
-        for (const line of YFXinput) {
+        for (const line of oEvent.data.split('\n')) {
             output_lines.push(math.evaluate(line, scope));
         }
     } catch (e) {
@@ -27,8 +26,7 @@ onmessage = function (oEvent) {
     // build a response
     let response;
     if (!err) {
-        YFXoutput = output_lines.join('\n')
-        response = { mathResult: YFXoutput }
+        response = { mathResult: output_lines.join('\n') }
     } else {
         response = { err: err.toString() }
     }
