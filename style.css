@@ -2,27 +2,22 @@ body {
 	margin: 0;
 	padding: 0;
 	background-color: #ececec;
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
 }
 
 #WorkArea {
-	top: 40px;
-	height: 90%;
+	display: flex;
+	flex: 1;
 }
 
 #INPUT {
-	position: absolute;
-	left: 0;
-	width: 60%;
-	height: inherit;
-	top: inherit;
+	flex: 3;
 }
 
 #OUTPUT {
-	position: absolute;
-	left: 60%;
-	width: 40%;
-	height: inherit;
-	top: inherit;
+	flex: 2;
 }
 
 [name=topBar] {
