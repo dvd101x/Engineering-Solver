@@ -14,13 +14,14 @@ postMessage(JSON.stringify(firstResponse))
 onmessage = function (oEvent) {
     let err = '';
     let output_lines = [];
-    try {
-        let scope = {};
-        for (const line of oEvent.data.split('\n')) {
+    let scope = {};
+
+    for (const line of oEvent.data.split('\n')) {
+        try {
             output_lines.push(math.evaluate(line, scope));
+        } catch (e) {
+            err = e
         }
-    } catch (e) {
-        err = e
     }
 
     // build a response
