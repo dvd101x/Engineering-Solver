@@ -3,28 +3,25 @@ importScripts("https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.5.1/math.js",'coo
 // 'http://www.coolprop.sourceforge.net/jscript/coolprop.js'
 
 math.import({props, HAprops,phase})
-const YFX = self.math.parser()
 
-const firstResponse = {
-  mathResult: "Type on the input to get results or \ninsert samples with the top menu. \nThis wokrs by using mathjs.org, coolprop.org and ace.c9.io",
-  err : null
-}
+const firstResponse =
+    "Type on the input to get results or \ninsert samples with the top menu. \nThis wokrs by using mathjs.org, coolprop.org and ace.c9.io";
 
-postMessage(JSON.stringify(firstResponse))
+postMessage(firstResponse);
 
 onmessage = function (oEvent) {
-    YFX.clear()
-    const YFXinput = oEvent.data.split('\n')
-    try {
-        YFXoutput = YFX.evaluate(YFXinput).join('\n')
-    } catch (e) {
-        YFXoutput=null,
-        err = e
+    let output_lines = [];
+    let scope = {};
+
+    for (const line of oEvent.data.split('\n')) {
+        let output;
+        try {
+            output = math.evaluate(line, scope);
+        } catch (e) {
+            output = e;
+        }
+        output_lines.push(output);
     }
-    // build a response
-    const response = {
-        mathResult: YFXoutput,
-        err: err.toString()
-    }
-    postMessage(JSON.stringify(response))
+
+    postMessage(output_lines.join('\n'));
 };
