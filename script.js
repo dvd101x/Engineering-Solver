@@ -3,7 +3,7 @@ const tabsField = document.getElementById("tabs")
 const insertButton = document.getElementById('sampleInsert')
 const sampleSelect = document.getElementById('sampleSelector')
 const listOfSessions = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9 }
-const wait = 100;
+const wait = 200;
 
 /* Array */
 //["080708","3772ff","df2935","cad2c5","e6e8e6"]
