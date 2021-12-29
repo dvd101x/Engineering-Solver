@@ -3,6 +3,7 @@ const tabsField = document.getElementById("tabs")
 const insertButton = document.getElementById('sampleInsert')
 const sampleSelect = document.getElementById('sampleSelector')
 const listOfSessions = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9 }
+const wait = 100;
 
 /* Array */
 //["080708","3772ff","df2935","cad2c5","e6e8e6"]
@@ -36,14 +37,19 @@ tabsField.addEventListener('change', event => {
 insertButton.addEventListener('click', () => { insertSampleFunc(sampleSelect.value) })
 
 // ace
+var timer;
 var editor = ace.edit("INPUT");
 editor.setTheme("ace/theme/monokai");
-editor.on("change", sendWorkToMathWorker);
+editor.on("change", code => {
+  clearTimeout(timer);
+  timer = setTimeout(sendWorkToMathWorker, wait, code);
+});
 editor.setSession(sessions[tabIDs.value]);
 
 var results = ace.edit("OUTPUT");
 results.setTheme("ace/theme/chrome");
 results.setReadOnly(true);
+results.renderer.setShowGutter(false);
 results.session.setMode("ace/mode/text");
 
 var numberOfLines = editor.session.getLength();
@@ -52,8 +58,9 @@ var mathWorker = new Worker("mathWorker.js");
 
 mathWorker.onmessage = function (oEvent) {
   results.setValue(oEvent.data);
+  results.clearSelection();
   if (numberOfLines != editor.session.getLength()) {
     saveSession(tabIDs.value)
-  }
+  };
   numberOfLines = editor.session.getLength();
 };
