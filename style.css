@@ -81,7 +81,7 @@ fieldset {
 	padding: 12px;
 }
 
-#samples {
+#examples {
 	float: right;
 	font-size: 10pt;
 	margin: 4px 2px;
@@ -89,7 +89,7 @@ fieldset {
 	font-size: 12pt;
 }
 
-#samples button {
+#examples button {
 	border-radius: 12 px;
 	font-weight: bolder;
 }

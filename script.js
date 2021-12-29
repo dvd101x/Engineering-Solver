@@ -1,7 +1,7 @@
 const tabIDs = document.forms.topBar.elements.sessionTab
 const tabsField = document.getElementById("tabs")
-const insertButton = document.getElementById('sampleInsert')
-const sampleSelect = document.getElementById('sampleSelector')
+const insertButton = document.getElementById('exampleInsert')
+const exampleSelect = document.getElementById('exampleSelector')
 const listOfSessions = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9 }
 const wait = 200;
 
@@ -34,7 +34,7 @@ tabsField.addEventListener('change', event => {
   editor.focus()
 })
 
-insertButton.addEventListener('click', () => { insertSampleFunc(sampleSelect.value) })
+insertButton.addEventListener('click', () => { insertExampleFunc(exampleSelect.value) })
 
 // ace
 var timer;
