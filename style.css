@@ -20,6 +20,22 @@ body {
 	flex: 2;
 }
 
+#outputTable {
+	font-family: 'Courier New', Courier, monospace;
+	font-size: 0.8em;
+}
+
+#outputTable td:nth-child(1){
+	text-align: right;
+	vertical-align: top;
+	color: gray;
+	padding: 0em 1em 0em 1em;
+}
+
+#outputTable td:nth-child(2){
+	text-align: left;
+}
+
 [name=topBar] {
 	height: 40px;
 	font-family: Verdana, Geneva, Tahoma, sans-serif;

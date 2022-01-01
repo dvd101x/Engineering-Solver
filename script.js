@@ -2,6 +2,7 @@ const tabIDs = document.forms.topBar.elements.sessionTab
 const tabsField = document.getElementById("tabs")
 const insertButton = document.getElementById('exampleInsert')
 const exampleSelect = document.getElementById('exampleSelector')
+const outputTable = document.getElementById("outputTable")
 const listOfSessions = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9 }
 const wait = 200;
 
@@ -47,30 +48,32 @@ editor.on("change", code => {
   timer = setTimeout(sendWorkToMathWorker, wait, code);
 });
 editor.setSession(sessions[tabIDs.value]);
-editor.renderer.setShowGutter(false);
 
+/*
 var results = ace.edit("OUTPUT");
 results.setTheme("ace/theme/chrome");
 results.setReadOnly(true);
 results.renderer.setShowGutter(false);
 results.session.setMode("ace/mode/text");
+*/
 
 var numberOfLines = editor.session.getLength();
 
 var mathWorker = new Worker("mathWorker.js");
 
 mathWorker.onmessage = function (oEvent) {
+  //results.setValue(oEvent.data);
+  //results.clearSelection();
   response = JSON.parse(oEvent.data)
   console.log(response)
-  const lines = response.outputs
-  const filteredLines = lines.filter(line => 
-    line != "[]" && line != "" && line != "undefined"
-  );
-  console.log(filteredLines)
-  outputs = filteredLines.join("\n")
-  console.log(outputs)
-  results.setValue(outputs);
-  results.clearSelection();
+  const results = response.outputs
+  let table = ""
+  results.forEach((line, N) => {
+    if (line != "[]" && line != "" && line != "undefined")
+      table += "<tr><td>" + (N + 1) + "</td><td>" + line.split("\n").join("<br>") + "</tr>"
+  });
+  outputTable.innerHTML = table;
+
   if (numberOfLines != editor.session.getLength()) {
     saveSession(tabIDs.value)
   };
