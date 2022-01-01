@@ -25,7 +25,9 @@ function saveSession(sessionID) {
 
 function sendWorkToMathWorker() {
   if (editor.getValue() != "") {
-    mathWorker.postMessage(editor.getValue());
+    const expressions = editor.getValue().split("\n");
+    const request = { expr: expressions }
+    mathWorker.postMessage(JSON.stringify(request))
   }
 }
 
@@ -45,6 +47,7 @@ editor.on("change", code => {
   timer = setTimeout(sendWorkToMathWorker, wait, code);
 });
 editor.setSession(sessions[tabIDs.value]);
+editor.renderer.setShowGutter(false);
 
 var results = ace.edit("OUTPUT");
 results.setTheme("ace/theme/chrome");
@@ -57,7 +60,16 @@ var numberOfLines = editor.session.getLength();
 var mathWorker = new Worker("mathWorker.js");
 
 mathWorker.onmessage = function (oEvent) {
-  results.setValue(oEvent.data);
+  response = JSON.parse(oEvent.data)
+  console.log(response)
+  const lines = response.outputs
+  const filteredLines = lines.filter(line => 
+    line != "[]" && line != "" && line != "undefined"
+  );
+  console.log(filteredLines)
+  outputs = filteredLines.join("\n")
+  console.log(outputs)
+  results.setValue(outputs);
   results.clearSelection();
   if (numberOfLines != editor.session.getLength()) {
     saveSession(tabIDs.value)

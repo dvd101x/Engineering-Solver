@@ -1,35 +1,33 @@
 importScripts("https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.1/math.js", 'coolprop.js', 'fluidProperties.js')
 
-// 'http://www.coolprop.sourceforge.net/jscript/coolprop.js'
-
 math.import({ props, HAprops, phase })
 const parser = self.math.parser()
 
-const firstResponse =
-    "Type on the input to get results or \ninsert samples with the top menu. \nThis wokrs by using mathjs.org, coolprop.org and ace.c9.io";
+const firstResponse = {
+    outputs: ["Type on the input to see results"]
+}
 
-postMessage(firstResponse);
+postMessage(JSON.stringify(firstResponse));
 
-function doMath(inputs){
+function doMath(inputs) {
     let output = [];
     parser.clear();
-    inputs.forEach((input, inputIndex) => {
+    inputs.forEach(input => {
         try {
             output_line = parser.evaluate(input);
         }
         catch (e) {
             output_line = e;
         }
-        // Checks for unwanted outputs like [], [[]], function() ..., null, etc.
-        if (output_line && output_line.toString() != "[]" && output_line.toString() != "[[]]"&& typeof (output_line) != "function" && output_line.toString() != "[object Object]") {
-            // Formats the output showing from which line it comes from and accounts for multiple line outputs
-            output.push((inputIndex + 1) + ":" + math.format(output_line, 14).split("\n").map(l => "\t" + l).join("\n"))
-        }
+        output.push(math.format(output_line,14))
     })
     return output
 }
 
 onmessage = function (oEvent) {
-    const inputs = oEvent.data.split('\n');
-    postMessage(doMath(inputs).join('\n'));
+    const inputs = JSON.parse(oEvent.data);
+    const response = {
+        outputs: doMath(inputs.expr),
+    }
+    postMessage(JSON.stringify(response));
 };
