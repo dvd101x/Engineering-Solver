@@ -10,6 +10,7 @@ body {
 #WorkArea {
 	display: flex;
 	flex: 1;
+	overflow: hidden;
 }
 
 #INPUT {
@@ -18,6 +19,7 @@ body {
 
 #OUTPUT {
 	flex: 2;
+	overflow: auto;
 }
 
 #outputTable {
