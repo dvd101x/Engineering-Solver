@@ -10,18 +10,15 @@ const firstResponse = {
 postMessage(JSON.stringify(firstResponse));
 
 function doMath(inputs) {
-    let output = [];
     parser.clear();
-    inputs.forEach(input => {
+    return inputs.map(input => {
         try {
-            output_line = parser.evaluate(input);
+            return math.format(parser.evaluate(input), 14)
         }
         catch (e) {
-            output_line = e;
+            return e.toString()
         }
-        output.push(math.format(output_line,14))
     })
-    return output
 }
 
 onmessage = function (oEvent) {
