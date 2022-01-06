@@ -49,23 +49,12 @@ editor.on("change", code => {
 });
 editor.setSession(sessions[tabIDs.value]);
 
-/*
-var results = ace.edit("OUTPUT");
-results.setTheme("ace/theme/chrome");
-results.setReadOnly(true);
-results.renderer.setShowGutter(false);
-results.session.setMode("ace/mode/text");
-*/
-
 var numberOfLines = editor.session.getLength();
 
 var mathWorker = new Worker("mathWorker.js");
 
 mathWorker.onmessage = function (oEvent) {
-  //results.setValue(oEvent.data);
-  //results.clearSelection();
   response = JSON.parse(oEvent.data)
-  console.log(response)
   const results = response.outputs
   let table = ""
   results.forEach((line, N) => {
