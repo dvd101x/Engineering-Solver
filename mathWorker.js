@@ -1,4 +1,4 @@
-importScripts("https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.1/math.js", 'coolprop.js', 'fluidProperties.js')
+importScripts("https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.1/math.js", 'https://cdn.jsdelivr.net/npm/coolporp@1.0.0/coolprop.js', 'fluidProperties.js')
 
 math.import({ props, HAprops, phase })
 const parser = self.math.parser()
