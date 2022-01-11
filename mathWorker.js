@@ -4,27 +4,27 @@ math.import({ props, HAprops, phase })
 const parser = self.math.parser()
 
 const firstResponse = {
-    outputs: ["Type on the input to see results"]
+  outputs: ["Type on the input to see results"]
 }
 
 postMessage(JSON.stringify(firstResponse));
 
 function doMath(inputs) {
-    parser.clear();
-    return inputs.map(input => {
-        try {
-            return math.format(parser.evaluate(input), 14)
-        }
-        catch (e) {
-            return e.toString()
-        }
-    })
+  parser.clear();
+  return inputs.map(input => {
+    try {
+      return math.format(parser.evaluate(input), 14)
+    }
+    catch (e) {
+      return e.toString()
+    }
+  })
 }
 
 onmessage = function (oEvent) {
-    const inputs = JSON.parse(oEvent.data);
-    const response = {
-        outputs: doMath(inputs.expr),
-    }
-    postMessage(JSON.stringify(response));
+  const inputs = JSON.parse(oEvent.data);
+  const response = {
+    outputs: doMath(inputs.expr),
+  }
+  postMessage(JSON.stringify(response));
 };
