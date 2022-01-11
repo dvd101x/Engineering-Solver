@@ -14,49 +14,52 @@
 		<form name="topBar">
 			<fieldset id='tabs'>
 				<input type="radio" value="1" name="sessionTab" id="tab1" checked>
-      <label for="tab1">1</label>
-      <input type="radio" value="2" name="sessionTab" id="tab2">
-      <label for="tab2">2</label>
-      <input type="radio" value="3" name="sessionTab" id="tab3">
-      <label for="tab3">3</label>
-      <input type="radio" value="4" name="sessionTab" id="tab4">
-      <label for="tab4">4</label>
-      <input type="radio" value="5" name="sessionTab" id="tab5">
-      <label for="tab5">5</label>
-      <input type="radio" value="6" name="sessionTab" id="tab6">
-      <label for="tab6">6</label>
-      <input type="radio" value="7" name="sessionTab" id="tab7">
-      <label for="tab7">7</label>
-      <input type="radio" value="8" name="sessionTab" id="tab8">
-      <label for="tab8">8</label>
-      <input type="radio" value="9" name="sessionTab" id="tab9">
-      <label for="tab9">9</label>
-    </fieldset>
-    <fieldset id="examples" style="float: right;">
-			<label for="exampleSelector">Examples:</label>
-      <select id="exampleSelector" name="example">
-          <option value="basicUsage">Basic Usage</option>
-          <option value="units">Units</option>
-          <option value="strings">Strings</option>
-          <option value="matrices">Matrices</option>
-          <option value="objects">Objects</option>
-          <option value="coolprop">Fluid Properties</option>
-          <option value="coolpropHigh">coolprop website</option>
-          <option value="VaporCompressionCycle">Vapor Compression Cycle</option>
-          <option value="refCycleWithRecuperator">Recuperator</option>
-      </select>
-      <button type="button" id="exampleInsert" name = "insertExample">+</button>
-    </fieldset>
-  </form>
-</nav>
-<div id="WorkArea">
-  <div id="INPUT"></div>
-  <div id="OUTPUT">
-    <table id='outputTable'></table>
+        <label for="tab1">1</label>
+        <input type="radio" value="2" name="sessionTab" id="tab2">
+        <label for="tab2">2</label>
+        <input type="radio" value="3" name="sessionTab" id="tab3">
+        <label for="tab3">3</label>
+        <input type="radio" value="4" name="sessionTab" id="tab4">
+        <label for="tab4">4</label>
+        <input type="radio" value="5" name="sessionTab" id="tab5">
+        <label for="tab5">5</label>
+        <input type="radio" value="6" name="sessionTab" id="tab6">
+        <label for="tab6">6</label>
+        <input type="radio" value="7" name="sessionTab" id="tab7">
+        <label for="tab7">7</label>
+        <input type="radio" value="8" name="sessionTab" id="tab8">
+        <label for="tab8">8</label>
+        <input type="radio" value="9" name="sessionTab" id="tab9">
+        <label for="tab9">9</label>
+      </fieldset>
+      <fieldset id="examples" style="float: right;">
+        <label for="exampleSelector">Examples:</label>
+        <select id="exampleSelector" name="example">
+            <option value="basicUsage">Basic Usage</option>
+            <option value="units">Units</option>
+            <option value="strings">Strings</option>
+            <option value="matrices">Matrices</option>
+            <option value="objects">Objects</option>
+            <option value="coolprop">Fluid Properties</option>
+            <option value="coolpropHigh">coolprop website</option>
+            <option value="VaporCompressionCycle">Vapor Compression Cycle</option>
+            <option value="refCycleWithRecuperator">Recuperator</option>
+        </select>
+        <button type="button" id="exampleInsert" name = "insertExample">+</button>
+      </fieldset>
+    </form>
+  </nav>
+
+  <div id="WorkArea">
+    <div id="INPUT"></div>
+    <div id="OUTPUT">
+      <table id='outputTable'></table>
+    </div>
   </div>
-</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13/ace.min.js" type="text/javascript" charset="utf-8"></script>
-<script src="script.js"></script>
-<script src="examples.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13/ace.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="script.js"></script>
+  <script src="examples.js"></script>
+
 </body>
 </html>
