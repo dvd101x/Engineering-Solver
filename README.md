@@ -94,4 +94,4 @@ Out: `50423.45039102888 J / kg`
 
 ## [Ace](https://ace.c9.io/)
 
-Ace is used for it's editing capabilities in the browser. You can access the quick menu by pressing `F1`
+Ace is used for its editing capabilities in the browser. You can access the quick menu by pressing `F1`
