@@ -6,7 +6,7 @@ Is a tool for doing numerical calculations fast. It includes units, thermodynami
 
 ## Quick start
 
-Open this site [Engineering-Solver](https://dvd101x.github.io/Engineering-Solver/)
+Open this site [Engineering-Solver](https://dvd101x.github.io/Engineering-Solver/).
 
 Write a few statements like:
 
@@ -49,7 +49,7 @@ Does all the calculations and unit conversions.
 
 ## [CoolProp](http://www.coolprop.org/coolprop/HighLevelAPI.html#propssi-function)
 
-Used for calling PropsSI and HAPropsSI but the unit handling is done with MathJS, thus the functions are not exactly the same as in CoolProp
+Used for calling PropsSI and HAPropsSI but the unit handling is done with MathJS, thus the functions are not exactly the same as in CoolProp.
 
 ### Fluid Properties: props()
 
@@ -94,4 +94,4 @@ Out: `50423.45039102888 J / kg`
 
 ## [Ace](https://ace.c9.io/)
 
-Ace is used for its editing capabilities in the browser. You can access the quick menu by pressing `F1`
+Ace is used for its editing capabilities in the browser. You can access the quick menu by pressing `F1`.
