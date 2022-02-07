@@ -1,5 +1,27 @@
 var mathExamples = {
   '': ['', ''],
+  'chemistry': [
+    "# Evaluate molar mass of Sulfuric Acid",
+    "sulfuricAcid = MM('H2SO4');",
+    "# Show the used formula",
+    "sulfuricAcid.formula",
+    "",
+    "# Show the elements for that formula",
+    "sulfuricAcid.elements",
+    "",
+    "# Show the total molar mass",
+    "sulfuricAcid.totalMass",
+    "",
+    "# Show the molar mass for all Hydrogen atoms",
+    "sulfuricAcid.molecularMass.H",
+    "",
+    "# Show the molar mass fraction of Oxygen",
+    "sulfuricAcid.fraction.O",
+    "",
+    "H2SO4 = sulfuricAcid.totalMass;",
+    "# Calculate 2 moles of Sulfuric Acid",
+    "2 mol H2SO4"
+  ],
   'coolpropHigh': [
     "# Based on http://www.coolprop.org/coolprop/HighLevelAPI.html#high-level-api",
     "",
@@ -233,7 +255,7 @@ var mathExamples = {
     "evap_COP = Q_c/W_comp",
     "\"COP(heating):\"",
     "cond_COP = Q_h/W_comp"
-]
+  ]
 }
 
 // to fill new samples
@@ -244,5 +266,5 @@ var mathExamples = {
 function insertExampleFunc(ID) {
   const mathExampleCode = mathExamples[ID].join('\n');
   editor.navigateFileEnd()
-  editor.insert('\n'+mathExampleCode)
+  editor.insert('\n' + mathExampleCode)
 }
