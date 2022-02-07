@@ -47,6 +47,26 @@ Does all the calculations and unit conversions.
 * [Units](https://mathjs.org/docs/datatypes/units.html)
 * [Functions](https://mathjs.org/docs/reference/functions.html)
 
+## Chemistry molar mass: MM()
+
+To call this function use `MM('H2O')` and this will get an object with the data of the compund, including totalMass, number of atoms of each element, mass fraction for each element, etc. The formula can include a notation including parenthesis and dot notation for hydrates.
+
+In:
+``` python
+borax = MM('Na2(B4O5(OH)4).8H2O');
+borax.elements
+borax.totalMass
+borax.fraction
+borax.fraction.Na
+```
+Out:
+``` javascript
+{"Na": 2, "B": 4, "O": 17, "H": 20}
+381.37214 g / mol
+{"Na": 0.12056344755545, "B": 0.11339055862864, "O": 0.71318738699686, "H": 0.052858606819051}
+0.12056344755545
+```
+
 ## [CoolProp](http://www.coolprop.org/coolprop/HighLevelAPI.html#propssi-function)
 
 Used for calling PropsSI and HAPropsSI but the unit handling is done with MathJS, thus the functions are not exactly the same as in CoolProp.
