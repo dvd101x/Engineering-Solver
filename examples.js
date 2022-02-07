@@ -20,7 +20,10 @@ var mathExamples = {
     "",
     "H2SO4 = sulfuricAcid.totalMass;",
     "# Calculate 2 moles of Sulfuric Acid",
-    "2 mol H2SO4"
+    "2 mol H2SO4",
+    "",
+    "# Calculate 2 grams of Sulfuric Acid",
+    "2 g / H2SO4"
   ],
   'coolpropHigh': [
     "# Based on http://www.coolprop.org/coolprop/HighLevelAPI.html#high-level-api",
