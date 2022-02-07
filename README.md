@@ -49,7 +49,7 @@ Does all the calculations and unit conversions.
 
 ## Chemistry molar mass: MM()
 
-To call this function use `MM('H2O')` and this will get an object with the data of the compund, including totalMass, number of atoms of each element, mass fraction for each element, etc. The formula can include a notation including parenthesis and dot notation for hydrates.
+To call this function use `MM('H2O')` and this will get an object with the data of the compund, including totalMass, number of atoms of each element, mass fraction for each element, etc. The formula can include a notation with parenthesis and dot notation for hydrates.
 
 In:
 ``` python
