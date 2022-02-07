@@ -1,4 +1,4 @@
-importScripts("https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.1/math.js", 'coolprop.js', 'fluidProperties.js', 'molecularMass.js')
+importScripts("https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.1.1/math.js", 'coolprop.js', 'fluidProperties.js', 'molecularMass.js')
 
 math.import({ props, HAprops, phase , MM })
 const parser = self.math.parser()
