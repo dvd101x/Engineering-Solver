@@ -47,7 +47,7 @@ function MM(formula) {
   formula = formula.replace(/\s/g, '');
   chemArray.forEach(x => {
     if (simpleFormula.test(x)) {
-      elmass[level] = addMolecules(elmass[level],chemEval(x),1)
+      elmass[level] = addMolecules(elmass[level], chemEval(x), 1)
     }
     else if (openingParenthesis.test(x)) {
       elmass[++level] = {}
@@ -55,10 +55,10 @@ function MM(formula) {
     else if (closingParenthesis.test(x)) {
       numMatch = x.match(/\d+$/)
       numMatch ? multiplier = parseInt(numMatch[0]) : multiplier = 1
-      elmass[level-1] = addMolecules(elmass[level-1], elmass[level], multiplier)
+      elmass[level - 1] = addMolecules(elmass[level - 1], elmass[level], multiplier)
       elmass[level--] = null
     }
-    else if (formulaAfterDot.test(x)){
+    else if (formulaAfterDot.test(x)) {
       numMatch = x.match(/\.(\d+)[A-Z]/)
       numMatch ? multiplier = parseInt(numMatch[1]) : multiplier = 1
       elmass[level] = addMolecules(elmass[level], chemEval(x), multiplier)
@@ -68,13 +68,13 @@ function MM(formula) {
   let molecularMass = {}
 
   for ([ele, atoms] of Object.entries(elmass[0])) {
-    molecularMass[ele] = math.unit(atom[ele]*atoms,'g/mol')
+    molecularMass[ele] = math.unit(atom[ele] * atoms, 'g/mol')
     total ? total = math.add(total, molecularMass[ele]) : total = molecularMass[ele]
   }
   let fraction = {}
   for ([ele, atoms] of Object.entries(elmass[0])) {
-    fraction[ele] = math.divide(molecularMass[ele],total)
+    fraction[ele] = math.divide(molecularMass[ele], total)
   }
 
-  return { elements: elmass[0], totalMass: total, formula: chemArray.join(''), fraction: fraction, molecularMass: molecularMass}
+  return { elements: elmass[0], totalMass: total, formula: chemArray.join(''), fraction: fraction, molecularMass: molecularMass }
 }
