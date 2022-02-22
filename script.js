@@ -3,7 +3,7 @@ const tabsField = document.getElementById("tabs")
 const insertButton = document.getElementById('exampleInsert')
 const exampleSelect = document.getElementById('exampleSelector')
 const outputTable = document.getElementById("outputTable")
-const listOfSessions = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9 }
+const listOfSessions = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 const wait = 200;
 
 /* Array */
@@ -15,7 +15,7 @@ ace.config.set('basePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13')
 var EditSession = require("ace/edit_session").EditSession;
 var UndoManager = require("ace/undomanager").UndoManager;
 
-for (ID in listOfSessions) {
+for (ID of listOfSessions) {
   sessions[ID] = new EditSession(localStorage.getItem('localSession' + ID) || "", "ace/mode/python");
   sessions[ID].setUndoManager(new UndoManager);
 }
