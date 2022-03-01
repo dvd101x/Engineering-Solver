@@ -13,7 +13,10 @@ function doMath(inputs) {
   parser.clear();
   return inputs.map(input => {
     try {
-      return math.format(parser.evaluate(input), 14)
+      let result = parser.evaluate(input)
+      if (typeof result != 'string')
+        {result = math.format(result,14)}
+      return result
     }
     catch (e) {
       return e.toString()
