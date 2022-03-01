@@ -56,10 +56,11 @@ var mathWorker = new Worker("mathWorker.js");
 mathWorker.onmessage = function (oEvent) {
   response = JSON.parse(oEvent.data)
   const results = response.outputs
+  const badResults = ["[]", "", "undefined"]
   let table = ""
   results.forEach((line, N) => {
-    if (line != "[]" && line != "" && line != "undefined")
-      table += "<tr><td>" + (N + 1) + "</td><td>" + line.split("\n").join("<br>") + "</tr>"
+    if (line && !badResults.includes(line))
+      table += `<tr><td><pre>${N + 1}</pre></td><td><pre>${line}<\pre></tr>`
   });
   outputTable.innerHTML = table;
 

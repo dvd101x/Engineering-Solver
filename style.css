@@ -22,9 +22,9 @@ body {
 	overflow: auto;
 }
 
-#outputTable {
-	font-family: 'Courier New', Courier, monospace;
-	font-size: 0.8em;
+#outputTable *{
+	margin:0px;
+	padding:0px
 }
 
 #outputTable td:nth-child(1){
