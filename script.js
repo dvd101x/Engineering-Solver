@@ -60,7 +60,7 @@ mathWorker.onmessage = function (oEvent) {
   let table = ""
   results.forEach((line, N) => {
     if (line && !badResults.includes(line))
-      table += `<tr><td><pre>${N + 1}</pre></td><td><pre>${line}<\pre></tr>`
+      table += `<tr><td><pre>${N + 1}</pre></td><td><pre>${line}</pre></tr>`
   });
   outputTable.innerHTML = table;
 
