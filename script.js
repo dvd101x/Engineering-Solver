@@ -4,7 +4,7 @@ const insertButton = document.getElementById('exampleInsert')
 const exampleSelect = document.getElementById('exampleSelector')
 const outputTable = document.getElementById("outputTable")
 const listOfSessions = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-const wait = 200;
+const wait = 500;
 
 /* Array */
 //["080708","3772ff","df2935","cad2c5","e6e8e6"]
