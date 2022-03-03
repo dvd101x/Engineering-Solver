@@ -35,16 +35,24 @@
       <fieldset id="examples" style="float: right;">
         <label for="exampleSelector">Examples:</label>
         <select id="exampleSelector" name="example">
-          <option value="basicUsage">Basic Usage</option>
-          <option value="units">Units</option>
-          <option value="strings">Strings</option>
-          <option value="matrices">Matrices</option>
-          <option value="objects">Objects</option>
-          <option value="coolprop">Fluid Properties</option>
-          <option value="coolpropHigh">coolprop website</option>
-          <option value="VaporCompressionCycle">Vapor Compression Cycle</option>
-          <option value="refCycleWithRecuperator">Recuperator</option>
-          <option value="chemistry">Chemistry</option>
+          <optgroup label="Math">
+            <option value="basicUsage">Basic Usage</option>
+            <option value="units">Units</option>
+            <option value="matrices">Matrices</option>
+          </optgroup>
+          <optgroup label="Data">
+            <option value="strings">Strings</option>
+            <option value="objects">Objects</option>
+          </optgroup>
+          <optgroup label="Thermodynamics">
+            <option value="coolprop">Fluid Properties</option>
+            <option value="coolpropHigh">coolprop website</option>
+            <option value="VaporCompressionCycle">Vapor Compression Cycle</option>
+            <option value="refCycleWithRecuperator">Recuperator</option>
+          </optgroup>
+          <optgroup label="Sciences">
+            <option value="chemistry">Chemistry</option>
+          </optgroup>
         </select>
         <button type="button" id="exampleInsert" name="insertExample">+</button>
       </fieldset>
