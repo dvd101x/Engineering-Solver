@@ -15,7 +15,7 @@ function doMath(inputs) {
   return inputs.map(input => {
     try {
       let result = parser.evaluate(input)
-      if (typeof result != 'string' & result != undefined)
+      if (!['string','undefined'].includes(typeof result))
         result = math.format(result,14)
       return result
     }
