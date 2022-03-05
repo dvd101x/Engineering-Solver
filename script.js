@@ -42,7 +42,10 @@ insertButton.addEventListener('click', () => { insertExampleFunc(exampleSelect.v
 // ace
 var timer;
 var editor = ace.edit("INPUT");
-editor.setTheme("ace/theme/solarized_light");
+editor.setOptions({
+  theme: "ace/theme/solarized_light",
+  wrap: "free"
+});
 editor.on("change", code => {
   clearTimeout(timer);
   timer = setTimeout(sendWorkToMathWorker, wait, code);
