@@ -40,12 +40,21 @@ You can work on any of the 9 tabs and your progress will be saved automatically 
 
 ## [MathJS](https://mathjs.org/)
 
-Does all the calculations and unit conversions.
-
-* [Syntax](https://mathjs.org/docs/expressions/syntax.html)
-* [Matrices](https://mathjs.org/docs/datatypes/matrices.html)
-* [Units](https://mathjs.org/docs/datatypes/units.html)
-* [Functions](https://mathjs.org/docs/reference/functions.html)
+Does all the calculations and unit conversions. Here are some usefull topics from the [docs](https://mathjs.org/docs/index.html).
+* [Expressions](https://mathjs.org/docs/expressions/index.html)
+  * [Syntax](https://mathjs.org/docs/expressions/syntax.html)
+  * [Albegra](https://mathjs.org/docs/expressions/algebra.html)
+* [Data Types](https://mathjs.org/docs/datatypes/index.html)
+  * [Numbers](https://mathjs.org/docs/datatypes/numbers.html)
+  * [BigNumbers](https://mathjs.org/docs/datatypes/bignumbers.html)
+  * [Fractions](https://mathjs.org/docs/datatypes/fractions.html)
+  * [Complex Numbers](https://mathjs.org/docs/datatypes/complex_numbers.html)
+  * [Matrices](https://mathjs.org/docs/datatypes/matrices.html)
+  * [Units](https://mathjs.org/docs/datatypes/units.html)
+* [Reference](https://mathjs.org/docs/reference/index.html)
+  * [Classes](https://mathjs.org/docs/reference/classes.html)
+  * [Functions](https://mathjs.org/docs/reference/functions.html)
+  * [Constants](https://mathjs.org/docs/reference/constants.html)
 
 ## Chemistry molar mass: MM()
 
