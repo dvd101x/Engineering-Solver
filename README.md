@@ -2,7 +2,7 @@
 
 Is a tool for doing numerical calculations fast. It includes units, thermodynamic properties and many more.
 
-[![MainFigure](Engineering-Calculator.png)](https://dvd101x.github.io/Engineering-Solver/)
+![MainFigure](Engineering-Calculator.png)](https://dvd101x.github.io/Engineering-Solver/)
 
 ## Quick start
 
