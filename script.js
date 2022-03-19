@@ -59,10 +59,8 @@ var mathWorker = new Worker("mathWorker.js");
 mathWorker.onmessage = function (oEvent) {
   response = JSON.parse(oEvent.data)
   const results = response.outputs
-  const badResults = ["[]", "", undefined]
   let lines = ""
   results.forEach(line => {
-    if (line && !badResults.includes(line))
       lines += `<pre>${line}</pre>`
   });
   outputs.innerHTML = lines;

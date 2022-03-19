@@ -15,33 +15,33 @@ entries ? for each new line
 
 function doMath(inputs) {
   parser.clear();
-  return inputs.map(input => {
-    let result
+  const results = inputs.map(input => {
     try {
-      result = parser.evaluate(input)
+      return parser.evaluate(input)
+    } catch (e) {
+      return e.toString()
     }
-    catch (e) {
-      result = e.toString()
+  })
+
+  return results.filter(x => x).map(result => {
+    if (result.entries) {
+      let lines = ""
+      result.entries.forEach(element => {
+        if (['string', 'undefined'].includes(typeof element)) {
+          lines += element + "\n"
+        }
+        else {
+          lines += math.format(element, 14) + "\n"
+        }
+      })
+      result = lines.trim()
     }
-    if (result){
-      if (result.entries) {
-        let lines = ""
-        result.entries.forEach(element => {
-          if (['string', 'undefined'].includes(typeof element)) {
-            lines += element + "\n"
-          }
-          else {
-            lines += math.format(element, 14) + "\n"
-          }
-        })
-        result = lines.trim()
-      }
-      else if (typeof result != 'string') {
-        result =  math.format(result, 14)
-      }
+    else if (typeof result != 'string') {
+      result = math.format(result, 14)
     }
     return result
-  })
+  }
+  )
 }
 
 onmessage = function (oEvent) {
@@ -50,4 +50,4 @@ onmessage = function (oEvent) {
     outputs: doMath(inputs.expr),
   }
   postMessage(JSON.stringify(response));
-};
+}
