@@ -20,22 +20,7 @@ body {
 #OUTPUT {
 	flex: 2;
 	overflow: auto;
-}
-
-#outputTable *{
-	margin:0px;
-	padding:0px
-}
-
-#outputTable td:nth-child(1){
-	text-align: right;
-	vertical-align: top;
-	color: gray;
-	padding: 0em 1em 0em 1em;
-}
-
-#outputTable td:nth-child(2){
-	text-align: left;
+	padding:0px 0px 0px 1em;
 }
 
 [name=topBar] {

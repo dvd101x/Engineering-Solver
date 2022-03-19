@@ -2,7 +2,7 @@ const tabIDs = document.forms.topBar.elements.sessionTab
 const tabsField = document.getElementById("tabs")
 const insertButton = document.getElementById('exampleInsert')
 const exampleSelect = document.getElementById('exampleSelector')
-const outputTable = document.getElementById("outputTable")
+const outputs = document.getElementById("OUTPUT")
 const listOfSessions = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 const wait = 500;
 
@@ -26,7 +26,7 @@ function saveSession(sessionID) {
 
 function sendWorkToMathWorker() {
   if (editor.getValue() != "") {
-    const expressions = editor.getValue().split("\n");
+    const expressions = editor.getValue().trim().split(/\n\s*\n/g);
     const request = { expr: expressions }
     mathWorker.postMessage(JSON.stringify(request))
   }
@@ -60,12 +60,12 @@ mathWorker.onmessage = function (oEvent) {
   response = JSON.parse(oEvent.data)
   const results = response.outputs
   const badResults = ["[]", "", undefined]
-  let table = ""
-  results.forEach((line, N) => {
+  let lines = ""
+  results.forEach(line => {
     if (line && !badResults.includes(line))
-      table += `<tr><td><pre>${N + 1}</pre></td><td><pre>${line}</pre></tr>`
+      lines += `<pre>${line}</pre>`
   });
-  outputTable.innerHTML = table;
+  outputs.innerHTML = lines;
 
   if (numberOfLines != editor.session.getLength()) {
     saveSession(tabIDs.value)

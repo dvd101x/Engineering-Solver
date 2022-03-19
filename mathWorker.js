@@ -9,19 +9,38 @@ const firstResponse = {
 }
 
 postMessage(JSON.stringify(firstResponse));
+/*
+entries ? for each new line
+*/
 
 function doMath(inputs) {
   parser.clear();
   return inputs.map(input => {
+    let result
     try {
-      let result = parser.evaluate(input)
-      if (!['string','undefined'].includes(typeof result))
-        result = math.format(result,14)
-      return result
+      result = parser.evaluate(input)
     }
     catch (e) {
-      return e.toString()
+      result = e.toString()
     }
+    if (result){
+      if (result.entries) {
+        let lines = ""
+        result.entries.forEach(element => {
+          if (['string', 'undefined'].includes(typeof element)) {
+            lines += element + "\n"
+          }
+          else {
+            lines += math.format(element, 14) + "\n"
+          }
+        })
+        result = lines.trim()
+      }
+      else if (typeof result != 'string') {
+        result =  math.format(result, 14)
+      }
+    }
+    return result
   })
 }
 
