@@ -85,7 +85,7 @@ Used for calling PropsSI and HAPropsSI but the unit handling is done with MathJS
 In: 
 ``` python
 # Saturated vapor enthalpy [J/kg] of R134a at 25C
-props('H', 'T', 25 celsius, 'Q', 1, 'R134a')
+props('H', 'R134a', {T:25 celsius, Q:1})
 ```
 Out: ` 4.1233395323186804e+5 J / kg`
 
@@ -102,7 +102,7 @@ It can be useful to know what the phase of a given state point is.
 In:
 ``` python
 # Phase of Water at 1 atmosphere and 0% Quality
-phase('P',1 atm,'Q',0 %,'Water')
+phase('Water', {P:1 atm, Q:0 %})
 ```
 Out: `twophase`
 
@@ -114,7 +114,7 @@ In:
 #Enthalpy (J per kg dry air) as a function of temperature, pressure,
 #    and relative humidity at dry bulb temperature T of 25C, pressure
 #    P of one atmosphere, relative humidity R of 50%
-HAprops('H','T',25 degC,'P',1 atm,'R',50%)
+HAprops('H', {T:25 degC, P:1 atm, R:50%})
 ```
 Out: `50423.45039102888 J / kg`
 
