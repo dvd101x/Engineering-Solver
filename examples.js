@@ -293,6 +293,7 @@ cycle[2].T = props('T', fluid, cycle[2]);
 cycle[2].D = props('D', fluid, cycle[2]);
 cycle[2].S = props('S', fluid, cycle[2]);
 
+
 # 2 to 3 Condensation
 cycle[3].P = cycle[2].P - cond.P_drop;
 cycle[3].T = cond.T-cond.subCooling;
@@ -307,6 +308,7 @@ cycle[4].T = props('T', fluid, cycle[4]);
 cycle[4].D = props('D', fluid, cycle[4]);
 cycle[4].S = props('S', fluid, cycle[4]);
 
+
 # Work, Energy and Performance
 W_comp   = mDot*(cycle[2].H - cycle[1].H);
 Q_h      = mDot*(cycle[2].H - cycle[3].H);
@@ -317,9 +319,9 @@ cond_COP = Q_h/W_comp;
 
 # Display results
 
-print('Compressor power   : $0 \t$1\t$2', W_comp to [W, BTU/h, TR], 4)
-print('Condenser heat out : $0 \t$1\t$2', Q_h    to [W, BTU/h, TR], 4)
-print('Evaporator heat in : $0 \t$1\t$2', Q_c    to [W, BTU/h, TR], 4)
+print('Compressor power   : $0 \\t$1\\t$2', W_comp to [W, BTU/h, TR], 4)
+print('Condenser heat out : $0 \\t$1\\t$2', Q_h    to [W, BTU/h, TR], 4)
+print('Evaporator heat in : $0 \\t$1\\t$2', Q_c    to [W, BTU/h, TR], 4)
 
 print('COP(cooling)       : $0', [evap_COP], 3)
 print('COP(heating)       : $0', [cond_COP], 3)`
