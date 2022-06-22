@@ -322,9 +322,9 @@ cond_COP = Q_h/W_comp;
 
 # Display results
 
-print('Compressor power   : $0 \t$1\t$2', W_comp to [W, BTU/h, TR], 4)
-print('Condenser heat out : $0 \t$1\t$2', Q_h    to [W, BTU/h, TR], 4)
-print('Evaporator heat in : $0 \t$1\t$2', Q_c    to [W, BTU/h, TR], 4)
+print('Compressor power   : $0 \\t$1\\t$2', W_comp to [W, BTU/h, TR], 4)
+print('Condenser heat out : $0 \\t$1\\t$2', Q_h    to [W, BTU/h, TR], 4)
+print('Evaporator heat in : $0 \\t$1\\t$2', Q_c    to [W, BTU/h, TR], 4)
 
 print('COP(cooling)       : $0', [evap_COP], 3)
 print('COP(heating)       : $0', [cond_COP], 3)`
