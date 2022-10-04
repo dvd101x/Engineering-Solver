@@ -37,7 +37,11 @@ function saveSession(sessionID) {
 
 function sendWorkToMathWorker() {
   if (editor.getValue() != "") {
-    const expressions = editor.getValue().trim().split(/\n\s*\n/g);
+    const expressions = editor
+      .getValue()
+      .replace(/\r?\n/g, '\n')
+      .trim()
+      .split(/\n\s*\n/g);
     const request = { expr: expressions }
     mathWorker.postMessage(JSON.stringify(request))
   }
