@@ -161,106 +161,133 @@ cos(45 deg)
 (2 == 3) == false
 22e-3`,
   'refCycleWithRecuperator':
-    `# Vapor compression cycle with recuperator (IHX)
-fluid = 'R404a'
-mDot = 281.1 kg/h
+    String.raw`# Vapor compression cycle with recuperator(IHX)
+fluid = 'R404a';
+mDot = 233 lb / h;
 
-evap = {T: 7.2 degC, P_drop :7066 Pa, superHeating : 0.1 K};
-cond = {T: 35 degC, P_drop: 0 Pa, subCooling : 0.1 K};
+# Evaporator
+evap = {
+    T: 25 degF,
+    P_drop: 1.93 psi,
+    superHeating: 10 degF
+};
+
+cond = {
+    T: 95 degF,
+    P_drop: 0 Pa,
+    subCooling: 2.5 K
+};
+
 etaS = 0.75;
-IHX = {epsilon : 0.8, thickness : 1 mm, cellSize : 10 mm, k : 230 W/(m K)};
+
+IHX = {
+    epsilon: 0.9,
+    thickness: 1 mm,
+    cellSize: 10 mm,
+    k: 230 W/ (m K)
+};
 
 # Define initial states
-cycle = {T:[], P:[], D:[], H:[], S:[]};
+cycle = [{}, {}, {}, {}, {}, {}];
+
+# Define the fluid function
+p(prop, state) = props(prop, fluid, state);
 
 # Define low and high pressure
 "P_low"
-P_low = props('P',fluid,{'T':evap.T,'Q':1})
+P_low = p('P', { 'T': evap.T, 'Q': 1 })
 "P high"
-P_high = props('P',fluid,{'T':cond.T, 'Q':0})
+P_high = p('P', { 'T': cond.T, 'Q': 0 })
 
 # 4 to 1 Evaporation
-cycle.P[1] = P_low;
-cycle.T[1] = evap.T+ evap.superHeating;
-cycle.D[1] = props('D',fluid,{'T':cycle.T[1],'P':cycle.P[1]});
-cycle.H[1] = props('H',fluid,{'T':cycle.T[1],'P':cycle.P[1]});
-cycle.S[1] = props('S',fluid,{'T':cycle.T[1],'P':cycle.P[1]});
+cycle[1].P = P_low;
+cycle[1].T = evap.T + evap.superHeating;
+
+cycle[1].D = p('D', cycle[1]);
+cycle[1].H = p('H', cycle[1]);
+cycle[1].S = p('S', cycle[1]);
 
 # 1 to 2 IHX low
-cycle.P[2] = cycle.P[1];
-cycle.T[4] = cond.T-cond.subCooling;
-H_eta = props('H',fluid,{'T':cycle.T[4],'P':cycle.P[2]});
-cycle.H[2] = IHX.epsilon*(H_eta-cycle.H[1])+cycle.H[1];
+cycle[2].P = cycle[1].P;
+cycle[4].T = cond.T - cond.subCooling;
+H_eta = p('H', { 'T': cycle[4].T, 'P': cycle[2].P });
 
-cycle.T[2] = props('T',fluid,{'P':cycle.P[2],'H':cycle.H[2]});
-cycle.D[2] = props('D',fluid,{'P':cycle.P[2],'H':cycle.H[2]});
-cycle.S[2] = props('S',fluid,{'P':cycle.P[2],'H':cycle.H[2]});
+cycle[2].H = IHX.epsilon * (H_eta - cycle[1].H) + cycle[1].H;
+cycle[2].T = p('T', cycle[2]);
+cycle[2].D = p('D', cycle[2]);
+cycle[2].S = p('S', cycle[2]);
 
 # 2 to 3 Compression
-cycle.P[3] = P_high;
-H_i = props('H',fluid,{'P':cycle.P[3],'S':cycle.S[2]});
-cycle.H[3] = (H_i-cycle.H[2])/etaS + cycle.H[2];
-cycle.T[3] = props('T',fluid,{'P':cycle.P[3],'H':cycle.H[3]});
-cycle.D[3] = props('D',fluid,{'P':cycle.P[3],'H':cycle.H[3]});
-cycle.S[3] = props('S',fluid,{'P':cycle.P[3],'H':cycle.H[3]});
+cycle[3].P = P_high;
+H_i = p('H', { 'P': cycle[3].P, 'S': cycle[2].S });
+cycle[3].H = (H_i - cycle[2].H) / etaS + cycle[2].H;
+cycle[3].T = p('T', cycle[3]);
+cycle[3].D = p('D', cycle[3]);
+cycle[3].S = p('S', cycle[3]);
 
 # 3 to 4 Condensation
-cycle.P[4] = cycle.P[3]-cond.P_drop;
-cycle.D[4] = props('D',fluid,{'P':cycle.P[4],'T':cycle.T[4]});
-cycle.H[4] = props('H',fluid,{'P':cycle.P[4],'T':cycle.T[4]});
-cycle.S[4] = props('S',fluid,{'P':cycle.P[4],'T':cycle.T[4]});
+cycle[4].P = cycle[3].P - cond.P_drop;
+cycle[4].D = p('D', cycle[4]);
+cycle[4].H = p('H', cycle[4]);
+cycle[4].S = p('S', cycle[4]);
 
 # 4 to 5 IHX high
-cycle.H[5] = cycle.H[1]-cycle.H[2]+cycle.H[4];
-cycle.P[5] = cycle.P[4];
-cycle.T[5] = props('T',fluid,{'P':cycle.P[5],'H':cycle.H[5]});
-cycle.D[5] = props('D',fluid,{'P':cycle.P[5],'H':cycle.H[5]});
-cycle.S[5] = props('S',fluid,{'P':cycle.P[5],'H':cycle.H[5]});
+cycle[5].H = cycle[1].H - cycle[2].H + cycle[4].H;
+cycle[5].P = cycle[4].P;
+cycle[5].T = p('T', cycle[5]);
+cycle[5].D = p('D', cycle[5]);
+cycle[5].S = p('S', cycle[5]);
 
 # 5 to 6 Expansion
-cycle.H[6] = cycle.H[5];
-cycle.P[6] = cycle.P[1]-evap.P_drop;
-cycle.T[6] = props('T',fluid,{'P':cycle.P[6],'H':cycle.H[6]});
-cycle.D[6] = props('D',fluid,{'P':cycle.P[6],'H':cycle.H[6]});
-cycle.S[6] = props('S',fluid,{'P':cycle.P[6],'H':cycle.H[6]});
+cycle[6].H = cycle[5].H;
+cycle[6].P = cycle[1].P - evap.P_drop;
+cycle[6].T = p('T', cycle[5]);
+cycle[6].D = p('D', cycle[5]);
+cycle[6].S = p('S', cycle[5]);
 
 # Display results
 "Compressor's power:"
-W_comp = mDot*(cycle.H[3]-cycle.H[2])
+W_comp = mDot * (cycle[3].H - cycle[2].H)
 "Condenser heat out:"
-Q_h = mDot*(cycle.H[4]-cycle.H[3])
+Q_h = mDot * (cycle[4].H - cycle[3].H)
 "Recuperator heat exchange:"
-Q_IHX = mDot*(cycle.H[2]-cycle.H[1])
+Q_IHX = mDot * (cycle[2].H - cycle[1].H)
 "Evaporator heat in:"
-Q_c = mDot*(cycle.H[1]-cycle.H[6])
-
-IHX.T = [cycle.T[1],cycle.T[2],cycle.T[3],cycle.T[4]];
-
-deltaA = IHX.T[3]-IHX.T[2];
-deltaB = IHX.T[4]-IHX.T[1];
-
-IHX.LMTD = (deltaA-deltaB)/log(deltaA/deltaB)
-IHX.U = IHX.k/IHX.thickness;
-IHX.A = Q_IHX/(IHX.U*IHX.LMTD)
-IHX.cellVol = IHX.cellSize^3;
+Q_c = mDot * (cycle[1].H - cycle[6].H)
+IHX.T = [cycle[1].T, cycle[2].T, cycle[3].T, cycle[4].T];
+deltaA = IHX.T[3] - IHX.T[2];
+deltaB = IHX.T[4] - IHX.T[1];
+IHX.LMTD = (deltaA - deltaB) / log(deltaA / deltaB)
+IHX.U = IHX.k / IHX.thickness;
+IHX.A = Q_IHX / (IHX.U * IHX.LMTD)
+IHX.cellVol = IHX.cellSize ^ 3;
 cellSizeToAreaFactor = 3.8424;
-IHX.cellArea = cellSizeToAreaFactor*IHX.cellSize^2;
+IHX.cellArea = cellSizeToAreaFactor * IHX.cellSize ^ 2;
+
 "Recuprator's Volume"
-IHX.Volume = IHX.A*IHX.cellVol/IHX.cellArea to mm^3
+IHX.Volume = IHX.A * IHX.cellVol / IHX.cellArea to mm ^ 3
+
+"Side of a IHX Cube"
+IHX.Volume ^ (1 / 3)
 
 "Evap COP with recuperator"
-evap_COP = Q_c/W_comp
-"Cond COP"
-cond_COP = Q_h/W_comp
+evap_COP = Q_c / W_comp
 
-H_i_w = props('H', fluid,{ 'P': cycle.P[3], 'S': cycle.S[1]});
-H_w = (H_i_w-cycle.H[1])/etaS + cycle.H[1];
-qNoIHX = cycle.H[1]-cycle.H[4];
-wNoIHX = H_w-cycle.H[1];
-"COP without recuperator"
-noIHX_COP = qNoIHX/wNoIHX
+"Cond COP";
+cond_COP = Q_h / W_comp;
+H_i_w = p('H', { 'P': cycle[3].P, 'S': cycle[1].S });
+H_w = (H_i_w - cycle[1].H) / etaS + cycle[1].H;
+qNoIHX = cycle[1].H - cycle[4].H;
+wNoIHX = H_w - cycle[1].H;
+
+"Evap COP without recuperator"
+noIHX_COP = qNoIHX / wNoIHX
+
+"evap_COP/noIHX_COP"
+improvementFactor = evap_COP / noIHX_COP
+
 "Improvement with recuperator"
-evap_COP/noIHX_COP`
+print("$0 %", [(improvementFactor - 1) * 100], 3)`
   ,
   'VaporCompressionCycle':
     `# Vapor Compression Cycle
