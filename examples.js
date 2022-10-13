@@ -1,5 +1,4 @@
 const mathExamples = {
-  '': ['', ''],
   'chemistry':
     `# Evaluate molar mass of Sulfuric Acid
 sulfuricAcid = MM('H2SO4');
@@ -240,7 +239,7 @@ cycle[5].S = p('S', cycle[5]);
 
 # 5 to 6 Expansion
 cycle[6].H = cycle[5].H;
-cycle[6].P = cycle[1].P - evap.P_drop;
+cycle[6].P = cycle[1].P + evap.P_drop;
 cycle[6].T = p('T', cycle[5]);
 cycle[6].D = p('D', cycle[5]);
 cycle[6].S = p('S', cycle[5]);
@@ -333,7 +332,7 @@ c[3].S = p('S', c[3]);
 
 # 3 to 4 Expansion
 c[4].H = c[3].H;
-c[4].P = c[1].P - evap.P_drop;
+c[4].P = c[1].P + evap.P_drop;
 c[4].T = p('T', c[4]);
 c[4].D = p('D', c[4]);
 c[4].S = p('S', c[4]);
