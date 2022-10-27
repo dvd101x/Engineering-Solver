@@ -13,24 +13,31 @@ body {
 	overflow: hidden;
 }
 
-#INPUT {
-	flex: 3;
+main>article.markdown-body {
+	flex: 1;
+	overflow: auto;
+	box-sizing: border-box;
 }
 
-#OUTPUT {
-	flex: 2;
-	overflow: auto;
-	padding:0px 0px 0px 1em;
+main>.markdown-body {
+	min-width: 200px;
+	max-width: 980px;
+	overflow: scroll;
+	padding: 1em;
+}
+
+#INPUT {
+	flex: 1;
 }
 
 [name=topBar] {
 	height: 40px;
-	font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 #tabs {
 	display: inline;
-	font-size: 11pt;
+	font-size: 12px;
+	margin: 0 2px;
 }
 
 #tabs input {
@@ -54,18 +61,16 @@ body {
 	border: 1px solid #ececec;
 	background: #ececec;
 	margin: 4px 2px;
-	padding: 4px 10px;
-	border-radius: 12px;
+	padding: 4px 8px;
+	border-radius: 1em;
 	position: relative;
-	top: 1px;
-	font-family: Arial, sans-serif;
-	font-weight: bold;
 }
 
 #tabs input:checked+label {
 	/* white background for selected tab */
 	background: #FFF;
 	border: 1px solid #ccc;
+	font-weight: bolder;
 }
 
 #tabs input:hover+label {
@@ -86,13 +91,8 @@ fieldset {
 
 #examples {
 	float: right;
-	font-size: 10pt;
-	margin: 4px 2px;
-	padding: 4px 10px;
-	font-size: 12pt;
 }
 
 #examples button {
-	border-radius: 12 px;
 	font-weight: bolder;
 }

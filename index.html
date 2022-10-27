@@ -6,11 +6,15 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Solver</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link rel="stylesheet" media="screen" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown-light.min.css" integrity="sha512-zb2pp+R+czM7GAemdSUQt6jFmr3qCo6ikvBgVU6F5GvwEDR0C2sefFiPEJ9QUpmAKdD5EqDUdNRtbOYnbF/eyQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.2/katex.min.css" integrity="sha512-zMdfms08UF0gvJ3NDsaDXtmg9pY0QxEs1+y8x5lGYJ1HhgbxAqlGDRIsHnjIlOm3dYi5eCjp96ME9LlgXBfrjg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
 </head>
 
 <body>
-  <nav>
+  <nav class="markdown-body">
     <form name="topBar">
       <fieldset id='tabs'>
         <input type="radio" value="1" name="sessionTab" id="tab1" checked>
@@ -54,7 +58,8 @@
         <input type="radio" value="20" name="sessionTab" id="tab20">
         <label for="tab20" id="tabL20">20</label>
       </fieldset>
-      <fieldset id="examples" style="float: right;">
+      <span>
+        <fieldset id="examples" style="float: right;">
         <label for="exampleSelector">Examples:</label>
         <select id="exampleSelector" name="example">
           <optgroup label="Math">
@@ -78,14 +83,16 @@
         </select>
         <button type="button" id="exampleInsert" name="insertExample">+</button>
       </fieldset>
+      </span>
+
     </form>
   </nav>
 
-  <div id="WorkArea">
+  <main id="WorkArea">
     <div id="INPUT"></div>
-    <div id="OUTPUT">
-    </div>
-  </div>
+    <article id="OUTPUT" class="markdown-body">
+    </article>
+  </main>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.0/ace.min.js" type="text/javascript"
     charset="utf-8"></script>

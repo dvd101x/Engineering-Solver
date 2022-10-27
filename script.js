@@ -6,8 +6,6 @@ const outputs = document.getElementById("OUTPUT")
 const listOfSessions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 const wait = 300;
 
-/* Array */
-//["080708","3772ff","df2935","cad2c5","e6e8e6"]
 var sessions = {}
 let sessionNames = {}
 
@@ -41,7 +39,6 @@ function sendWorkToMathWorker() {
       .getValue()
       .replace(/\r?\n/g, '\n')
       .trim()
-      .split(/\n\s*\n/g);
     const request = { expr: expressions }
     mathWorker.postMessage(JSON.stringify(request))
   }
@@ -74,11 +71,7 @@ var mathWorker = new Worker("mathWorker.js");
 mathWorker.onmessage = function (oEvent) {
   response = JSON.parse(oEvent.data)
   const results = response.outputs
-  let lines = ""
-  results.forEach(line => {
-      lines += `<pre>${line}</pre>`
-  });
-  outputs.innerHTML = lines;
+  outputs.innerHTML = results;
 
   if (numberOfLines != editor.session.getLength()) {
     saveSession(tabIDs.value)
