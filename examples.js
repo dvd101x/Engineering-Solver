@@ -288,72 +288,7 @@ improvementFactor = evap_COP / noIHX_COP
 "Improvement with recuperator"
 print("$0 %", [(improvementFactor - 1) * 100], 3)`
   ,
-  'VaporCompressionCycle':
-    `# Vapor Compression Cycle
-fluid = 'R134a'
-mDot  = 1 kg/minute
-
-evap  = {T: -20 degC, P_drop: 0 Pa, superHeating: 10 K}
-cond  = {T:  40 degC, P_drop: 0 Pa, subCooling  : 10 K}
-etaS  = 0.75
-
-# Define an array of empty states as objects
-c = [{},{},{},{}];
-
-# Short function to get fluid properties
-p(DesiredProperty, FluidState) = props(DesiredProperty, fluid, FluidState);
-
-# Define low and high pressure
-pLow  = p('P', {T: evap.T, Q: 100%});
-pHigh = p('P', {T: cond.T, Q: 0%  });
-
-# 4 to 1 Evaporation
-c[1].P = pLow;
-c[1].T = evap.T+ evap.superHeating;
-c[1].D = p('D', c[1]);
-c[1].H = p('H', c[1]);
-c[1].S = p('S', c[1]);
-
-# 1 to 2 Compression of vapor
-c[2].P = pHigh;
-H_i    = p('H',{P:c[2].P, S:c[1].S});
-c[2].H = (H_i-c[1].H)/etaS + c[1].H;
-c[2].T = p('T', c[2]);
-c[2].D = p('D', c[2]);
-c[2].S = p('S', c[2]);
-
-
-# 2 to 3 Condensation
-c[3].P = c[2].P - cond.P_drop;
-c[3].T = cond.T-cond.subCooling;
-c[3].D = p('D', c[3]);
-c[3].H = p('H', c[3]);
-c[3].S = p('S', c[3]);
-
-# 3 to 4 Expansion
-c[4].H = c[3].H;
-c[4].P = c[1].P + evap.P_drop;
-c[4].T = p('T', c[4]);
-c[4].D = p('D', c[4]);
-c[4].S = p('S', c[4]);
-
-
-# Work, Energy and Performance
-W_comp   = mDot*(c[2].H - c[1].H);
-Q_h      = mDot*(c[2].H - c[3].H);
-Q_c      = mDot*(c[1].H - c[4].H);
-
-evap_COP = Q_c/W_comp;
-cond_COP = Q_h/W_comp;
-
-# Display results
-
-print('Compressor power   : $0 \\t$1\\t$2', W_comp to [W, BTU/h, TR], 4)
-print('Condenser heat out : $0 \\t$1\\t$2', Q_h    to [W, BTU/h, TR], 4)
-print('Evaporator heat in : $0 \\t$1\\t$2', Q_c    to [W, BTU/h, TR], 4)
-
-print('COP(cooling)       : $0', [evap_COP], 3)
-print('COP(heating)       : $0', [cond_COP], 3)`
+  'VaporCompressionCycle':"# # Vapor Compression Cycle\n\n# ## Fluid input\nfluid = 'R134a'\nmDot  = 1 kg/minute\n\n# ## Components input\n# Evaporator\nevap  = {T: -20 degC, P_drop: 0 Pa, superHeating: 10 K}\n# Condenser\ncond  = {T:  40 degC, P_drop: 0 Pa, subCooling  : 10 K}\n# Compressor\netaS  = 0.75\n\n#Define an array of empty states as objects\nc = [{},{},{},{}];\n\n#Short function to get fluid properties\np(DesiredProperty, FluidState) = props(DesiredProperty, fluid, FluidState);\n\n#Define low and high pressure\npLow  = p('P', {T: evap.T, Q: 100%});\npHigh = p('P', {T: cond.T, Q: 0%  });\n\n#4 to 1 Evaporation\nc[1].P = pLow;\nc[1].T = evap.T+ evap.superHeating;\nc[1].D = p('D', c[1]);\nc[1].H = p('H', c[1]);\nc[1].S = p('S', c[1]);\n\n#1 to 2 Compression of vapor\nc[2].P = pHigh;\nH_i    = p('H',{P:c[2].P, S:c[1].S});\nc[2].H = (H_i-c[1].H)/etaS + c[1].H;\nc[2].T = p('T', c[2]);\nc[2].D = p('D', c[2]);\nc[2].S = p('S', c[2]);\n\n\n#2 to 3 Condensation\nc[3].P = c[2].P - cond.P_drop;\nc[3].T = cond.T-cond.subCooling;\nc[3].D = p('D', c[3]);\nc[3].H = p('H', c[3]);\nc[3].S = p('S', c[3]);\n\n#3 to 4 Expansion\nc[4].H = c[3].H;\nc[4].P = c[1].P + evap.P_drop;\nc[4].T = p('T', c[4]);\nc[4].D = p('D', c[4]);\nc[4].S = p('S', c[4]);\n\n\n#Work, Energy and Performance\nW_comp   = mDot*(c[2].H - c[1].H);\nQ_h      = mDot*(c[2].H - c[3].H);\nQ_c      = mDot*(c[1].H - c[4].H);\n\nevap_COP = Q_c/W_comp;\ncond_COP = Q_h/W_comp;\n\n# ## Work and Energy\n\nprint('Compressor power   : $0 \\t$1\\t$2', W_comp to [W, BTU/h, TR], 4)\nprint('Condenser heat out : $0 \\t$1\\t$2', Q_h    to [W, BTU/h, TR], 4)\nprint('Evaporator heat in : $0 \\t$1\\t$2', Q_c    to [W, BTU/h, TR], 4)\n\n\nprint('COP(cooling)       : $0', [evap_COP], 3)\nprint('COP(heating)       : $0', [cond_COP], 3)"
 }
 
 function insertExampleFunc(ID) {
