@@ -15,16 +15,32 @@ var EditSession = require("ace/edit_session").EditSession;
 var UndoManager = require("ace/undomanager").UndoManager;
 
 for (ID of listOfSessions) {
-  sessions[ID] = new EditSession(localStorage.getItem('localSession' + ID) || "", "ace/mode/python");
+  const thisSession = 'localSession'+ ID;
+  const sessionText = localStorage.getItem(thisSession)
+
+  if (sessionText)
+    if(!sessionText.trim())
+      localStorage.removeItem(thisSession)
+  sessions[ID] = new EditSession(localStorage.getItem(thisSession) || "", "ace/mode/python");
   sessions[ID].setUndoManager(new UndoManager);
-  sessionNames[ID] = setSessionName(ID)
+  sessionNames[ID] = setSessionName(ID);
 }
 
 function setSessionName(ID){
-  const firstLineComment = /^\s*#\s*(.*)\s*\n/
-  const sessionText = localStorage.getItem('localSession'+ ID)
-  const noteBookName = firstLineComment.test(sessionText) ? sessionText.match(firstLineComment)[1]: "Notebook " + ID
-  document.getElementById('tabL'+ID).title = noteBookName
+  const firstLineComment = /^\s*#\s*.*?(\w.*?)\s*\n/
+  const thisSession = 'localSession'+ ID;
+  let noteBookName
+  if(localStorage.getItem(thisSession)){
+    const sessionText = localStorage.getItem(thisSession)
+    const foundName = firstLineComment.test(sessionText) ? sessionText.match(firstLineComment)[1] : null;
+    noteBookName = foundName ? foundName : "Notebook " + ID
+    document.getElementById('tabL'+ID).innerHTML = sessionText.trim() ? (foundName ? (noteBookName.length > 16 ? noteBookName.slice(0,15)+'…' : noteBookName) : String(ID)) : '.'
+    document.getElementById('tabL'+ID).title = sessionText.trim() ? noteBookName : 'Empty'
+  }
+  else{
+    document.getElementById('tabL'+ID).innerHTML = '.'
+    document.getElementById('tabL'+ID).title = 'Empty'
+  }
   return noteBookName
 }
 
