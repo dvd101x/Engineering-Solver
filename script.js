@@ -34,7 +34,7 @@ function setSessionName(ID){
     const sessionText = localStorage.getItem(thisSession)
     const foundName = firstLineComment.test(sessionText) ? sessionText.match(firstLineComment)[1] : null;
     noteBookName = foundName ? foundName : "Notebook " + ID
-    document.getElementById('tabL'+ID).innerHTML = sessionText.trim() ? (foundName ? (noteBookName.length > 16 ? noteBookName.slice(0,15)+'…' : noteBookName) : String(ID)) : '.'
+    document.getElementById('tabL'+ID).innerHTML = sessionText.trim() ? (foundName ? (noteBookName.length > 16 ? noteBookName.slice(0,15).trim()+'…' : noteBookName) : String(ID)) : '.'
     document.getElementById('tabL'+ID).title = sessionText.trim() ? noteBookName : 'Empty'
   }
   else{
