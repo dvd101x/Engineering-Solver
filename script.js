@@ -6,13 +6,13 @@ const outputs = document.getElementById("OUTPUT")
 const listOfSessions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 const wait = 300;
 
-var sessions = {}
+let sessions = {}
 let sessionNames = {}
 
 ace.config.set('basePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13')
 
-var EditSession = require("ace/edit_session").EditSession;
-var UndoManager = require("ace/undomanager").UndoManager;
+let EditSession = require("ace/edit_session").EditSession;
+let UndoManager = require("ace/undomanager").UndoManager;
 
 for (ID of listOfSessions) {
   const thisSession = 'localSession'+ ID;
@@ -68,8 +68,8 @@ tabsField.addEventListener('change', event => {
 insertButton.addEventListener('click', () => { insertExampleFunc(exampleSelect.value) })
 
 // ace
-var timer;
-var editor = ace.edit("INPUT");
+let timer;
+let editor = ace.edit("INPUT");
 editor.setOptions({
   theme: "ace/theme/solarized_light",
   wrap: "free"
@@ -80,9 +80,9 @@ editor.on("change", code => {
 });
 editor.setSession(sessions[tabIDs.value]);
 
-var numberOfLines = editor.session.getLength();
+let numberOfLines = editor.session.getLength();
 
-var mathWorker = new Worker("mathWorker.js");
+let mathWorker = new Worker("mathWorker.js");
 
 mathWorker.onmessage = function (oEvent) {
   response = JSON.parse(oEvent.data)
