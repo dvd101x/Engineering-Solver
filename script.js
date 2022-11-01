@@ -15,31 +15,31 @@ let EditSession = require("ace/edit_session").EditSession;
 let UndoManager = require("ace/undomanager").UndoManager;
 
 for (ID of listOfSessions) {
-  const thisSession = 'localSession'+ ID;
+  const thisSession = 'localSession' + ID;
   const sessionText = localStorage.getItem(thisSession)
 
   if (sessionText)
-    if(!sessionText.trim())
+    if (!sessionText.trim())
       localStorage.removeItem(thisSession)
   sessions[ID] = new EditSession(localStorage.getItem(thisSession) || "", "ace/mode/python");
   sessions[ID].setUndoManager(new UndoManager);
   sessionNames[ID] = setSessionName(ID);
 }
 
-function setSessionName(ID){
+function setSessionName(ID) {
   const firstLineComment = /^\s*#\s*.*?(\w.*?)\s*\n/
-  const thisSession = 'localSession'+ ID;
+  const thisSession = 'localSession' + ID;
   let noteBookName
-  if(localStorage.getItem(thisSession)){
+  if (localStorage.getItem(thisSession)) {
     const sessionText = localStorage.getItem(thisSession)
     const foundName = firstLineComment.test(sessionText) ? sessionText.match(firstLineComment)[1] : null;
     noteBookName = foundName ? foundName : "Notebook " + ID
-    document.getElementById('tabL'+ID).innerHTML = sessionText.trim() ? (foundName ? (noteBookName.length > 16 ? noteBookName.slice(0,15).trim()+'…' : noteBookName) : String(ID)) : '.'
-    document.getElementById('tabL'+ID).title = sessionText.trim() ? noteBookName : 'Empty'
+    document.getElementById('tabL' + ID).innerHTML = sessionText.trim() ? (foundName ? (noteBookName.length > 16 ? noteBookName.slice(0, 15).trim() + '…' : noteBookName) : String(ID)) : '.'
+    document.getElementById('tabL' + ID).title = sessionText.trim() ? noteBookName : 'Empty'
   }
-  else{
-    document.getElementById('tabL'+ID).innerHTML = '.'
-    document.getElementById('tabL'+ID).title = 'Empty'
+  else {
+    document.getElementById('tabL' + ID).innerHTML = '.'
+    document.getElementById('tabL' + ID).title = 'Empty'
   }
   return noteBookName
 }
@@ -80,17 +80,18 @@ editor.on("change", code => {
 });
 editor.setSession(sessions[tabIDs.value]);
 
-let numberOfLines = editor.session.getLength();
-
 let mathWorker = new Worker("mathWorker.js");
 
-mathWorker.onmessage = function (oEvent) {
-  response = JSON.parse(oEvent.data)
-  const results = response.outputs
-  outputs.innerHTML = results;
+let timerSave;
+const waitToSave = 1500;
 
-  if (numberOfLines != editor.session.getLength()) {
-    saveSession(tabIDs.value)
-  };
-  numberOfLines = editor.session.getLength();
+mathWorker.onmessage = function (oEvent) {
+  const results = JSON.parse(oEvent.data).outputs
+  outputs.innerHTML = results;
+  clearTimeout(timerSave);
+  timerSave = setTimeout(
+    saveSession,
+    waitToSave,
+    tabIDs.value
+  )
 };
