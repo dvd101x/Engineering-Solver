@@ -87,11 +87,8 @@ const waitToSave = 1500;
 
 mathWorker.onmessage = function (oEvent) {
   const results = JSON.parse(oEvent.data).outputs
+  const tabToSave = tabIDs.value;
   outputs.innerHTML = results;
   clearTimeout(timerSave);
-  timerSave = setTimeout(
-    saveSession,
-    waitToSave,
-    tabIDs.value
-  )
+  timerSave = setTimeout(saveSession, waitToSave, tabToSave)
 };
