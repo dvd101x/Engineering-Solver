@@ -9,7 +9,7 @@ const wait = 300;
 let sessions = {}
 let sessionNames = {}
 
-ace.config.set('basePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13')
+ace.config.set('basePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.0')
 
 let EditSession = require("ace/edit_session").EditSession;
 let UndoManager = require("ace/undomanager").UndoManager;
