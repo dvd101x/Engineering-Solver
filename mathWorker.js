@@ -8,8 +8,6 @@ importScripts(
   "https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"
 )
 
-const mat = math.create(math.all)
-
 // this function return a mapped function in case of array or the function in case of scalar
 function mapped(f, x) {
   return math.sum(math.size(x)) > 0 ? math.map(x, f) : f(x)
@@ -19,6 +17,8 @@ function mapLog(x, ...args) {
   const base = args.length == 0 ? math.e : args[0]
   return math.sum(math.size(x)) > 0 ? math.map(x, x => math.log(x, base)) : math.log(x, base)
 }
+
+const mat = math.create(math.all)
 
 mat.import({
   props,
