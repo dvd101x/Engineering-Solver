@@ -7,9 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Solver</title>
   <link rel="stylesheet" media="screen" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown-light.min.css" integrity="sha512-zb2pp+R+czM7GAemdSUQt6jFmr3qCo6ikvBgVU6F5GvwEDR0C2sefFiPEJ9QUpmAKdD5EqDUdNRtbOYnbF/eyQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.2/katex.min.css" integrity="sha512-zMdfms08UF0gvJ3NDsaDXtmg9pY0QxEs1+y8x5lGYJ1HhgbxAqlGDRIsHnjIlOm3dYi5eCjp96ME9LlgXBfrjg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown-light.min.css"
+    integrity="sha512-zb2pp+R+czM7GAemdSUQt6jFmr3qCo6ikvBgVU6F5GvwEDR0C2sefFiPEJ9QUpmAKdD5EqDUdNRtbOYnbF/eyQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.2/katex.min.css"
+    integrity="sha512-zMdfms08UF0gvJ3NDsaDXtmg9pY0QxEs1+y8x5lGYJ1HhgbxAqlGDRIsHnjIlOm3dYi5eCjp96ME9LlgXBfrjg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="//unpkg.com/alpinejs" defer></script>
 </head>
 
 <body>
@@ -59,35 +64,35 @@
       </fieldset>
       <span>
         <fieldset id="examples" style="float: right;">
-        <label for="exampleSelector">Examples:</label>
-        <select id="exampleSelector" name="example">
-          <optgroup label="Math">
-            <option value="basicUsage">Basic Usage</option>
-            <option value="units">Units</option>
-            <option value="matrices">Matrices</option>
-          </optgroup>
-          <optgroup label="Data">
-            <option value="strings">Strings</option>
-            <option value="objects">Objects</option>
-          </optgroup>
-          <optgroup label="Thermodynamics">
-            <option value="coolprop">Fluid Properties</option>
-            <option value="coolpropHigh">coolprop website</option>
-            <option value="VaporCompressionCycle">Vapor Compression Cycle</option>
-            <option value="refCycleWithRecuperator">Recuperator</option>
-          </optgroup>
-          <optgroup label="Sciences">
-            <option value="chemistry">Chemistry</option>
-          </optgroup>
-        </select>
-        <button type="button" id="exampleInsert" name="insertExample">+</button>
-      </fieldset>
+          <label for="exampleSelector">Examples:</label>
+          <select id="exampleSelector" name="example">
+            <optgroup label="Math">
+              <option value="basicUsage">Basic Usage</option>
+              <option value="units">Units</option>
+              <option value="matrices">Matrices</option>
+            </optgroup>
+            <optgroup label="Data">
+              <option value="strings">Strings</option>
+              <option value="objects">Objects</option>
+            </optgroup>
+            <optgroup label="Thermodynamics">
+              <option value="coolprop">Fluid Properties</option>
+              <option value="coolpropHigh">coolprop website</option>
+              <option value="VaporCompressionCycle">Vapor Compression Cycle</option>
+              <option value="refCycleWithRecuperator">Recuperator</option>
+            </optgroup>
+            <optgroup label="Sciences">
+              <option value="chemistry">Chemistry</option>
+            </optgroup>
+          </select>
+          <button type="button" id="exampleInsert" name="insertExample">+</button>
+        </fieldset>
       </span>
 
     </form>
   </nav>
 
-  <main id="WorkArea">
+  <main>
     <div id="INPUT"></div>
     <article id="OUTPUT" class="markdown-body">
     </article>
@@ -95,7 +100,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.0/ace.min.js" type="text/javascript"
     charset="utf-8"></script>
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
   <script src="examples.js"></script>
 
 </body>

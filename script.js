@@ -71,7 +71,7 @@ insertButton.addEventListener('click', () => { insertExampleFunc(exampleSelect.v
 let timer;
 let editor = ace.edit("INPUT");
 editor.setOptions({
-  theme: "ace/theme/solarized_light",
+  theme: "ace/theme/monokai",
   wrap: "free"
 });
 editor.on("change", code => {
