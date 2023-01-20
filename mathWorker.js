@@ -18,7 +18,7 @@ function mapLog(x, ...args) {
   return math.sum(math.size(x)) > 0 ? math.map(x, x => math.log(x, base)) : math.log(x, base)
 }
 
-const mat = math.create(math.all)
+const mat = math.create()
 
 mat.import({
   props,
