@@ -8,57 +8,212 @@ importScripts(
   "https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"
 )
 
-// this function return a mapped function in case of array or the function in case of scalar
-function mapped(f, x) {
-  return math.sum(math.size(x)) > 0 ? math.map(x, f) : f(x)
+// consistently gets the size of an array, matrix or scalar as an array
+sizeAsArray = (x) => (math.isMatrix(x) | isScalar(x)) ? math.size(x).toArray() : math.size(x)
+
+// checks if a value is scalar
+isScalar = (x) => math.count(math.size(x)) == 0
+
+// checks if the size of a value corresponds to a scalar
+sizeOfScalar = (size) => math.sum(math.size(size)) == 0
+
+// creates shape of the dimension needed to concat a value in N dimensions
+// a matrix of size [3, 4] to dim = 3 yields [1, 3, 3]
+// in other words it appends 1 to the left as needed
+shapeToConcat = (Mat, dim) => math.resize(sizeAsArray(Mat).reverse(), [dim], 1).reverse()
+
+// calculates what is the common sizes/shapes of the functions to concat
+// throws an error specifying why the sizes/shapes can't be broadcasted
+function broadcast_shapes(...shapes) {
+  // is the number of dims of the shapes to broadcast
+  const sizes = shapes.map(shape => shape.length)
+  // it should work with scalars but it doesn't
+  const N = math.max(sizes)
+  let broadcasted_shape = []
+  let maxDims = []
+
+  // Gets the maximum size in each dimension
+  for (let n = 0; n < N; ++n) {
+    let maxDim = 0
+    shapes.forEach((shape, ns) => {
+      if (sizes[ns] > n) {
+        const nDim = shape[sizes[ns] - n - 1]
+        if (nDim > maxDim) {
+          maxDim = nDim
+        }
+      }
+    })
+    maxDims[N - n - 1] = maxDim
+  }
+
+  // Calculates the broadcasted shape
+  // If for each shape to broadcast, check from right to left
+  // from last dimension to first dimension if it can be broadcasted
+  // It means it is possible to broadcast a dimension to a dimension N
+  // the current dimension is none, 1
+  // if the current dimension is already N there is nothing to be done
+  // it is not possible to broadcast a dimension size 2 to a 3 for example
+
+  for (let n = 0; n < N; ++n) {
+    shapes.forEach((shape, ns) => {
+      if (sizes[ns] > n) {
+        const dimID = sizes[ns] - n - 1 // right to left
+        const nDim = shape[dimID]
+        const broadcastID = N - n - 1 // right to left
+        if ((nDim < maxDims[broadcastID]) & (nDim > 1)) {
+          throw new Error(`shape missmatch: missmatch is found in arg ${ns} with shape (${shape}) not possible to broadcast dimension ${dimID} with size ${nDim} to size ${maxDims[broadcastID]}`)
+        }
+        else {
+          broadcasted_shape[broadcastID] = maxDims[broadcastID]
+        }
+      }
+    })
+  }
+
+  return broadcasted_shape
 }
 
-function mapLog(x, ...args) {
-  const base = args.length == 0 ? math.e : args[0]
-  return math.sum(math.size(x)) > 0 ? math.map(x, x => math.log(x, base)) : math.log(x, base)
+function broadcast_matrices(...Ms) {
+  // Broadcasts many arrays
+	
+  // if they are all scalars, there is nothing to do
+  if (Ms.every(x => isScalar(x))) {
+    return Ms
+  }
+
+  const s = broadcast_shapes(...Ms.map(x => sizeAsArray(x)))
+  const N = s.length
+  return Ms.map(M => {
+    if (isScalar(M) & !sizeOfScalar(s)) {
+      M = math.matrix([M])
+    }
+
+    if (sizeAsArray(M).length < N) {
+      M.reshape(shapeToConcat(M, N))
+    }
+
+    for (let i = 0; i < N; ++i) {
+      if (((M.size()[i] == 1) | (M.size()[i] == 0)) & (s[i] > 1)) {
+        M = math.concat(...Array(s[i]).fill(M), i)
+      }
+    }
+    return M
+  })
 }
 
 const mat = math.create()
 
 mat.import({
-  props,
-  HAprops,
-  phase,
-  MM,
-  exp: x => mapped(math.exp, x),
-  log: mapLog, // log 
-  gamma: x=> mapped(math.gamma, x),
-  square: x=> mapped(math.square, x),
-  sin: x => mapped(math.sin, x),
-  cos: x => mapped(math.cos, x),
-  cube: x => mapped(math.cube, x),
-  //cbrt: x => mapped(math.cbrt, x),
-  cbrt: x => mapped(x2 => math.cbrt(x2), x),  // this is a temporary fix as cbrt doesn't work with map
-  acos: x => mapped(math.acos, x),
-  acosh: x => mapped(math.acosh, x),
-  acot: x => mapped(math.acot, x),
-  acoth: x => mapped(math.acoth, x),
-  acsc: x => mapped(math.acsc, x),
-  acsch: x => mapped(math.acsch, x),
-  asec: x => mapped(math.asec, x),
-  asech: x => mapped(math.asech, x),
-  asin: x => mapped(math.asin, x),
-  asinh: x => mapped(math.asinh, x),
-  atan: x => mapped(math.atan, x),
-  atanh: x => mapped(math.atanh, x),
-  cosh: x => mapped(math.cosh, x),
-  cot: x => mapped(math.cot, x),
-  coth: x => mapped(math.coth, x),
-  csc: x => mapped(math.csc, x),
-  csch: x => mapped(math.csch, x),
-  sec: x => mapped(math.sec, x),  
-  //'atan2(1:10, 1:10)', already works it hasn't lost it's vectorization
-  sech: x => mapped(math.sech, x),
-  sin: x => mapped(math.sin, x),
-  sinh: x => mapped(math.sinh, x),
-  tan: x => mapped(math.tan, x),
-  tanh: x => mapped(math.tanh, x)
+  add: (...Ms) => math.add(...broadcast_matrices(...Ms)),
+  subtract: (...Ms) => math.subtract(...broadcast_matrices(...Ms)),
+  dotMultiply: (...Ms) => math.dotMultiply(...broadcast_matrices(...Ms)),
+  dotDivide: (...Ms) => math.dotDivide(...broadcast_matrices(...Ms)),
 },{override:true})
+
+mat.import({
+  exp: math.typed({
+    'Array | Matrix': x => math.map(x, math.exp)
+  }),
+  log: math.typed({
+    'Array | Matrix': x => math.map(x, x1 => math.log(x1, math.e)),
+    'Array | Matrix, number': (x, base) => math.map(x, x1 => math.log(x1, base))
+  }),
+  gamma: math.typed({
+    'Array | Matrix' : x => math.map(x, math.gamma)
+  }),
+  square: math.typed({
+    'Array | Matrix' : x => math.map(x, math.square)
+  }),
+  sqrt: math.typed({
+    'Array | Matrix' : x => math.map(x, math.sqrt)
+  }),
+  cube: math.typed({
+    'Array | Matrix' : x => math.map(x, math.cube)
+  }),
+  cbrt: math.typed({
+    // temporary fix until cbrt works as the rest
+    'Array | Matrix' : x => math.map(x, x => math.cbrt(x))
+  }),
+  // trigonometrics [sin, cos, tan, csc, sec, cot]
+  sin: math.typed({
+    'Array | Matrix' : x => math.map(x, math.sin)
+  }),
+  cos: math.typed({
+    'Array | Matrix' : x => math.map(x, math.cos)
+  }),
+  tan: math.typed({
+    'Array | Matrix' : x => math.map(x, math.tan)
+  }),
+  csc: math.typed({
+    'Array | Matrix' : x => math.map(x, math.csc)
+  }),
+  sec: math.typed({
+    'Array | Matrix' : x => math.map(x, math.sec)  
+  }),
+  cot: math.typed({
+    'Array | Matrix' : x => math.map(x, math.cot)
+  }),
+
+  // trigonometrics hypberbolics [sinh, cosh, tanh, csch, sech, coth]
+  sinh: math.typed({
+    'Array | Matrix' : x => math.map(x, math.sinh)
+  }),
+  cosh: math.typed({
+    'Array | Matrix' : x => math.map(x, math.cosh)
+  }),
+  tanh: math.typed({
+    'Array | Matrix' : x => math.map(x, math.tanh)
+  }),
+  csch: math.typed({
+    'Array | Matrix' : x => math.map(x, math.csch)
+  }),
+  sech: math.typed({
+    'Array | Matrix' : x => math.map(x, math.sech)  
+  }),
+  coth: math.typed({
+    'Array | Matrix' : x => math.map(x, math.coth)
+  }),
+
+  // trigonometrics arc [asin, acos, atan, acsc, asec, acot]
+  asin: math.typed({
+    'Array | Matrix' : x => math.map(x, math.asin)
+  }),
+  acos: math.typed({
+    'Array | Matrix' : x => math.map(x, math.acos)
+  }),
+  atan: math.typed({
+    'Array | Matrix' : x => math.map(x, math.atan)
+  }),
+  acsc: math.typed({
+    'Array | Matrix' : x => math.map(x, math.acsc)
+  }),
+  asec: math.typed({
+    'Array | Matrix' : x => math.map(x, math.asec)  
+  }),
+  acot: math.typed({
+    'Array | Matrix' : x => math.map(x, math.acot)
+  }),
+
+  // trigonometrics arc hyperbolic [asinh, acosh, atanh, acsch, asech, acoth]
+    asinh: math.typed({
+    'Array | Matrix' : x => math.map(x, math.asinh)
+  }),
+  acosh: math.typed({
+    'Array | Matrix' : x => math.map(x, math.acosh)
+  }),
+  atanh: math.typed({
+    'Array | Matrix' : x => math.map(x, math.atanh)
+  }),
+  acsch: math.typed({
+    'Array | Matrix' : x => math.map(x, math.acsch)
+  }),
+  asech: math.typed({
+    'Array | Matrix' : x => math.map(x, math.asech)  
+  }),
+  acoth: math.typed({
+    'Array | Matrix' : x => math.map(x, math.acoth)
+  })
+},{override:false})
 
 mat.createUnit('TR', '12e3 BTU/h')
 const parser = mat.parser()
