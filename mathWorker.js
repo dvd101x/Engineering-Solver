@@ -110,110 +110,64 @@ mat.import({
   dotDivide: (...Ms) => math.dotDivide(...broadcast_matrices(...Ms)),
 },{override:true})
 
+function mapped(f) {
+  return math.typed({
+    'Array | Matrix': X => math.map(X, x => f(x))
+  })
+}
+
 mat.import({
-  exp: math.typed({
-    'Array | Matrix': x => math.map(x, math.exp)
-  }),
+  props,
+  HAprops,
+  phase,
+  exp: mapped(math.exp),
   log: math.typed({
     'Array | Matrix': x => math.map(x, x1 => math.log(x1, math.e)),
     'Array | Matrix, number': (x, base) => math.map(x, x1 => math.log(x1, base))
   }),
-  gamma: math.typed({
-    'Array | Matrix' : x => math.map(x, math.gamma)
-  }),
-  square: math.typed({
-    'Array | Matrix' : x => math.map(x, math.square)
-  }),
-  sqrt: math.typed({
-    'Array | Matrix' : x => math.map(x, math.sqrt)
-  }),
-  cube: math.typed({
-    'Array | Matrix' : x => math.map(x, math.cube)
-  }),
+  gamma: mapped(math.gamma),
+  square: mapped(math.square),
+  sqrt: mapped(math.sqrt),
+  cube: mapped(math.cube),
   cbrt: math.typed({
-    // temporary fix until cbrt works as the rest
+    // temporary fix until cbrt can be mapped
     'Array | Matrix' : x => math.map(x, x => math.cbrt(x))
   }),
   // trigonometrics [sin, cos, tan, csc, sec, cot]
-  sin: math.typed({
-    'Array | Matrix' : x => math.map(x, math.sin)
-  }),
-  cos: math.typed({
-    'Array | Matrix' : x => math.map(x, math.cos)
-  }),
-  tan: math.typed({
-    'Array | Matrix' : x => math.map(x, math.tan)
-  }),
-  csc: math.typed({
-    'Array | Matrix' : x => math.map(x, math.csc)
-  }),
-  sec: math.typed({
-    'Array | Matrix' : x => math.map(x, math.sec)  
-  }),
-  cot: math.typed({
-    'Array | Matrix' : x => math.map(x, math.cot)
-  }),
+  sin: mapped(math.sin),
+  cos: mapped(math.cos),
+  tan: mapped(math.tan),
+  csc: mapped(math.csc),
+  sec: mapped(math.sec),
+  cot: mapped(math.cot),
 
   // trigonometrics hypberbolics [sinh, cosh, tanh, csch, sech, coth]
-  sinh: math.typed({
-    'Array | Matrix' : x => math.map(x, math.sinh)
-  }),
-  cosh: math.typed({
-    'Array | Matrix' : x => math.map(x, math.cosh)
-  }),
-  tanh: math.typed({
-    'Array | Matrix' : x => math.map(x, math.tanh)
-  }),
-  csch: math.typed({
-    'Array | Matrix' : x => math.map(x, math.csch)
-  }),
-  sech: math.typed({
-    'Array | Matrix' : x => math.map(x, math.sech)  
-  }),
-  coth: math.typed({
-    'Array | Matrix' : x => math.map(x, math.coth)
-  }),
+  sinh: mapped(math.sinh),
+  cosh: mapped(math.cosh),
+  tanh: mapped(math.tanh),
+  csch: mapped(math.csch),
+  sech: mapped(math.sech),
+  coth: mapped(math.coth),
 
   // trigonometrics arc [asin, acos, atan, acsc, asec, acot]
-  asin: math.typed({
-    'Array | Matrix' : x => math.map(x, math.asin)
-  }),
-  acos: math.typed({
-    'Array | Matrix' : x => math.map(x, math.acos)
-  }),
-  atan: math.typed({
-    'Array | Matrix' : x => math.map(x, math.atan)
-  }),
-  acsc: math.typed({
-    'Array | Matrix' : x => math.map(x, math.acsc)
-  }),
-  asec: math.typed({
-    'Array | Matrix' : x => math.map(x, math.asec)  
-  }),
-  acot: math.typed({
-    'Array | Matrix' : x => math.map(x, math.acot)
-  }),
+  asin: mapped(math.asin),
+  acos: mapped(math.acos),
+  atan: mapped(math.atan),
+  acsc: mapped(math.acsc),
+  asec: mapped(math.asec),
+  acot: mapped(math.acot),
 
   // trigonometrics arc hyperbolic [asinh, acosh, atanh, acsch, asech, acoth]
-    asinh: math.typed({
-    'Array | Matrix' : x => math.map(x, math.asinh)
-  }),
-  acosh: math.typed({
-    'Array | Matrix' : x => math.map(x, math.acosh)
-  }),
-  atanh: math.typed({
-    'Array | Matrix' : x => math.map(x, math.atanh)
-  }),
-  acsch: math.typed({
-    'Array | Matrix' : x => math.map(x, math.acsch)
-  }),
-  asech: math.typed({
-    'Array | Matrix' : x => math.map(x, math.asech)  
-  }),
-  acoth: math.typed({
-    'Array | Matrix' : x => math.map(x, math.acoth)
-  })
-},{override:false})
+  asinh: mapped(math.asinh),
+  acosh: mapped(math.acosh),
+  atanh: mapped(math.atanh),
+  acsch: mapped(math.acsch),
+  asech: mapped(math.asech),
+  acoth: mapped(math.acoth)
+
+  //atan2 already works, thus no need to do anything
+},{override:false}
+)
 
 mat.createUnit('TR', '12e3 BTU/h')
 const parser = mat.parser()
