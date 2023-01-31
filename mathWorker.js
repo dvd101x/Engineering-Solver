@@ -108,6 +108,7 @@ mat.import({
   subtract: (...Ms) => math.subtract(...broadcast_matrices(...Ms)),
   dotMultiply: (...Ms) => math.dotMultiply(...broadcast_matrices(...Ms)),
   dotDivide: (...Ms) => math.dotDivide(...broadcast_matrices(...Ms)),
+  dotPow: (...Ms) => math.dotPow(...broadcast_matrices(...Ms)),
 },{override:true})
 
 function mapped(f) {
