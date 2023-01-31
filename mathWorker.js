@@ -132,7 +132,8 @@ mat.import({
   cube: mapped(math.cube),
   cbrt: math.typed({
     // temporary fix until cbrt can be mapped
-    'Array | Matrix' : x => math.map(x, x => math.cbrt(x))
+    'Array | Matrix' : X => math.map(X, x => math.cbrt(x)),
+    'Array | Matrix, boolean': (X, roots) => math.map(X, x => math.cbrt(x, roots))
   }),
   // trigonometrics [sin, cos, tan, csc, sec, cot]
   sin: mapped(math.sin),
