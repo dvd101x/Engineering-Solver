@@ -103,41 +103,44 @@ function broadcast_matrices(...Ms) {
 
 const mat = math.create()
 
+const broadcastedFunction = (f, ...Ms) => f(...broadcast_matrices(...Ms))
+
 mat.import({
-  // Arithmetic functions
-  add: (...Ms) => math.add(...broadcast_matrices(...Ms)),
-  subtract: (...Ms) => math.subtract(...broadcast_matrices(...Ms)),
-  dotMultiply: (...Ms) => math.dotMultiply(...broadcast_matrices(...Ms)),
-  dotDivide: (...Ms) => math.dotDivide(...broadcast_matrices(...Ms)),
-  dotPow: (...Ms) => math.dotPow(...broadcast_matrices(...Ms)),
+   // Arithmetic functions
+  add: (...Ms) => broadcastedFunction(math.add, ...Ms),
+  subtract: (...Ms) => broadcastedFunction(math.subtract, ...Ms),
+  dotMultiply: (...Ms) => broadcastedFunction(math.dotMultiply, ...Ms),
+  dotDivide: (...Ms) => broadcastedFunction(math.dotDivide, ...Ms),
+  dotPow: (...Ms) => broadcastedFunction(math.dotPow, ...Ms),
 
   // Bitwise functions
-  bitAnd: (...Ms) => math.bitAnd(...broadcast_matrices(...Ms)),
-  bitNot: (...Ms) => math.bitNot(...broadcast_matrices(...Ms)),
-  bitOr: (...Ms) => math.bitOr(...broadcast_matrices(...Ms)),
-  bitXor: (...Ms) => math.bitXor(...broadcast_matrices(...Ms)),
+  bitAnd: (...Ms) => broadcastedFunction(math.bitAnd, ...Ms),
+  bitNot: (...Ms) => broadcastedFunction(math.bitNot, ...Ms),
+  bitOr: (...Ms) => broadcastedFunction(math.bitOr, ...Ms),
+  bitXor: (...Ms) => broadcastedFunction(math.bitXor, ...Ms),
 
   // Loigical functions
-  and: (...Ms) => math.and(...broadcast_matrices(...Ms)),
-  not: (...Ms) => math.not(...broadcast_matrices(...Ms)),
-  or: (...Ms) => math.or(...broadcast_matrices(...Ms)),
-  xor: (...Ms) => math.xor(...broadcast_matrices(...Ms)),
+  and: (...Ms) => broadcastedFunction(math.and, ...Ms),
+  not: (...Ms) => broadcastedFunction(math.not, ...Ms),
+  or: (...Ms) => broadcastedFunction(math.or, ...Ms),
+  xor: (...Ms) => broadcastedFunction(math.xor, ...Ms),
 
   // Relational functions
-  compare: (...Ms) => math.compare(...broadcast_matrices(...Ms)),
-  compareText: (...Ms) => math.compareText(...broadcast_matrices(...Ms)),
-  deepEqual: (...Ms) => math.deepEqual(...broadcast_matrices(...Ms)),
-  equal: (...Ms) => math.equal(...broadcast_matrices(...Ms)),
-  equalText: (...Ms) => math.equalText(...broadcast_matrices(...Ms)),
-  larger: (...Ms) => math.larger(...broadcast_matrices(...Ms)),
-  largerEq: (...Ms) => math.largerEq(...broadcast_matrices(...Ms)),
-  smaller: (...Ms) => math.smaller(...broadcast_matrices(...Ms)),
-  smallerEq: (...Ms) => math.smallerEq(...broadcast_matrices(...Ms)),
-  unequal: (...Ms) => math.unequal(...broadcast_matrices(...Ms)),
+  compare: (...Ms) => broadcastedFunction(math.compare, ...Ms),
+  compareText: (...Ms) => broadcastedFunction(math.compareText, ...Ms),
+  deepEqual: (...Ms) => broadcastedFunction(math.deepEqual, ...Ms),
+  equal: (...Ms) => broadcastedFunction(math.equal, ...Ms),
+  equalText: (...Ms) => broadcastedFunction(math.equalText, ...Ms),
+  larger: (...Ms) => broadcastedFunction(math.larger, ...Ms),
+  largerEq: (...Ms) => broadcastedFunction(math.largerEq, ...Ms),
+  smaller: (...Ms) => broadcastedFunction(math.smaller, ...Ms),
+  smallerEq: (...Ms) => broadcastedFunction(math.smallerEq, ...Ms),
+  unequal: (...Ms) => broadcastedFunction(math.unequal, ...Ms),
 
   // Unit functions
-  to: (...Ms) => math.to(...broadcast_matrices(...Ms)),
-},{override:true})
+  to: (...Ms) => broadcastedFunction(math.to, ...Ms),
+},
+  { override: true })
 
 function mapped(f) {
   return math.typed({
