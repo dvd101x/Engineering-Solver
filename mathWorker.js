@@ -8,102 +8,104 @@ importScripts(
   "https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"
 )
 
-// consistently gets the size of an array, matrix or scalar as an array
-sizeAsArray = (x) => (math.isMatrix(x) | isScalar(x)) ? math.size(x).toArray() : math.size(x)
-
-// checks if a value is scalar
-isScalar = (x) => math.count(math.size(x)) == 0
 
 // checks if the size of a value corresponds to a scalar
-sizeOfScalar = (size) => math.sum(math.size(size)) == 0
+sizeOfScalar = (size) => math.sum(math.size(size)) === 0
 
-// creates shape of the dimension needed to concat a value in N dimensions
-// a matrix of size [3, 4] to dim = 3 yields [1, 3, 3]
-// in other words it appends 1 to the left as needed
-shapeToConcat = (Mat, dim) => math.resize(sizeAsArray(Mat).reverse(), [dim], 1).reverse()
-
-// calculates what is the common sizes/shapes of the functions to concat
-// throws an error specifying why the sizes/shapes can't be broadcasted
-function broadcast_shapes(...shapes) {
-  // is the number of dims of the shapes to broadcast
-  const sizes = shapes.map(shape => shape.length)
-  // it should work with scalars but it doesn't
-  const N = math.max(sizes)
-  let broadcasted_shape = []
-  let maxDims = []
-
-  // Gets the maximum size in each dimension
-  for (let n = 0; n < N; ++n) {
-    let maxDim = 0
-    shapes.forEach((shape, ns) => {
-      if (sizes[ns] > n) {
-        const nDim = shape[sizes[ns] - n - 1]
-        if (nDim > maxDim) {
-          maxDim = nDim
-        }
-      }
-    })
-    maxDims[N - n - 1] = maxDim
-  }
-
-  // Calculates the broadcasted shape
-  // If for each shape to broadcast, check from right to left
-  // from last dimension to first dimension if it can be broadcasted
-  // It means it is possible to broadcast a dimension to a dimension N
-  // the current dimension is none, 1
-  // if the current dimension is already N there is nothing to be done
-  // it is not possible to broadcast a dimension size 2 to a 3 for example
-
-  for (let n = 0; n < N; ++n) {
-    shapes.forEach((shape, ns) => {
-      if (sizes[ns] > n) {
-        const dimID = sizes[ns] - n - 1 // right to left
-        const nDim = shape[dimID]
-        const broadcastID = N - n - 1 // right to left
-        if ((nDim < maxDims[broadcastID]) & (nDim > 1)) {
-          throw new Error(`shape missmatch: missmatch is found in arg ${ns} with shape (${shape}) not possible to broadcast dimension ${dimID} with size ${nDim} to size ${maxDims[broadcastID]}`)
-        }
-        else {
-          broadcasted_shape[broadcastID] = maxDims[broadcastID]
-        }
-      }
-    })
-  }
-
-  return broadcasted_shape
-}
-
-function broadcast_matrices(...Ms) {
-  // Broadcasts many arrays
-	
-  // if they are all scalars, there is nothing to do
-  if (Ms.every(x => isScalar(x))) {
-    return Ms
-  }
-
-  const s = broadcast_shapes(...Ms.map(x => sizeAsArray(x)))
-  const N = s.length
-  return Ms.map(M => {
-    if (isScalar(M) & !sizeOfScalar(s)) {
-      M = math.matrix([M])
-    }
-
-    if (sizeAsArray(M).length < N) {
-      M.reshape(shapeToConcat(M, N))
-    }
-
-    for (let i = 0; i < N; ++i) {
-      if (((M.size()[i] == 1) | (M.size()[i] == 0)) & (s[i] > 1)) {
-        M = math.concat(...Array(s[i]).fill(M), i)
-      }
-    }
-    return M
+// consistently gets the size of an array, matrix or scalar as an array
+sizeAsArray = math.typed(
+  'sizeAsArray',
+  {
+    'Array': (x) => math.size(x),
+    'any': (x) => math.size(x).toArray()
   })
+
+// checks if a value is scalar
+isScalar = math.typed(
+  'isScalar',
+  {
+    'Array | Matrix': x => false,
+    'any': x => true
+  }
+)
+
+// aligns a shapte to a size in N dimensions
+alignShape = (shape, nDims, pad) => shape.length < nDims ? math.resize(shape.reverse(), [nDims], pad).reverse() : shape
+
+// calculates the shape needed to concat an array in a dimension
+shapeToConcat = (Mat, dim) => alignShape(sizeAsArray(Mat), dim, 1)
+
+// stretches a matrix up to a certain size on a dimensions
+// TODO: use function repeat when it's available
+stretch = (matrix, size, dim) => math.concat(...Array(size).fill(matrix), dim)
+
+broadcast_shapes = math.typed(
+  // Calculates the final broadcastable shape from different shape inputs
+  // Throws an error if it brakes the broadcasting rules
+  'broadcast_shapes',
+  {
+    '...Array': (shapes) => {
+      const dims = shapes.map(shape => shape.length)
+      const N = math.max(dims)
+      const shapes_array = shapes.map((shape, i) => alignShape(shape, N, 0))
+      const max_shapes = math.max(shapes_array, 0)
+
+      shapes_array.forEach(
+        (shape, shapeID) => {
+          shape.forEach(
+            (dim, dimID) => {
+              if ((dim < max_shapes[dimID]) & (dim > 1))
+                throw new Error(`shape missmatch: missmatch is found in arg ${shapeID} with shape (${shape}) not possible to broadcast dimension ${dimID} with size ${dim} to size ${max_shapes[dimID]}`)
+            }
+          )
+        }
+      )
+      return max_shapes
+    }
+  }
+)          
+
+function broadcast(...matrices) {
+  // Broadcasts many arrays
+  if (matrices.every(matrix => isScalar(matrix))) {
+    return matrices
+  }
+
+  const broadcastedMatrixSize = broadcast_shapes(...matrices.map(matrix => sizeAsArray(matrix)))
+  const N = broadcastedMatrixSize.length
+  const broadcasted_matrices =
+    matrices.map(matrix => {
+      let matrixSize
+
+      if (isScalar(matrix)) {
+        matrix = [matrix]
+      }
+
+      matrixSize = sizeAsArray(matrix)
+
+      if (matrixSize.length < N) {
+        matrix = math.reshape(
+          matrix,
+          shapeToConcat(matrix, N))
+
+        matrixSize = sizeAsArray(matrix)
+      }
+
+      broadcastedMatrixSize.forEach(
+        (size, dim) => {
+          if (matrixSize[dim] < size) {
+            matrix = stretch(matrix, size, dim)
+          }
+        }
+      )
+      return matrix
+    })
+  return broadcasted_matrices
 }
 
 const mat = math.create()
 
-const broadcastedFunction = (f, ...Ms) => f(...broadcast_matrices(...Ms))
+const broadcastedFunction = (f, ...Ms) => f(...broadcast(...Ms))
 
 mat.import({
    // Arithmetic functions
