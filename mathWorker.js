@@ -132,7 +132,6 @@ mat.import({
  
    // Relational functions
    compare: (...Ms) => broadcastedFunction(math.compare, ...Ms),
-   compareNatural: (...Ms) => broadcastedFunction(math.compareNatural, ...Ms),
    compareText: (...Ms) => broadcastedFunction(math.compareText, ...Ms),
    compareUnits: (...Ms) => broadcastedFunction(math.compareUnits, ...Ms),
    deepEqual: (...Ms) => broadcastedFunction(math.deepEqual, ...Ms),
