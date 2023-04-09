@@ -16,6 +16,61 @@ function mapped(f) {
   })
 }
 
+timeRange = math.typed(
+  // Makes a range that can be used in solveODE
+  {
+    'number, number, number': (...args) => math.range(...args, true).toArray(),
+    'Unit, Unit, Unit': (...args) => {
+      let units = args[0].clone()
+      units.value = null
+      return math.range(...args.map(x => x.toNumber(units)), true)
+        .toArray()
+        .map(
+          x => math.unit(x, units)
+        )
+    }
+  }
+)
+
+solveODE = function (f, T, y0) {
+  // https://mathworld.wolfram.com/EulerForwardMethod.html
+  const t_start = T[0]
+  const t_end = T[1]
+  const h = T[2]
+  const t = timeRange(t_start, t_end, h)
+
+  let y = [[...y0]]
+  t.slice(0, t.length - 1).forEach((t_n, n) => {
+    const h = math.subtract(t[n + 1], t_n)
+    const y_n = y[n];
+    y.push(
+      math.add(
+        y_n,
+        math.dotMultiply(
+          h,
+          f(t_n, y_n)
+        )
+      )
+    )
+  });
+  return { t, y }
+}
+
+mat.import({
+  solveODE: math.typed('solveODE', {
+    // As odeEuler requires function, Array, Array and returns an object with two arrays by default, this uses math.typed to do the convertions automatically
+    'function, Array, number': (f, T, y0) => {
+      const sol = odeEuler(f, T, [y0])
+      return { t: sol.t, y: sol.y.map(y => y[0]) }
+    },
+    'function, Array, Array': (f, T, y0) => math.odeEuler(f, T, y0),
+    'function, Matrix, Matrix': (f, T, y0) => {
+      const sol = odeEuler(f, T.toArray(), y0.toArray())
+      return { t: math.matrix(sol.t), y: math.matrix(sol.y) }
+    }
+  })
+})
+
 mat.import({
   props,
   HAprops,
