@@ -59,7 +59,7 @@ odeEuler = function (f, T, y0) {
 mat.import({
   solveODE: math.typed('solveODE', {
     // As odeEuler requires function, Array, Array and returns an object with two arrays by default, this uses math.typed to do the convertions automatically
-    'function, Array, number': (f, T, y0) => {
+    'function, Array, number|Unit': (f, T, y0) => {
       const sol = odeEuler(f, T, [y0])
       return { t: sol.t, y: sol.y.map(y => y[0]) }
     },
