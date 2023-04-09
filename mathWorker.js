@@ -32,7 +32,7 @@ timeRange = math.typed(
   }
 )
 
-solveODE = function (f, T, y0) {
+odeEuler = function (f, T, y0) {
   // https://mathworld.wolfram.com/EulerForwardMethod.html
   const t_start = T[0]
   const t_end = T[1]
