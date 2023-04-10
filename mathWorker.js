@@ -12,23 +12,23 @@ const mat = math.create()
 
 function mapped(f) {
   return math.typed({
-    'Array | Matrix': X => math.map(X, x => f(x))
+      'Array | Matrix': X => math.map(X, x => f(x))
   })
 }
 
 timeRange = math.typed(
   // Makes a range that can be used in solveODE
   {
-    'number, number, number': (...args) => math.range(...args, true).toArray(),
-    'Unit, Unit, Unit': (...args) => {
-      let units = args[0].clone()
-      units.value = null
-      return math.range(...args.map(x => x.toNumber(units)), true)
-        .toArray()
-        .map(
-          x => math.unit(x, units)
-        )
-    }
+      'number, number, number': (...args) => math.range(...args, true).toArray(),
+      'Unit, Unit, Unit': (...args) => {
+          let units = args[0].clone()
+          units.value = null
+          return math.range(...args.map(x => x.toNumber(units)), true)
+              .toArray()
+              .map(
+                  x => math.unit(x, units)
+              )
+      }
   }
 )
 
@@ -41,33 +41,176 @@ odeEuler = function (f, T, y0) {
 
   let y = [[...y0]]
   t.slice(0, t.length - 1).forEach((t_n, n) => {
-    const h = math.subtract(t[n + 1], t_n)
-    const y_n = y[n];
-    y.push(
-      math.add(
-        y_n,
-        math.dotMultiply(
-          h,
-          f(t_n, y_n)
-        )
+      //const h = math.subtract(t[n + 1], t_n)
+      const y_n = y[n];
+      y.push(
+          math.add(
+              y_n,
+              math.dotMultiply(
+                  h,
+                  f(t_n, y_n)
+              )
+          )
       )
-    )
   });
   return { t, y }
 }
 
+function odeRK2(f, T, y0) {
+  // https://mathworld.wolfram.com/Runge-KuttaMethod.html
+  const t_start = T[0]
+  const t_end = T[1]
+  const h = T[2]
+  const t = timeRange(t_start, t_end, h)
+  let y = [[...y0]]
+  t.slice(0, t.length - 1).forEach((t_n, n) => {
+      console.log(h)
+      const y_n = y[n];
+      k_1 = math.dotMultiply(h, f(t_n, y_n));
+
+      k_2 = math.dotMultiply(h, f(math.add(t_n, math.dotDivide(h, 2)), math.add(
+          y_n,
+          math.dotDivide(
+              k_1,
+              2
+          )
+      )));
+
+      y.push(
+          math.add(
+              y_n,
+              k_2
+          )
+      )
+  });
+  return { t, y }
+}
+
+function odeRalston(f, T, y0) {
+  // https://mathworld.wolfram.com/Runge-KuttaMethod.html
+  const t_start = T[0]
+  const t_end = T[1]
+  const h = T[2]
+  const t = timeRange(t_start, t_end, h)
+  let y = [[...y0]]
+  t.slice(0, t.length - 1).forEach((t_n, n) => {
+      console.log(h)
+      const y_n = y[n];
+      k_1 = f(t_n, y_n);
+
+      k_2 = f(math.add(t_n, math.dotMultiply(2 / 3, h)), math.add(
+          y_n,
+          math.dotMultiply(
+              2 / 3,
+              math.dotMultiply(
+                  h,
+                  k_1
+              )
+          )
+      ));
+
+      y.push(
+          math.add(
+              y_n,
+              math.dotMultiply(
+                  h,
+                  math.add(
+                      math.dotMultiply(1 / 4, k_1),
+                      math.dotMultiply(3 / 4, k_2)
+                  )
+
+              )
+          )
+      )
+  });
+  return { t, y }
+}
+
+function odeRK4(f, T, y0) {
+  // https://mathworld.wolfram.com/Runge-KuttaMethod.html
+  const t_start = T[0]
+  const t_end = T[1]
+  const h = T[2]
+  const t = timeRange(t_start, t_end, h)
+  let y = [[...y0]]
+  t.slice(0, t.length - 1).forEach((t_n, n) => {
+      const y_n = y[n];
+      k_1 = math.dotMultiply(h, f(t_n, y_n));
+
+      k_2 = math.dotMultiply(h, f(math.add(t_n, math.dotDivide(h, 2)), math.add(
+          y_n,
+          math.dotDivide(
+              k_1,
+              2
+          )
+      )));
+
+      k_3 = math.dotMultiply(h, f(math.add(t_n, math.dotDivide(h, 2)), math.add(
+          y_n,
+          math.dotDivide(
+              k_2,
+              2
+          )
+      )));
+
+      k_4 = math.dotMultiply(h, f(math.add(t_n, h), math.add(y_n, k_3)));
+
+      y.push(
+          math.add(
+              y_n,
+              math.add(
+                  math.dotMultiply(
+                      1 / 6,
+                      k_1
+                  ),
+                  math.dotMultiply(
+                      1 / 3,
+                      k_2
+                  ),
+                  math.dotMultiply(
+                      1 / 3,
+                      k_3
+                  )
+                  ,
+                  math.dotMultiply(
+                      1 / 6,
+                      k_4
+                  )
+              )
+          )
+      )
+  });
+  return { t, y }
+}
+
+const solvers = {
+  euler: odeEuler,
+  ralston: odeRalston,
+  rk2: odeRK2,
+  rk4: odeRK4
+}
+
 mat.import({
   solveODE: math.typed('solveODE', {
-    // As odeEuler requires function, Array, Array and returns an object with two arrays by default, this uses math.typed to do the convertions automatically
-    'function, Array, number|Unit': (f, T, y0) => {
-      const sol = odeEuler(f, T, [y0])
-      return { t: sol.t, y: sol.y.map(y => y[0]) }
-    },
-    'function, Array, Array': (f, T, y0) => math.odeEuler(f, T, y0),
-    'function, Matrix, Matrix': (f, T, y0) => {
-      const sol = odeEuler(f, T.toArray(), y0.toArray())
-      return { t: math.matrix(sol.t), y: math.matrix(sol.y) }
-    }
+      // As odeEuler requires function, Array, Array and returns an object with two arrays by default, this uses math.typed to do the convertions automatically
+      'function, Array, number|Unit': (f, T, y0) => {
+          const sol = odeEuler(f, T, [y0])
+          return { t: sol.t, y: sol.y.map(y => y[0]) }
+      },
+      'function, Array, number|Unit, string': (f, T, y0, method) => {
+          const sol = solvers[method](f, T, [y0])
+          return { t: sol.t, y: sol.y.map(y => y[0]) }
+      },
+      'function, Array, Array': (f, T, y0) => odeEuler(f, T, y0),
+      'function, Array, Array, string': (f, T, y0, method) => solvers[method](f, T, y0),
+      'function, Matrix, Matrix': (f, T, y0) => {
+          const sol = odeEuler(f, T.toArray(), y0.toArray())
+          return { t: math.matrix(sol.t), y: math.matrix(sol.y) }
+      },
+      'function, Matrix, Matrix, string': (f, T, y0, method) => {
+          const sol = solvers[method](f, T.toArray(), y0.toArray())
+          return { t: math.matrix(sol.t), y: math.matrix(sol.y) }
+      }
   })
 })
 
@@ -77,17 +220,17 @@ mat.import({
   phase,
   exp: mapped(math.exp),
   log: math.typed({
-    'Array | Matrix': x => math.map(x, x1 => math.log(x1, math.e)),
-    'Array | Matrix, number': (x, base) => math.map(x, x1 => math.log(x1, base))
+      'Array | Matrix': x => math.map(x, x1 => math.log(x1, math.e)),
+      'Array | Matrix, number': (x, base) => math.map(x, x1 => math.log(x1, base))
   }),
   gamma: mapped(math.gamma),
   square: mapped(math.square),
   sqrt: mapped(math.sqrt),
   cube: mapped(math.cube),
   cbrt: math.typed({
-    // temporary fix until cbrt can be mapped
-    'Array | Matrix' : X => math.map(X, x => math.cbrt(x)),
-    'Array | Matrix, boolean': (X, roots) => math.map(X, x => math.cbrt(x, roots))
+      // temporary fix until cbrt can be mapped
+      'Array | Matrix': X => math.map(X, x => math.cbrt(x)),
+      'Array | Matrix, boolean': (X, roots) => math.map(X, x => math.cbrt(x, roots))
   }),
   // trigonometrics [sin, cos, tan, csc, sec, cot]
   sin: mapped(math.sin),
@@ -122,7 +265,7 @@ mat.import({
   acoth: mapped(math.acoth)
 
   //atan2 already works, thus no need to do anything
-},{override:false}
+}, { override: false }
 )
 
 mat.createUnit('TR', '12e3 BTU/h')
@@ -130,9 +273,9 @@ const parser = mat.parser()
 
 const md = markdownit({ html: true })
   .use(texmath, {
-    engine: katex,
-    delimiters: ['dollars', 'beg_end'],
-    katexOptions: { macros: { "\\RR": "\\mathbb{R}" } }
+      engine: katex,
+      delimiters: ['dollars', 'beg_end'],
+      katexOptions: { macros: { "\\RR": "\\mathbb{R}" } }
   })
 
 const intro = `# Intro
@@ -159,19 +302,19 @@ function math2str(x) {
 function evalBlock(block) {
   let mathResult
   try {
-    mathResult = parser.evaluate(block)
+      mathResult = parser.evaluate(block)
   } catch (error) {
-    return error.toString()
+      return error.toString()
   }
   if (typeof mathResult != 'undefined') {
-    if (mathResult.entries) {
-      return mathResult.entries
-        .filter(x => typeof x != 'undefined')
-        .map(x => math2str(x)).join("\n")
-    }
-    else {
-      return math2str(mathResult)
-    }
+      if (mathResult.entries) {
+          return mathResult.entries
+              .filter(x => typeof x != 'undefined')
+              .map(x => math2str(x)).join("\n")
+      }
+      else {
+          return math2str(mathResult)
+      }
   }
 }
 
@@ -186,47 +329,47 @@ function makeDoc(code) {
   let lastType = '';
   parser.clear()
   splitCode
-    .forEach((line, lineNum) => {
-      if (lastType === lineTypes[lineNum]) {
-        cells[cells.length - 1].source.push(line)
-      }
-      else {
-        cells.push({ cell_type: lineTypes[lineNum], source: [line] })
-      }
-      lastType = lineTypes[lineNum]
-    })
+      .forEach((line, lineNum) => {
+          if (lastType === lineTypes[lineNum]) {
+              cells[cells.length - 1].source.push(line)
+          }
+          else {
+              cells.push({ cell_type: lineTypes[lineNum], source: [line] })
+          }
+          lastType = lineTypes[lineNum]
+      })
   let cleanCells = []
   cells.forEach(x => {
-    if (x.cell_type === 'md') {
-      cleanCells.push({ cell_type: 'md', source: x.source.map(e => e.slice(2)) })
-    }
-    else {
-      const thereIsSomething = x.source.join('\n').trim();
-      let notEmptyMath = x.source.filter(e => e)
-      if (thereIsSomething) {
-        cleanCells.push({ cell_type: 'math', source: x.source })
+      if (x.cell_type === 'md') {
+          cleanCells.push({ cell_type: 'md', source: x.source.map(e => e.slice(2)) })
       }
-    }
+      else {
+          const thereIsSomething = x.source.join('\n').trim();
+          let notEmptyMath = x.source.filter(e => e)
+          if (thereIsSomething) {
+              cleanCells.push({ cell_type: 'math', source: x.source })
+          }
+      }
   })
 
   let output = [];
 
   const processOutput = {
-    math: mathCell => {
-      const blocks = mathCell.join('\n')
-        .split(/\n\s*\n/g)
-        .filter(x => x.trim())
-      const results = evalBlocks(blocks)
-      return results
-        .filter(x => x)
-        .map(
-          result => result.length ? '<pre>' + result + '</pre>' : '').join('\n')
-    },
-    md: markdown => md.render(markdown.join('\n'))
+      math: mathCell => {
+          const blocks = mathCell.join('\n')
+              .split(/\n\s*\n/g)
+              .filter(x => x.trim())
+          const results = evalBlocks(blocks)
+          return results
+              .filter(x => x)
+              .map(
+                  result => result.length ? '<pre>' + result + '</pre>' : '').join('\n')
+      },
+      md: markdown => md.render(markdown.join('\n'))
   }
 
   cleanCells.forEach(
-    cell => output.push(processOutput[cell.cell_type](cell.source))
+      cell => output.push(processOutput[cell.cell_type](cell.source))
   )
   return output.join('\n')
 }
@@ -234,7 +377,7 @@ function makeDoc(code) {
 onmessage = function (oEvent) {
   const inputs = JSON.parse(oEvent.data);
   const response = {
-    outputs: makeDoc(inputs.expr),
+      outputs: makeDoc(inputs.expr),
   }
   postMessage(JSON.stringify(response));
 }
