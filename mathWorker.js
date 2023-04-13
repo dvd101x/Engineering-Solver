@@ -281,17 +281,17 @@ mat.import({
     solveODE: math.typed('solveODE', {
         // As odeEuler requires function, Array, Array and returns an object with two arrays by default, this uses math.typed to do the convertions automatically
         'function, Array, number|Unit': (f, T, y0) => {
-            const sol = odeEuler(f, T, [y0])
+            const sol = odeAB5(f, T, [y0])
             return { t: sol.t, y: sol.y.map(y => y[0]) }
         },
         'function, Array, number|Unit, string': (f, T, y0, method) => {
             const sol = solvers[method](f, T, [y0])
             return { t: sol.t, y: sol.y.map(y => y[0]) }
         },
-        'function, Array, Array': (f, T, y0) => odeEuler(f, T, y0),
+        'function, Array, Array': (f, T, y0) => odeAB5(f, T, y0),
         'function, Array, Array, string': (f, T, y0, method) => solvers[method](f, T, y0),
         'function, Matrix, Matrix': (f, T, y0) => {
-            const sol = odeEuler(f, T.toArray(), y0.toArray())
+            const sol = odeAB5(f, T.toArray(), y0.toArray())
             return { t: math.matrix(sol.t), y: math.matrix(sol.y) }
         },
         'function, Matrix, Matrix, string': (f, T, y0, method) => {
