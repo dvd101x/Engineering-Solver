@@ -24,7 +24,7 @@ timeRange = math.typed(
     {
         'number, number, number': (...args) => {
             let tRange = math.range(...args, true).toArray()
-            const tol = args[2]/100;
+            const tol = Math.abs(args[2]/100);
             const err = Math.abs(tRange[tRange.length - 1] - args[1])
           
             if (err > tol) {
@@ -36,7 +36,7 @@ timeRange = math.typed(
             let units = args[0].clone()
             units.value = null
             let tRange = math.range(...args.map(x => x.toNumber(units)), true).toArray()
-            const tol = args[2].toNumber(units)/100
+            const tol = Math.abs(args[2].toNumber(units)/100)
             const err = Math.abs(tRange[tRange.length - 1] - args[1].toNumber(units))
             if ( err > tol) {
                 tRange.push(args[1].toNumber(units))
