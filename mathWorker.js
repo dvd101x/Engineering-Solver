@@ -23,7 +23,7 @@ timeRange = math.typed(
     {
         'number, number, number': (...args) => {
             let tRange = math.range(...args, true).toArray()
-            if (tRange.length & tRange[tRange.length - 1] != args[1]) {
+            if (tRange.length && tRange[tRange.length - 1] != args[1]) {
                 tRange.push(args[1])
             }
             return tRange
@@ -32,7 +32,7 @@ timeRange = math.typed(
             let units = args[0].clone()
             units.value = null
             let tRange = math.range(...args.map(x => x.toNumber(units)), true).toArray()
-            if (tRange.length & tRange[tRange.length - 1] != args[1].toNumber(units)) {
+            if (tRange.length && tRange[tRange.length - 1] != args[1].toNumber(units)) {
                 tRange.push(args[1].toNumber(units))
             }
             return tRange
