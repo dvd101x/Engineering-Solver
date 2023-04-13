@@ -18,13 +18,24 @@ function mapped(f) {
 
 timeRange = math.typed(
     // Makes a range that can be used in solveODE
+    // Can use units
+    // It forces to include t_end
     {
-        'number, number, number': (...args) => math.range(...args, true).toArray(),
+        'number, number, number': (...args) => {
+            let tRange = math.range(...args, true).toArray()
+            if (tRange.length & tRange[tRange.length - 1] != args[1]) {
+                tRange.push(args[1])
+            }
+            return tRange
+        },
         'Unit, Unit, Unit': (...args) => {
             let units = args[0].clone()
             units.value = null
-            return math.range(...args.map(x => x.toNumber(units)), true)
-                .toArray()
+            let tRange = math.range(...args.map(x => x.toNumber(units)), true).toArray()
+            if (tRange.length & tRange[tRange.length - 1] != args[1].toNumber(units)) {
+                tRange.push(args[1].toNumber(units))
+            }
+            return tRange
                 .map(
                     x => math.unit(x, units)
                 )
@@ -34,15 +45,13 @@ timeRange = math.typed(
 
 odeEuler = function (f, T, y0) {
     // https://mathworld.wolfram.com/EulerForwardMethod.html
-    const t_start = T[0]
-    const t_end = T[1]
-    const h = T[2]
-    const t = timeRange(t_start, t_end, h)
+    const t = timeRange(...T)
     const N = t.length - 1 // number of times the method has to run
 
     let y = [y0]
 
     for (let n = 0; n < N; n++) {
+        const h = math.subtract(t[n + 1], t[n])
         y.push(
             math.add(
                 y[n],
@@ -58,14 +67,12 @@ odeEuler = function (f, T, y0) {
 
 function odeRK2(f, T, y0) {
     // https://mathworld.wolfram.com/Runge-KuttaMethod.html
-    const t_start = T[0]
-    const t_end = T[1]
-    const h = T[2]
-    const t = timeRange(t_start, t_end, h)
+    const t = timeRange(...T)
     const N = t.length - 1
     let y = [y0]
 
     for (let n = 0; n < N; n++) {
+        const h = math.subtract(t[n + 1], t[n])
         const k_1 = math.dotMultiply(h, f(t[n], y[n]));
 
         const k_2 = math.dotMultiply(h, f(math.add(t[n], math.dotDivide(h, 2)), math.add(
@@ -88,14 +95,13 @@ function odeRK2(f, T, y0) {
 
 function odeRalston(f, T, y0) {
     // https://mathworld.wolfram.com/Runge-KuttaMethod.html
-    const t_start = T[0]
-    const t_end = T[1]
-    const h = T[2]
-    const t = timeRange(t_start, t_end, h)
+    const t = timeRange(...T)
     const N = t.length - 1
     let y = [y0]
 
     for (n = 0; n < N; n++) {
+        const h = math.subtract(t[n + 1], t[n])
+
         const k_1 = f(t[n], y[n]);
 
         const k_2 = f(math.add(t[n], math.dotMultiply(2 / 3, h)), math.add(
@@ -127,14 +133,13 @@ function odeRalston(f, T, y0) {
 
 function odeRK4(f, T, y0) {
     // https://mathworld.wolfram.com/Runge-KuttaMethod.html
-    const t_start = T[0]
-    const t_end = T[1]
-    const h = T[2]
-    const t = timeRange(t_start, t_end, h)
+    const t = timeRange(...T)
     const N = t.length - 1
     let y = [y0]
 
     for (n = 0; n < N; n++) {
+        const h = math.subtract(t[n + 1], t[n])
+
         const k_1 = math.dotMultiply(h, f(t[n], y[n]));
 
         const k_2 = math.dotMultiply(h, f(math.add(t[n], math.dotDivide(h, 2)), math.add(
@@ -185,10 +190,7 @@ function odeRK4(f, T, y0) {
 
 function odeAB5(f, T, y0) {
     // https://mathworld.wolfram.com/Runge-KuttaMethod.html
-    const t_start = T[0]
-    const t_end = T[1]
-    const h = T[2]
-    const t = timeRange(t_start, t_end, h)
+    const t = timeRange(...T)
     const b = [1901 / 720, -2774 / 720, 2616 / 720, -1274 / 720, 251 / 720]
     const s = b.length // order of the adams method (number of steps)
     const N = t.length - 1 // number of times the method needs to run
@@ -199,10 +201,13 @@ function odeAB5(f, T, y0) {
     // first 5 steps do RK4
 
     for (let n = 0; n < Math.min(N, s - 1); n++) {
-        F.push(f(t[n], y[n]))
-        k_1 = math.dotMultiply(h, F[n]);
+        const h = math.subtract(t[n + 1], t[n])
 
-        k_2 = math.dotMultiply(h, f(math.add(t[n], math.dotDivide(h, 2)), math.add(
+        F.push(f(t[n], y[n]))
+
+        const k_1 = math.dotMultiply(h, F[n]);
+
+        const k_2 = math.dotMultiply(h, f(math.add(t[n], math.dotDivide(h, 2)), math.add(
             y[n],
             math.dotDivide(
                 k_1,
@@ -210,7 +215,7 @@ function odeAB5(f, T, y0) {
             )
         )));
 
-        k_3 = math.dotMultiply(h, f(math.add(t[n], math.dotDivide(h, 2)), math.add(
+        const k_3 = math.dotMultiply(h, f(math.add(t[n], math.dotDivide(h, 2)), math.add(
             y[n],
             math.dotDivide(
                 k_2,
@@ -218,7 +223,7 @@ function odeAB5(f, T, y0) {
             )
         )));
 
-        k_4 = math.dotMultiply(h, f(math.add(t[n], h), math.add(y[n], k_3)));
+        const k_4 = math.dotMultiply(h, f(math.add(t[n], h), math.add(y[n], k_3)));
 
         y.push(
             math.add(
@@ -248,6 +253,8 @@ function odeAB5(f, T, y0) {
 
     // then do AB5 using the previous evaluations of f
     for (let n = s - 1; n < N; n++) {
+
+        const h = math.subtract(t[n + 1], t[n])
         F.push(f(t[n], y[n]))
         y.push(
             math.add(
