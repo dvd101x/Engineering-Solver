@@ -19,11 +19,15 @@ function mapped(f) {
 timeRange = math.typed(
     // Makes a range that can be used in solveODE
     // Can use units
-    // It forces to include t_end
+    // It forces to include t_end if the last value of t is not close enough to t_end
+  'timeRange',
     {
         'number, number, number': (...args) => {
             let tRange = math.range(...args, true).toArray()
-            if (tRange.length && tRange[tRange.length - 1] != args[1]) {
+            const tol = args[2]/100;
+            const err = Math.abs(tRange[tRange.length - 1] - args[1])
+          
+            if (err > tol) {
                 tRange.push(args[1])
             }
             return tRange
@@ -32,7 +36,9 @@ timeRange = math.typed(
             let units = args[0].clone()
             units.value = null
             let tRange = math.range(...args.map(x => x.toNumber(units)), true).toArray()
-            if (tRange.length && tRange[tRange.length - 1] != args[1].toNumber(units)) {
+            const tol = args[2].toNumber(units)/100
+            const err = Math.abs(tRange[tRange.length - 1] - args[1].toNumber(units))
+            if ( err > tol) {
                 tRange.push(args[1].toNumber(units))
             }
             return tRange
