@@ -324,6 +324,7 @@ mat.import({
     props,
     HAprops,
     phase,
+    MM,
     exp: mapped(math.exp),
     log: math.typed({
         'Array | Matrix': x => math.map(x, x1 => math.log(x1, math.e)),
