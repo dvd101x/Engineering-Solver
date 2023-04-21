@@ -314,7 +314,7 @@ print("$0 %", [(improvementFactor - 1) * 100], 3)`
   dm = 2750 kg/s          # Mass flow rate
   A = (3.66 m)^2 * pi     # Area of the rocket
   dragCoef = 0.2          # Drag coefficient
-  method = "rk4"          # [euler, rk2, ralston, rk4]
+  method = "euler"        # [euler, rk2, ralston, rk4]
   
   # Define the equations of motion. We just thrust into current direction of motion, e.g. making a gravity turn.
   gravity(r) = mu / r.^2

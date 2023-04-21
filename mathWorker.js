@@ -16,38 +16,44 @@ function mapped(f) {
     })
 }
 
-timeRange = math.typed(
-    // Makes a range that can be used in solveODE
-    // Can use units
-    // It forces to include t_end if the last value of t is not close enough to t_end
-  'timeRange',
-    {
-        'number, number, number': (...args) => {
-            let tRange = math.range(...args, true).toArray()
-            const tol = Math.abs(args[2]/100);
-            const err = Math.abs(tRange[tRange.length - 1] - args[1])
-          
-            if (err > tol) {
-                tRange.push(args[1])
-            }
-            return tRange
-        },
-        'Unit, Unit, Unit': (...args) => {
-            let units = args[0].clone()
-            units.value = null
-            let tRange = math.range(...args.map(x => x.toNumber(units)), true).toArray()
-            const tol = Math.abs(args[2].toNumber(units)/100)
-            const err = Math.abs(tRange[tRange.length - 1] - args[1].toNumber(units))
-            if ( err > tol) {
-                tRange.push(args[1].toNumber(units))
-            }
-            return tRange
-                .map(
-                    x => math.unit(x, units)
-                )
-        }
+function trimStep(t_n, tf, h){
+  // Trims the next step to reach tf (not after tf)
+  const next = math.add(t_n,h)
+  if(math.isPositive(h)){
+    if(math.larger(next, tf)){
+      h = math.subtract(tf, t_n)
     }
-)
+  }
+  else if(math.isNegative(h)){
+    if(math.smaller(next, tf)){
+      h =  math.subtract(tf, t_n)
+    }
+  }
+  return h
+}
+
+function notFinished(t_n, tf, h){
+  // Checks if the time has reached the final time in the direction of the time step
+  if(math.isPositive(h)){
+    // If time step is positive, return true if 
+    return math.smaller(t_n, tf)
+  }
+  else if(math.isNegative(h)){
+    return math.smaller(tf, t_n)
+  }
+}
+
+function timeRange(t0, tf, h){
+  let t = [t0]
+  h = h ? h : math.divide(math.subtract(tf, t0), 8)
+  let n = 0
+  while(notFinished(t[n], tf, h)){
+    h = trimStep(t[n], tf, h)
+    t.push(math.add(t[n],h))
+    n ++
+  }
+  return t.length > 1 ? t : []
+}
 
 odeEuler = function (f, T, y0) {
     // https://mathworld.wolfram.com/EulerForwardMethod.html
