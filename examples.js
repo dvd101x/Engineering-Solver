@@ -290,94 +290,94 @@ print("$0 %", [(improvementFactor - 1) * 100], 3)`
   ,
   'VaporCompressionCycle':"# # Vapor Compression Cycle\n\n# ## Fluid input\nfluid = 'R134a'\nmDot  = 1 kg/minute\n\n# ## Components input\n# Evaporator\nevap  = {T: -20 degC, P_drop: 0 Pa, superHeating: 10 K}\n# Condenser\ncond  = {T:  40 degC, P_drop: 0 Pa, subCooling  : 10 K}\n# Compressor\netaS  = 0.75\n\n#Define an array of empty states as objects\nc = [{},{},{},{}];\n\n#Short function to get fluid properties\np(DesiredProperty, FluidState) = props(DesiredProperty, fluid, FluidState);\n\n#Define low and high pressure\npLow  = p('P', {T: evap.T, Q: 100%});\npHigh = p('P', {T: cond.T, Q: 0%  });\n\n#4 to 1 Evaporation\nc[1].P = pLow;\nc[1].T = evap.T+ evap.superHeating;\nc[1].D = p('D', c[1]);\nc[1].H = p('H', c[1]);\nc[1].S = p('S', c[1]);\n\n#1 to 2 Compression of vapor\nc[2].P = pHigh;\nH_i    = p('H',{P:c[2].P, S:c[1].S});\nc[2].H = (H_i-c[1].H)/etaS + c[1].H;\nc[2].T = p('T', c[2]);\nc[2].D = p('D', c[2]);\nc[2].S = p('S', c[2]);\n\n\n#2 to 3 Condensation\nc[3].P = c[2].P - cond.P_drop;\nc[3].T = cond.T-cond.subCooling;\nc[3].D = p('D', c[3]);\nc[3].H = p('H', c[3]);\nc[3].S = p('S', c[3]);\n\n#3 to 4 Expansion\nc[4].H = c[3].H;\nc[4].P = c[1].P + evap.P_drop;\nc[4].T = p('T', c[4]);\nc[4].D = p('D', c[4]);\nc[4].S = p('S', c[4]);\n\n\n#Work, Energy and Performance\nW_comp   = mDot*(c[2].H - c[1].H);\nQ_h      = mDot*(c[2].H - c[3].H);\nQ_c      = mDot*(c[1].H - c[4].H);\n\nevap_COP = Q_c/W_comp;\ncond_COP = Q_h/W_comp;\n\n# ## Work and Energy\n\nprint('Compressor power   : $0 \\t$1\\t$2', W_comp to [W, BTU/h, TR], 4)\nprint('Condenser heat out : $0 \\t$1\\t$2', Q_h    to [W, BTU/h, TR], 4)\nprint('Evaporator heat in : $0 \\t$1\\t$2', Q_c    to [W, BTU/h, TR], 4)\n\n\nprint('COP(cooling)       : $0', [evap_COP], 3)\nprint('COP(heating)       : $0', [cond_COP], 3)",
   odeSolver: String.raw`# # Rocket Trajectory Optimization
-  # 
-  # > **reference:** [mathjs](https://mathjs.org/examples/browser/rocket_trajectory_optimization.html)
-  # Define initial values
-  G = gravitationConstant # Gravitational constant
-  mbody = 5.9724e24 kg    # Mass of Earth
-  mu = G * mbody          # Standard gravitational parameter
-  g0 = gravity            # Standard gravity: used for calculating propellant consumption (dmdt)
-  r0 = 6371 km            # Mean radius of Earth
-  t0 = 0 s                # Simulation start
-  dt = 0.5 s              # Simulation timestep
-  t_stage1 = 149.5 s      # Simulation duration
-  isp_sea = 282 s         # Specific impulse (at sea level)
-  isp_vac = 311 s         # Specific impulse (in vacuum)
-  gamma0 = 89.99970 deg   # Initial pitch angle (90 deg is vertical)
-  v0 = 0.9 m/s          # Initial velocity (must be non-zero because ODE is ill-conditioned)
-  phi0 = 0 deg            # Initial orbital reference angle
-  m1 = 433100 kg          # First stage mass
-  m2 = 111500 kg          # Second stage mass
-  m3 = 1700 kg            # Third stage / fairing mass
-  mp = 5000 kg            # Payload mass
-  m0 = m1+m2+m3+mp        # Initial mass of rocket
-  dm = 2750 kg/s          # Mass flow rate
-  A = (3.66 m)^2 * pi     # Area of the rocket
-  dragCoef = 0.2          # Drag coefficient
-  method = "euler"        # [euler, rk2, ralston, rk4]
-  
-  # Define the equations of motion. We just thrust into current direction of motion, e.g. making a gravity turn.
-  gravity(r) = mu / r.^2
-  angVel(r, v, gamma) = v/r * cos(gamma) * rad                          # Angular velocity of rocket around moon
-  density(r) = 1.2250 kg/m^3 * exp(-g0 * (r - r0) / (83246.8 m^2/s^2))  # Assume constant temperature
-  drag(r, v) = 1/2 * density(r) .* v.^2 * A * dragCoef
-  
-  # pressure ~ density for constant temperature
-  isp(r) = isp_vac + (isp_sea - isp_vac) * density(r)/density(r0)
-  thrust(r) = g0 * isp(r) * dm
-   
-  # It is important to maintain the same argument order for each of these functions.
-  drdt(v, gamma) = v sin(gamma)
-  dvdt(r, v, m, gamma) = - gravity(r) * sin(gamma) + (thrust(r) - drag(r, v)) / m
-  dmdt() = - dm
-  dphidt(r, v, gamma) = angVel(r, v, gamma)
-  dgammadt(r, v, gamma) = angVel(r, v, gamma) - gravity(r) * cos(gamma) / v * rad
-  dydt(t, y) = [
-    drdt(y[2], y[5]),
-    dvdt(y[1], y[2], y[3], y[5]),
-    dmdt(),
-    dphidt(y[1], y[2], y[5]),
-    dgammadt(y[1], y[2], y[5])
-  ]
-  
-  # Remember to maintain the same variable order in the call to ndsolve.
-  x = [r0, v0, m0, phi0, gamma0]
-  result_stage1 = solveODE(dydt, [t0, t_stage1, dt], x, method)
-  
-  # Reset initial conditions for interstage flight
-  dm = 0 kg/s
-  t_interstage = t_stage1 + 10 s
-  x = flatten(result_stage1.y[end,:])
-  x[3] = m2+m3+mp   # New mass after stage seperation
-  result_interstage = solveODE(dydt, [t_stage1, t_interstage, dt], x, method)
-  
-  # Reset initial conditions for stage 2 flight
-  dm = 270.8 kg/s
-  isp_vac = 348 s
-  t_stage2 = t_interstage + 350 s
-  x = flatten(result_interstage.y[end,:])
-  result_stage2 = solveODE(dydt, [t_interstage, t_stage2, dt], x, method)
-  
-  # Reset initial conditions for unpowered flight
-  dm = 0 kg / s
-  t_unpowered1 = t_stage2 + 900 s
-  dt = 10 s
-  x = flatten(result_stage2.y[end,:])
-  result_unpowered1 = solveODE(dydt, [t_stage2, t_unpowered1, dt], x, method)
-  
-  # Reset initial conditions for final orbit insertion
-  dm = 270.8 kg / s
-  t_insertion = t_unpowered1 + 39 s
-  dt = 0.5 s
-  x = flatten(result_unpowered1.y[end,:])
-  result_insertion = solveODE(dydt, [t_unpowered1, t_insertion, dt], x, method)
-  
-  # Reset initial conditions for unpowered flight
-  dm = 0 kg / s
-  t_unpowered2 = t_insertion + 250 s
-  dt = 10 s
-  x = flatten(result_insertion.y[end,:])
-  result_unpowered2 = solveODE(dydt, [t_insertion, t_unpowered2, dt], x, method)`
+# 
+# > **reference:** [mathjs](https://mathjs.org/examples/browser/rocket_trajectory_optimization.html)
+# Define initial values
+G = gravitationConstant # Gravitational constant
+mbody = 5.9724e24 kg    # Mass of Earth
+mu = G * mbody          # Standard gravitational parameter
+g0 = gravity            # Standard gravity: used for calculating propellant consumption (dmdt)
+r0 = 6371 km            # Mean radius of Earth
+t0 = 0 s                # Simulation start
+dt = 0.5 s              # Simulation timestep
+t_stage1 = 149.5 s      # Simulation duration
+isp_sea = 282 s         # Specific impulse (at sea level)
+isp_vac = 311 s         # Specific impulse (in vacuum)
+gamma0 = 89.99970 deg   # Initial pitch angle (90 deg is vertical)
+v0 = 0.9 m/s          # Initial velocity (must be non-zero because ODE is ill-conditioned)
+phi0 = 0 deg            # Initial orbital reference angle
+m1 = 433100 kg          # First stage mass
+m2 = 111500 kg          # Second stage mass
+m3 = 1700 kg            # Third stage / fairing mass
+mp = 5000 kg            # Payload mass
+m0 = m1+m2+m3+mp        # Initial mass of rocket
+dm = 2750 kg/s          # Mass flow rate
+A = (3.66 m)^2 * pi     # Area of the rocket
+dragCoef = 0.2          # Drag coefficient
+method = "euler"        # [euler, rk2, ralston, rk4]
+
+# Define the equations of motion. We just thrust into current direction of motion, e.g. making a gravity turn.
+gravity(r) = mu / r.^2
+angVel(r, v, gamma) = v/r * cos(gamma) * rad                          # Angular velocity of rocket around moon
+density(r) = 1.2250 kg/m^3 * exp(-g0 * (r - r0) / (83246.8 m^2/s^2))  # Assume constant temperature
+drag(r, v) = 1/2 * density(r) .* v.^2 * A * dragCoef
+
+# pressure ~ density for constant temperature
+isp(r) = isp_vac + (isp_sea - isp_vac) * density(r)/density(r0)
+thrust(r) = g0 * isp(r) * dm
+
+# It is important to maintain the same argument order for each of these functions.
+drdt(v, gamma) = v sin(gamma)
+dvdt(r, v, m, gamma) = - gravity(r) * sin(gamma) + (thrust(r) - drag(r, v)) / m
+dmdt() = - dm
+dphidt(r, v, gamma) = angVel(r, v, gamma)
+dgammadt(r, v, gamma) = angVel(r, v, gamma) - gravity(r) * cos(gamma) / v * rad
+dydt(t, y) = [
+  drdt(y[2], y[5]),
+  dvdt(y[1], y[2], y[3], y[5]),
+  dmdt(),
+  dphidt(y[1], y[2], y[5]),
+  dgammadt(y[1], y[2], y[5])
+]
+
+# Remember to maintain the same variable order in the call to ndsolve.
+x = [r0, v0, m0, phi0, gamma0]
+result_stage1 = solveODE(dydt, [t0, t_stage1, dt], x, method)
+
+# Reset initial conditions for interstage flight
+dm = 0 kg/s
+t_interstage = t_stage1 + 10 s
+x = flatten(result_stage1.y[end,:])
+x[3] = m2+m3+mp   # New mass after stage seperation
+result_interstage = solveODE(dydt, [t_stage1, t_interstage, dt], x, method)
+
+# Reset initial conditions for stage 2 flight
+dm = 270.8 kg/s
+isp_vac = 348 s
+t_stage2 = t_interstage + 350 s
+x = flatten(result_interstage.y[end,:])
+result_stage2 = solveODE(dydt, [t_interstage, t_stage2, dt], x, method)
+
+# Reset initial conditions for unpowered flight
+dm = 0 kg / s
+t_unpowered1 = t_stage2 + 900 s
+dt = 10 s
+x = flatten(result_stage2.y[end,:])
+result_unpowered1 = solveODE(dydt, [t_stage2, t_unpowered1, dt], x, method)
+
+# Reset initial conditions for final orbit insertion
+dm = 270.8 kg / s
+t_insertion = t_unpowered1 + 39 s
+dt = 0.5 s
+x = flatten(result_unpowered1.y[end,:])
+result_insertion = solveODE(dydt, [t_unpowered1, t_insertion, dt], x, method)
+
+# Reset initial conditions for unpowered flight
+dm = 0 kg / s
+t_unpowered2 = t_insertion + 250 s
+dt = 10 s
+x = flatten(result_insertion.y[end,:])
+result_unpowered2 = solveODE(dydt, [t_insertion, t_unpowered2, dt], x, method)`
 }
 
 function insertExampleFunc(ID) {
