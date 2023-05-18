@@ -481,7 +481,7 @@ function makeDoc(code) {
     return output.join('\n')
 }
 
-function onmessage(oEvent) {
+onmessage = function (oEvent) {
     const inputs = JSON.parse(oEvent.data);
     const response = {
         outputs: makeDoc(inputs.expr),
