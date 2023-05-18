@@ -55,7 +55,7 @@ function timeRange(t0, tf, h){
   return t.length > 1 ? t : []
 }
 
-odeEuler = function (f, T, y0) {
+function odeEuler(f, T, y0) {
     // https://mathworld.wolfram.com/EulerForwardMethod.html
     const t = timeRange(...T)
     const N = t.length - 1 // number of times the method has to run
@@ -481,7 +481,7 @@ function makeDoc(code) {
     return output.join('\n')
 }
 
-onmessage = function (oEvent) {
+function onmessage(oEvent) {
     const inputs = JSON.parse(oEvent.data);
     const response = {
         outputs: makeDoc(inputs.expr),
