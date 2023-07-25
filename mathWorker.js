@@ -1,10 +1,10 @@
 importScripts(
-    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.6.0/math.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.9.1/math.min.js",
     "coolprop.js",
-    "fluidProperties.js",
-    "molecularMass.js",
-    "solveODE.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.3/katex.min.js",
+    "ext/fluidProperties.js",
+    "ext/molecularMass.js",
+    "ext/solveODE.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js",
     "https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js",
 )
