@@ -3,7 +3,6 @@ importScripts(
     "coolprop.js",
     "ext/fluidProperties.js",
     "ext/molecularMass.js",
-    "ext/solveODE.js",
     "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js",
     "https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js",
@@ -22,7 +21,6 @@ mat.import({
     HAprops,
     phase,
     MM,
-    solveODE: createSolveODE(),
     exp: mapped(math.exp),
     log: math.typed({
         'Array | Matrix': x => math.map(x, x1 => math.log(x1, math.e)),

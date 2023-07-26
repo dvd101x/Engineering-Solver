@@ -80,7 +80,7 @@ editor.on("change", code => {
 });
 editor.setSession(sessions[tabIDs.value]);
 
-let mathWorker = new Worker("/mathWorker.js");
+let mathWorker = new Worker("mathWorker.js");
 
 let timerSave;
 const waitToSave = 1500;
