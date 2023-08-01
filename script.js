@@ -210,9 +210,7 @@ function completer(text) {
     }
 
     // remove duplicates
-    matches = matches.filter(function (elem, pos, arr) {
-      return arr.indexOf(elem) === pos
-    })
+    matches = Array.from(new Set(matches))
   }
 
   return matches
