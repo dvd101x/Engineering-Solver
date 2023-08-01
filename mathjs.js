@@ -24,9 +24,11 @@
         let expressionEnd = new RegExp("^[\\]\\)]");
         let identifiers = new RegExp("^[_A-Za-z\xa1-\uffff][_A-Za-z0-9\xa1-\uffff]*");
 
-        let builtins = wordRegexp(
-            Object.keys(math.expression.mathWithTransform)
+        let builtins = wordRegexp([
+            "props", "HAprops", "phase", "MM",
+            ...Object.keys(math.expression.mathWithTransform)
                 .filter(mathFunction => !['expr', 'type'].includes(mathFunction))
+        ]
         );
 
         let keywords = wordRegexp(['to', 'in', 'and', 'not', 'or', 'xor', 'mod']);

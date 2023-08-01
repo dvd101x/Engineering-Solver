@@ -167,6 +167,13 @@ function completer(text) {
       }
     }
 
+    const importedFunctions = ["props", "HAprops", "phase", "MM"]
+    for (const func of importedFunctions) {
+      if (func.startsWith(keyword)) {
+        matches.push(func)
+      }
+    }
+
     // units
     const Unit = math.Unit
     for (const name in Unit.UNITS) {
