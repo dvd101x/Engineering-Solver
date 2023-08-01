@@ -382,6 +382,6 @@ result_unpowered2 = solveODE(dydt, [t_insertion, t_unpowered2, dt], x, method)`
 
 function insertExampleFunc(ID) {
   const mathExampleCode = mathExamples[ID];
-  editor.navigateFileEnd()
-  editor.insert('\n' + mathExampleCode)
+  editor.replaceRange('\n' + mathExampleCode, {line:editor.lastLine(), ch:0}, {line:editor.lastLine(), ch:0})
+  editor.focus()
 }
