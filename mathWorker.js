@@ -1,5 +1,5 @@
 importScripts(
-    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.9.1/math.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.9.1/math.js",
     "coolprop.js",
     "ext/fluidProperties.js",
     "ext/molecularMass.js",
@@ -8,67 +8,38 @@ importScripts(
     "https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js",
 )
 
-const mat = math.create()
-
 function mapped(f) {
     return math.typed({
         'Array | Matrix': X => math.map(X, x => f(x))
     })
 }
 
-mat.import({
-    props,
-    HAprops,
-    phase,
-    MM,
-    exp: mapped(math.exp),
-    log: math.typed({
-        'Array | Matrix': x => math.map(x, x1 => math.log(x1, math.e)),
-        'Array | Matrix, number': (x, base) => math.map(x, x1 => math.log(x1, base))
-    }),
-    gamma: mapped(math.gamma),
-    square: mapped(math.square),
-    sqrt: mapped(math.sqrt),
-    cube: mapped(math.cube),
-    cbrt: mapped(math.cbrt),
-    // trigonometrics [sin, cos, tan, csc, sec, cot]
-    sin: mapped(math.sin),
-    cos: mapped(math.cos),
-    tan: mapped(math.tan),
-    csc: mapped(math.csc),
-    sec: mapped(math.sec),
-    cot: mapped(math.cot),
+// at some point mathjs lost vectorization of these functions, this is an attempt to add the function back
+const functionsToVectorize =
+    [
+        "exp", "gamma", "square", "sqrt", "cube", "cbrt",
+        "sin", "cos", "tan", "csc", "sec", "cot",
+        "sinh", "cosh", "tanh", "csch", "sech", "coth",
+        "asin", "acos", "atan", "acsc", "asec", "acot",
+        "asinh", "acosh", "atanh", "acsch", "asech"
+    ]
 
-    // trigonometrics hypberbolics [sinh, cosh, tanh, csch, sech, coth]
-    sinh: mapped(math.sinh),
-    cosh: mapped(math.cosh),
-    tanh: mapped(math.tanh),
-    csch: mapped(math.csch),
-    sech: mapped(math.sech),
-    coth: mapped(math.coth),
+math.import(
+    {
+        props,
+        HAprops,
+        phase,
+        MM,
+        ...Object.fromEntries(functionsToVectorize.map(f => [f, mapped(math[f])])),
+        log: math.typed({
+            'Array | Matrix': x => math.map(x, x1 => math.log(x1, math.e)),
+            'Array | Matrix, number': (x, base) => math.map(x, x1 => math.log(x1, base))
+        })
+    }
+    , { override: false })
 
-    // trigonometrics arc [asin, acos, atan, acsc, asec, acot]
-    asin: mapped(math.asin),
-    acos: mapped(math.acos),
-    atan: mapped(math.atan),
-    acsc: mapped(math.acsc),
-    asec: mapped(math.asec),
-    acot: mapped(math.acot),
-
-    // trigonometrics arc hyperbolic [asinh, acosh, atanh, acsch, asech, acoth]
-    asinh: mapped(math.asinh),
-    acosh: mapped(math.acosh),
-    atanh: mapped(math.atanh),
-    acsch: mapped(math.acsch),
-    asech: mapped(math.asech),
-    acoth: mapped(math.acoth)
-
-    // atan2 already works, thus no need to do anything
-}, { override: false }
-)
-
-mat.createUnit('TR', '12e3 BTU/h')
-const parser = mat.parser()
+math.createUnit('TR', '12e3 BTU/h')
+const parser = math.parser()
 
 const md = markdownit({ html: true })
     .use(texmath, {

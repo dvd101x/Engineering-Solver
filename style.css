@@ -31,6 +31,11 @@ main>.markdown-body {
 	flex: 1;
 }
 
+main>div.CodeMirror {
+	flex: 1;
+	height: auto;
+}
+
 [name=topBar] {
 	height: 40px;
 }
