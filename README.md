@@ -10,7 +10,7 @@ Open this site [Engineering-Solver](https://dvd101x.github.io/Engineering-Solver
 
 Write a few statements like:
 
-``` python
+``` jl
 2+2
 3 m to mm
 3 m + 2 in to mm
@@ -61,7 +61,7 @@ Does all the calculations and unit conversions. Here are some usefull topics fro
 To call this function use `MM('H2O')` and this will get an object with the data of the compund, including totalMass, number of atoms of each element, mass fraction for each element, etc. The formula can include a notation with parenthesis and dot notation for hydrates.
 
 In:
-``` python
+``` jl
 borax = MM('Na2(B4O5(OH)4).8H2O');
 borax.elements
 borax.totalMass
@@ -83,7 +83,7 @@ Used for calling PropsSI and HAPropsSI but the unit handling is done with MathJS
 ### Fluid Properties: props()
 
 In: 
-``` python
+``` jl
 # Saturated vapor enthalpy [J/kg] of R134a at 25C
 props('H', 'R134a', {T:25 celsius, Q:1})
 ```
@@ -100,7 +100,7 @@ Out: ` 4.1233395323186804e+5 J / kg`
 It can be useful to know what the phase of a given state point is.
 
 In:
-``` python
+``` jl
 # Phase of Water at 1 atmosphere and 0% Quality
 phase('Water', {P:1 atm, Q:0 %})
 ```
@@ -110,7 +110,7 @@ Out: `twophase`
 
 In:
 
-``` python
+``` jl
 #Enthalpy (J per kg dry air) as a function of temperature, pressure,
 #    and relative humidity at dry bulb temperature T of 25C, pressure
 #    P of one atmosphere, relative humidity R of 50%
@@ -121,6 +121,17 @@ Out: `50423.45039102888 J / kg`
 * [Humid Air: Sample Code](http://coolprop.sourceforge.net/fluid_properties/HumidAir.html#sample-hapropssi-code)
 * [Humid Air: List of Parameters (Properties)](http://coolprop.sourceforge.net/fluid_properties/HumidAir.html#table-of-inputs-outputs-to-hapropssi)
 
-## [Ace](https://ace.c9.io/)
+## [CodeMirror 5](https://codemirror.net/5/)
 
-Ace is used for its editing capabilities in the browser. You can access the quick menu by pressing `F1`.
+CodeMirror is used for editing the mathjs code in the browser and includes:
+- Syntax Highligting
+- Automcpletion with <kbd>Ctrl</kbd> + <kbd>Space</kbd>
+  - Functions
+  - Physical Constants
+  - Prefixed Units
+  - Variables in Scope
+- Drag and Drop text documents
+- Other key bindings
+  - Find with <kbd>Ctrl</kbd> + <kbd>F</kbd>
+  - Replace with <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd>
+  - The rest can be found in [CodeMirror: Sublime Text bindings demo](https://codemirror.net/5/demo/sublime.html)
