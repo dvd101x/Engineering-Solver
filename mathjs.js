@@ -16,18 +16,34 @@
             return new RegExp("^((" + words.join(")|(") + "))\\b");
         }
 
-        let singleOperators = new RegExp("^[\\+\\-\\*/&%|\\^~<>!@'\\\\]");
-        let singleDelimiters = new RegExp('^[\\(\\[\\{\\},:=;\\.]');
-        let doubleOperators = new RegExp("^((==)|(~=)|(<=)|(>=)|(<<)|(>>)|(\\.[\\+\\-\\*/\\^\\\\]))");
-        let doubleDelimiters = new RegExp("^((!=)|(\\+=)|(\\-=)|(\\*=)|(/=)|(&=)|(\\|=)|(\\^=))");
-        let tripleDelimiters = new RegExp("^((>>=)|(<<=))");
+        let singleOperators = new RegExp("^[\\+\\-\\*/&|\\^~<>!%']");
+        let singleDelimiters = new RegExp('^[\\(\\[\\{\\},:=;\\.?]');
+        let doubleOperators = new RegExp("^((==)|(!=)|(<=)|(>=)|(<<)|(>>)|(\\.[\\+\\-\\*/\\^]))");
+        let doubleDelimiters = new RegExp("^((!=)|(\^\\|))");
+        let tripleDelimiters = new RegExp("^((>>>)|(<<<))");
         let expressionEnd = new RegExp("^[\\]\\)]");
         let identifiers = new RegExp("^[_A-Za-z\xa1-\uffff][_A-Za-z0-9\xa1-\uffff]*");
 
+        const mathFunctions = []
+        const mathPhysicalConstants = []
+        const mathIgnore = ['expr', 'type']
+        const numberLiterals = ['e', 'E', 'i', 'Infinity', 'LN2', 'LN10', 'LOG2E', 'LOG10E', 'NaN',
+            'null', 'phi', 'pi', 'PI', 'SQRT1_2', 'SQRT2', 'tau', 'undefined', 'version']
+
+        // based on https://github.com/josdejong/mathjs/blob/develop/bin/cli.js
+        for (const expression in math.expression.mathWithTransform) {
+            if (!mathIgnore.includes(expression)) {
+                if (typeof math[expression] === "function") {
+                    mathFunctions.push(expression)
+                } else if (!numberLiterals.includes(expression)) {
+                    mathPhysicalConstants.push(expression)
+                }
+            }
+        }
+
         let builtins = wordRegexp([
             "props", "HAprops", "phase", "MM",
-            ...Object.keys(math.expression.mathWithTransform)
-                .filter(mathFunction => !['expr', 'type'].includes(mathFunction))
+            ...mathFunctions
         ]
         );
 
@@ -45,32 +61,7 @@
         let units = wordRegexp(Array.from(new Set(listOfUnits)))
 
         // physicalCOnstants taken from https://mathjs.org/docs/datatypes/units.html#physical-constants
-        let physicalConstants = wordRegexp(
-            [
-                // Universal constants
-                'speedOfLight', 'gravitationConstant', 'planckConstant', 'reducedPlanckConstant',
-
-                // Electromagnetic constants
-                'magneticConstant', 'electricConstant', 'vacuumImpedance', 'coulomb', 'elementaryCharge', 'bohrMagneton',
-                'conductanceQuantum', 'inverseConductanceQuantum', 'magneticFluxQuantum', 'nuclearMagneton', 'klitzing',
-
-                //Atomic and nuclear constants
-                'bohrRadius', 'classicalElectronRadius', 'electronMass', 'fermiCoupling', 'fineStructure', 'hartreeEnergy',
-                'protonMass', 'deuteronMass', 'neutronMass', 'quantumOfCirculation', 'rydberg', 'thomsonCrossSection',
-                'weakMixingAngle', 'efimovFactor',
-
-                //Physico-chemical constants
-                'atomicMass', 'avogadro', 'boltzmann', 'faraday', 'firstRadiation', 'loschmidt', 'gasConstant',
-                'molarPlanckConstant', 'molarVolume', 'sackurTetrode', 'secondRadiation', 'stefanBoltzmann',
-                'wienDisplacement',
-
-                //Adopted Values
-                'molarMass', 'molarMassC12', 'gravity', 'atm',
-
-                //Natural Units
-                'planckLength', 'planckMass', 'planckTime', 'planckCharge', 'planckTemperature'
-            ]
-        )
+        let physicalConstants = wordRegexp(mathPhysicalConstants)
 
         // tokenizers
         function tokenTranspose(stream, state) {

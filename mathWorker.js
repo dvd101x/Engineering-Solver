@@ -76,15 +76,15 @@ function evalBlock(block) {
     } catch (error) {
         return error.toString()
     }
-    if (typeof mathResult != 'undefined') {
-        if (mathResult.entries) {
-            return mathResult.entries
-                .filter(x => typeof x != 'undefined')
-                .map(x => math2str(x)).join("\n")
+    if (typeof mathResult != 'undefined' && mathResult) {
+        if (typeof mathResult === 'object') {
+            if (mathResult.entries && Array.isArray(mathResult.entries)) {
+                return mathResult.entries
+                    .filter(x => typeof x != 'undefined')
+                    .map(x => math2str(x)).join("\n")
+            }
         }
-        else {
-            return math2str(mathResult)
-        }
+        return math2str(mathResult)
     }
 }
 
