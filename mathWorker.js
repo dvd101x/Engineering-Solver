@@ -152,7 +152,6 @@ onmessage = function (oEvent) {
         mathState: getMathState(),
         parserState: parser.getAll()
     }
-    console.log(response)
     postMessage(JSON.stringify(response));
 }
 
