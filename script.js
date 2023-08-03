@@ -214,9 +214,6 @@ function completer(text) {
       }
     }
 
-    // not necessary to autocomplete singe letters
-    matches.filter(x => x.length > 1)
-
     // remove duplicates
     matches = Array.from(new Set(matches))
   }
