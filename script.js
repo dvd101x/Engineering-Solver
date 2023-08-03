@@ -8,6 +8,9 @@ const wait = 300;
 let workerState = initialState
 let parserState = {}
 let mathWorker = new Worker("mathWorker.js");
+let lastTab = localStorage.getItem("lastTab") === null ? 1 : localStorage.getItem("lastTab")
+
+tabIDs.value = lastTab
 
 const textEditor = document.getElementById("INPUT")
 let editor = CodeMirror.fromTextArea(textEditor, {
@@ -91,6 +94,9 @@ tabsField.addEventListener('change', () => {
   }
   editor.swapDoc(sessions[ID]);
   editor.focus()
+  localStorage.setItem("lastTab", ID)
+  saveSession(lastTab)
+  lastTab = ID
 })
 
 insertButton.addEventListener('click', () => { insertExampleFunc(exampleSelect.value) })
@@ -213,6 +219,9 @@ function completer(text) {
         }
       }
     }
+
+    // not necessary to autocomplete singe letters
+    matches.filter(x => x.length > 1)
 
     // remove duplicates
     matches = Array.from(new Set(matches))
