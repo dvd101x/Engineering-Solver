@@ -7,6 +7,7 @@ importScripts(
     "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js",
     "https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js",
 )
+const parser = math.parser()
 
 function mapped(f) {
     return math.typed({
@@ -39,7 +40,7 @@ math.import(
     , { override: false })
 
 math.createUnit('TR', '12e3 BTU/h')
-const parser = math.parser()
+
 
 const md = markdownit({ html: true })
     .use(texmath, {
@@ -60,7 +61,9 @@ const intro = `# Intro
 `
 
 const firstResponse = {
-    outputs: [md.render(intro)]
+    outputs: [md.render(intro)],
+    mathState:null,
+    parserState:null
 }
 
 postMessage(JSON.stringify(firstResponse));
@@ -117,7 +120,7 @@ function makeDoc(code) {
             const thereIsSomething = x.source.join('\n').trim();
             let notEmptyMath = x.source.filter(e => e)
             if (thereIsSomething) {
-                cleanCells.push({ cell_type: 'math', source: x.source })
+                cleanCells.push({ cell_type: 'math', source: notEmptyMath })
             }
         }
     })
@@ -148,6 +151,51 @@ onmessage = function (oEvent) {
     const inputs = JSON.parse(oEvent.data);
     const response = {
         outputs: makeDoc(inputs.expr),
+        mathState: getMathState(),
+        parserState: parser.getAll()
     }
     postMessage(JSON.stringify(response));
+}
+
+function getMathState(){
+    // will return
+    // number literals, physicalConstants, functions, units, prefixes
+    const ignore = ['expr', 'type']
+    const numberLiterals = [
+        'e', 'E', 'i', 'Infinity', 'LN2', 'LN10', 'LOG2E', 'LOG10E', 'NaN',
+        'null', 'phi', 'pi', 'PI', 'SQRT1_2', 'SQRT2', 'tau', 'undefined', 'version'
+    ]
+
+    const functions = []
+    const physicalConstants = []
+
+    // based on https://github.com/josdejong/mathjs/blob/develop/bin/cli.js
+    for (const expression in math.expression.mathWithTransform) {
+        if (!ignore.includes(expression)) {
+            if (typeof math[expression] === "function") {
+                functions.push(expression)
+            } else if (!numberLiterals.includes(expression)) {
+                physicalConstants.push(expression)
+            }
+        }
+    }
+
+    prefixes = []
+    for (category in math.Unit.PREFIXES) {
+        prefixes.push(...Object.keys(math.Unit.PREFIXES[category]))
+    }
+    prefixes = Array.from(new Set(prefixes))
+
+    units = {}
+    for (unit in math.Unit.UNITS) {
+        units[unit] = Object.keys(math.Unit.UNITS[unit].prefixes).map(prefix => prefixes.indexOf(prefix))
+    }
+
+    return {
+        units,
+        prefixes,
+        numberLiterals,
+        functions,
+        physicalConstants
+    }
 }

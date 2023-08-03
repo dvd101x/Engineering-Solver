@@ -5,8 +5,8 @@ const exampleSelect = document.getElementById('exampleSelector')
 const outputs = document.getElementById("OUTPUT")
 const listOfSessions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 const wait = 300;
-
-const parser = math.parser()
+let workerState = null
+let parserState = null
 
 const myTextArea = document.getElementById("INPUT")
 let editor = CodeMirror.fromTextArea(myTextArea, {
@@ -28,8 +28,6 @@ let editor = CodeMirror.fromTextArea(myTextArea, {
   styleActiveLine: true,
   hintOptions: { hint: mathHints }
 })
-
-
 
 let sessions = {}
 let sessionNames = {}
@@ -101,11 +99,13 @@ let timerSave;
 const waitToSave = 1500;
 
 mathWorker.onmessage = function (oEvent) {
-  const results = JSON.parse(oEvent.data).outputs
+  const results = JSON.parse(oEvent.data)
   const tabToSave = tabIDs.value;
-  outputs.innerHTML = results;
+  outputs.innerHTML = results.outputs;
   clearTimeout(timerSave);
   timerSave = setTimeout(saveSession, waitToSave, tabToSave)
+  workerState = results.mathState
+  parserState = results.parserState
 };
 
 function mathHints(cm, options) {
@@ -140,69 +140,69 @@ function completer(text) {
   let matches = []
   let keyword
   const m = /[a-zA-Z_0-9]+$/.exec(text)
+  // join all withs with it's suffixes and make a huge list
+  let listOfUnits = []
+
+  for (const unit in workerState.units) {
+    listOfUnits.push(...workerState.units[unit].map(prefixIndex => workerState.prefixes[prefixIndex] + unit))
+  }
+
+  // remove duplicates
+  listOfUnits = Array.from(new Set(listOfUnits))
+  
   if (m) {
     keyword = m[0]
 
     // scope variables
-    for (const def in parser.getAll()) {
+    for (const def in parserState) {
       if (def.startsWith(keyword)) {
         matches.push(def)
       }
     }
 
-    // math functions and constants
-    const ignore = ['expr', 'type']
-    const mathFunctions = math.expression.mathWithTransform
-
-    for (const func in mathFunctions) {
-      if (hasOwnPropertySafe(mathFunctions, func)) {
-        if (func.startsWith(keyword) && ignore.indexOf(func) === -1) {
-          matches.push(func)
-        }
-      }
-    }
-
-    const importedFunctions = ["props", "HAprops", "phase", "MM"]
-    for (const func of importedFunctions) {
+    // math functions
+    for (const func of workerState.functions) {
       if (func.startsWith(keyword)) {
         matches.push(func)
       }
     }
 
-    // units
-    const Unit = math.Unit
-    for (const name in Unit.UNITS) {
-      if (hasOwnPropertySafe(Unit.UNITS, name)) {
-        if (name.startsWith(keyword)) {
-          matches.push(name)
-        }
+    // number literals
+    for (const num of workerState.numberLiterals) {
+      if (num.startsWith(keyword)) {
+        matches.push(num)
       }
     }
-    for (const name in Unit.PREFIXES) {
-      if (hasOwnPropertySafe(Unit.PREFIXES, name)) {
-        const prefixes = Unit.PREFIXES[name]
-        for (const prefix in prefixes) {
-          if (hasOwnPropertySafe(prefixes, prefix)) {
-            if (prefix.startsWith(keyword)) {
-              matches.push(prefix)
-            } else if (keyword.startsWith(prefix)) {
-              const unitKeyword = keyword.substring(prefix.length)
-              for (const n in Unit.UNITS) {
-                const fullUnit = prefix + n
-                if (hasOwnPropertySafe(Unit.UNITS, n)) {
-                  if (
-                    !matches.includes(fullUnit) &&
-                    n.startsWith(unitKeyword) &&
-                    Unit.isValuelessUnit(fullUnit)) {
-                    matches.push(fullUnit)
-                  }
-                }
-              }
+
+    // physical constants
+    for (const physicalConstant of workerState.physicalConstants) {
+      if (physicalConstant.startsWith(keyword)) {
+        matches.push(physicalConstant)
+      }
+    }
+
+    // units
+    for (const prefix of workerState.prefixes) {
+      if (prefix.startsWith(keyword)) {
+        matches.push(prefix)
+      } else if (keyword.startsWith(prefix)) {
+        const unitKeyword = keyword.substring(prefix.length)
+        for (const n in workerState.units) {
+          const fullUnit = prefix + n
+          if (hasOwnPropertySafe(workerState.units, n)) {
+            if (
+              !matches.includes(fullUnit) &&
+              n.startsWith(unitKeyword) &&
+              listOfUnits.includes(fullUnit)) {
+              matches.push(fullUnit)
             }
           }
         }
       }
     }
+
+    // not necessary to autocomplete singe letters
+    matches.filter(x => x.length > 1)
 
     // remove duplicates
     matches = Array.from(new Set(matches))

@@ -24,44 +24,27 @@
         let expressionEnd = new RegExp("^[\\]\\)]");
         let identifiers = new RegExp("^[_A-Za-z\xa1-\uffff][_A-Za-z0-9\xa1-\uffff]*");
 
-        const mathFunctions = []
-        const mathPhysicalConstants = []
-        const mathIgnore = ['expr', 'type']
-        const numberLiterals = ['e', 'E', 'i', 'Infinity', 'LN2', 'LN10', 'LOG2E', 'LOG10E', 'NaN',
-            'null', 'phi', 'pi', 'PI', 'SQRT1_2', 'SQRT2', 'tau', 'undefined', 'version']
+        // constantly gets the state from mathWorker, but at the beginning it's taken from a constants
+        const mathState = workerState === null ? initialState : workerState
 
-        // based on https://github.com/josdejong/mathjs/blob/develop/bin/cli.js
-        for (const expression in math.expression.mathWithTransform) {
-            if (!mathIgnore.includes(expression)) {
-                if (typeof math[expression] === "function") {
-                    mathFunctions.push(expression)
-                } else if (!numberLiterals.includes(expression)) {
-                    mathPhysicalConstants.push(expression)
-                }
-            }
-        }
-
-        let builtins = wordRegexp([
-            "props", "HAprops", "phase", "MM",
-            ...mathFunctions
-        ]
-        );
+        let builtins = wordRegexp(mathState.functions);
 
         let keywords = wordRegexp(['to', 'in', 'and', 'not', 'or', 'xor', 'mod']);
 
-        // generates a list of all valid units in mathjs
+        // join all withs with it's suffixes and make a huge list
         let listOfUnits = []
-        for (const unit in math.Unit.UNITS) {
-            for (const prefix in math.Unit.UNITS[unit].prefixes) {
-                listOfUnits.push(prefix + unit)
-            }
+
+        for (const unit in mathState.units) {
+            listOfUnits.push(...mathState.units[unit].map(prefixIndex => mathState.prefixes[prefixIndex] + unit))
         }
 
         // remove duplicates
-        let units = wordRegexp(Array.from(new Set(listOfUnits)))
+        listOfUnits = Array.from(new Set(listOfUnits))
+        
+        let units = wordRegexp(listOfUnits)
 
         // physicalCOnstants taken from https://mathjs.org/docs/datatypes/units.html#physical-constants
-        let physicalConstants = wordRegexp(mathPhysicalConstants)
+        let physicalConstants = wordRegexp(mathState.physicalConstants)
 
         // tokenizers
         function tokenTranspose(stream, state) {
@@ -109,9 +92,7 @@
                 if (stream.match(/^[+-]?\d*\.\d+([EeDd][+-]?\d+)?[ij]?/)) { return 'number'; };
                 if (stream.match(/^[+-]?\d+([EeDd][+-]?\d+)?[ij]?/)) { return 'number'; };
             }
-            if (stream.match(wordRegexp(['e', 'E', 'i', 'Infinity', 'LN2', 'LN10', 'LOG2E', 'LOG10E', 'NaN',
-                'null', 'phi', 'pi', 'PI', 'SQRT1_2', 'SQRT2', 'tau', 'undefined', 'version']
-            ))) { return 'number'; };
+            if (stream.match(wordRegexp(mathState.numberLiterals))) { return 'number'; };
 
 
 
@@ -134,7 +115,6 @@
                 state.tokenize = tokenTranspose;
                 return null;
             };
-
 
             // Handle non-detected items
             stream.next();
