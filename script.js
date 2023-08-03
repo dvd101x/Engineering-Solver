@@ -109,6 +109,7 @@ editor.on("change", code => {
 });
 
 editor.setValue(localStorage.getItem('localSession' + tabIDs.value) || "")
+sessions[tabIDs.value] = editor.getDoc()
 
 let timerSave;
 const waitToSave = 1500;
