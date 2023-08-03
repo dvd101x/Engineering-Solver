@@ -37,9 +37,9 @@ for (ID of listOfSessions) {
   const thisSession = 'localSession' + ID;
   const sessionText = localStorage.getItem(thisSession)
 
-  if (sessionText)
-    if (!sessionText.trim())
-      localStorage.removeItem(thisSession)
+  if (sessionText && !sessionText.trim()) {
+    localStorage.removeItem(thisSession)
+  }
   sessions[ID] = CodeMirror.Doc(localStorage.getItem(thisSession) || "", "mathjs");
   sessionNames[ID] = setSessionName(ID);
 }
@@ -149,7 +149,7 @@ function completer(text) {
 
   // remove duplicates
   listOfUnits = Array.from(new Set(listOfUnits))
-  
+
   if (m) {
     keyword = m[0]
 
