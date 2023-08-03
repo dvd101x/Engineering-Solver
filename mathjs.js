@@ -44,7 +44,7 @@
         let units = wordRegexp(listOfUnits)
 
         // physicalCOnstants taken from https://mathjs.org/docs/datatypes/units.html#physical-constants
-        let physicalConstants = wordRegexp(mathInfo.constants)
+        let physicalConstants = wordRegexp(mathState.physicalConstants)
 
         // tokenizers
         function tokenTranspose(stream, state) {

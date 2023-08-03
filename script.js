@@ -5,11 +5,12 @@ const exampleSelect = document.getElementById('exampleSelector')
 const outputs = document.getElementById("OUTPUT")
 const listOfSessions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 const wait = 300;
-let workerState = null
-let parserState = null
+let workerState = initialState
+let parserState = {}
+let mathWorker = new Worker("mathWorker.js");
 
-const myTextArea = document.getElementById("INPUT")
-let editor = CodeMirror.fromTextArea(myTextArea, {
+const textEditor = document.getElementById("INPUT")
+let editor = CodeMirror.fromTextArea(textEditor, {
   lineNumbers: true,
   lineWrapping: true,
   mode: "mathjs",
@@ -85,15 +86,13 @@ tabsField.addEventListener('change', () => {
 
 insertButton.addEventListener('click', () => { insertExampleFunc(exampleSelect.value) })
 
-// ace
+// CodeMirror
 let timer;
 editor.on("change", code => {
   clearTimeout(timer);
   timer = setTimeout(sendWorkToMathWorker, wait, code);
 });
 editor.swapDoc(sessions[tabIDs.value]);
-
-let mathWorker = new Worker("mathWorker.js");
 
 let timerSave;
 const waitToSave = 1500;
@@ -104,8 +103,12 @@ mathWorker.onmessage = function (oEvent) {
   outputs.innerHTML = results.outputs;
   clearTimeout(timerSave);
   timerSave = setTimeout(saveSession, waitToSave, tabToSave)
-  workerState = results.mathState
-  parserState = results.parserState
+  if(results.mathState){
+    workerState = results.mathState
+  }
+  if(results.parserState){
+    parserState = results.parserState
+  }
 };
 
 function mathHints(cm, options) {

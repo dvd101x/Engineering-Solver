@@ -61,9 +61,7 @@ const intro = `# Intro
 `
 
 const firstResponse = {
-    outputs: [md.render(intro)],
-    mathState:null,
-    parserState:null
+    outputs: [md.render(intro)]
 }
 
 postMessage(JSON.stringify(firstResponse));
@@ -154,6 +152,7 @@ onmessage = function (oEvent) {
         mathState: getMathState(),
         parserState: parser.getAll()
     }
+    console.log(response)
     postMessage(JSON.stringify(response));
 }
 
