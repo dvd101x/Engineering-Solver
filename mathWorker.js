@@ -116,9 +116,8 @@ function makeDoc(code) {
         }
         else {
             const thereIsSomething = x.source.join('\n').trim();
-            let notEmptyMath = x.source.filter(e => e)
             if (thereIsSomething) {
-                cleanCells.push({ cell_type: 'math', source: notEmptyMath })
+                cleanCells.push({ cell_type: 'math', source: x.source })
             }
         }
     })

@@ -37,11 +37,11 @@ let sessionNames = {}
 for (ID of listOfSessions) {
   const thisSession = 'localSession' + ID;
   const sessionText = localStorage.getItem(thisSession)
+  sessions[ID] = null
 
   if (sessionText && !sessionText.trim()) {
     localStorage.removeItem(thisSession)
   }
-  sessions[ID] = CodeMirror.Doc(localStorage.getItem(thisSession) || "", "mathjs");
   sessionNames[ID] = setSessionName(ID);
 }
 
@@ -64,8 +64,12 @@ function setSessionName(ID) {
 }
 
 function saveSession(sessionID) {
-  localStorage.setItem('localSession' + sessionID, editor.getValue())
-  sessionNames[sessionID] = setSessionName(sessionID)
+  const thisSession = 'localSession' + sessionID
+  if (sessions[sessionID] !== null) {
+    const textToSave = sessions[sessionID].getValue().replace(/\r\n/g, '\n');
+    localStorage.setItem(thisSession, textToSave)
+    sessionNames[sessionID] = setSessionName(sessionID)
+  }
 }
 
 function sendWorkToMathWorker() {
@@ -80,7 +84,12 @@ function sendWorkToMathWorker() {
 }
 
 tabsField.addEventListener('change', () => {
-  editor.swapDoc(sessions[tabIDs.value]);
+  const ID = tabIDs.value;
+  const thisSession = 'localSession' + ID;
+  if (sessions[ID] === null) {
+    sessions[ID] = CodeMirror.Doc(localStorage.getItem(thisSession) || "", "mathjs");
+  }
+  editor.swapDoc(sessions[ID]);
   editor.focus()
 })
 
@@ -92,7 +101,8 @@ editor.on("change", code => {
   clearTimeout(timer);
   timer = setTimeout(sendWorkToMathWorker, wait, code);
 });
-editor.swapDoc(sessions[tabIDs.value]);
+
+editor.setValue(localStorage.getItem('localSession' + tabIDs.value) || "")
 
 let timerSave;
 const waitToSave = 1500;
@@ -103,10 +113,10 @@ mathWorker.onmessage = function (oEvent) {
   outputs.innerHTML = results.outputs;
   clearTimeout(timerSave);
   timerSave = setTimeout(saveSession, waitToSave, tabToSave)
-  if(results.mathState){
+  if (results.mathState) {
     workerState = results.mathState
   }
-  if(results.parserState){
+  if (results.parserState) {
     parserState = results.parserState
   }
 };
