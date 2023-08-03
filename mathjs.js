@@ -31,7 +31,7 @@
 
         let keywords = wordRegexp(['to', 'in', 'and', 'not', 'or', 'xor', 'mod']);
 
-        // join all withs with it's suffixes and make a huge list
+        // join all units with it's suffixes in a single list
         let listOfUnits = []
 
         for (const unit in mathState.units) {
@@ -40,11 +40,11 @@
 
         // remove duplicates
         listOfUnits = Array.from(new Set(listOfUnits))
-        
+
         let units = wordRegexp(listOfUnits)
 
         // physicalCOnstants taken from https://mathjs.org/docs/datatypes/units.html#physical-constants
-        let physicalConstants = wordRegexp(mathState.physicalConstants)
+        let physicalConstants = wordRegexp(mathInfo.constants)
 
         // tokenizers
         function tokenTranspose(stream, state) {
