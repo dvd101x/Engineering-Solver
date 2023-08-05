@@ -13,6 +13,7 @@ let lastTab = localStorage.getItem("lastTab") === null ? 1 : localStorage.getIte
 tabIDs.value = lastTab
 
 const textEditor = document.getElementById("INPUT")
+textEditor.value = localStorage.getItem('localSession' + tabIDs.value) || ""
 let editor = CodeMirror.fromTextArea(textEditor, {
   lineNumbers: true,
   lineWrapping: true,
@@ -108,11 +109,11 @@ editor.on("change", code => {
   timer = setTimeout(sendWorkToMathWorker, wait, code);
 });
 
-editor.setValue(localStorage.getItem('localSession' + tabIDs.value) || "")
+// editor.setValue(localStorage.getItem('localSession' + tabIDs.value) || "")
 sessions[tabIDs.value] = editor.getDoc()
 
 let timerSave;
-const waitToSave = 1500;
+const waitToSave = 1000;
 
 mathWorker.onmessage = function (oEvent) {
   const results = JSON.parse(oEvent.data)

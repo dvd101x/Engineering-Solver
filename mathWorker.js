@@ -27,10 +27,7 @@ const functionsToVectorize =
 
 math.import(
     {
-        props,
-        HAprops,
-        phase,
-        MM,
+        props, HAprops, phase, MM,
         ...Object.fromEntries(functionsToVectorize.map(f => [f, mapped(math[f])])),
         log: math.typed({
             'Array | Matrix': x => math.map(x, x1 => math.log(x1, math.e)),
@@ -40,7 +37,6 @@ math.import(
     , { override: false })
 
 math.createUnit('TR', '12e3 BTU/h')
-
 
 const md = markdownit({ html: true })
     .use(texmath, {
@@ -65,6 +61,16 @@ const firstResponse = {
 }
 
 postMessage(JSON.stringify(firstResponse));
+
+onmessage = (oEvent) => {
+    const inputs = JSON.parse(oEvent.data);
+    const response = {
+        outputs: makeDoc(inputs.expr),
+        mathState: getMathState(),
+        parserState: parser.getAll()
+    }
+    postMessage(JSON.stringify(response));
+}
 
 function math2str(x) {
     return typeof x == "string" ? x : math.format(x, 14)
@@ -142,16 +148,6 @@ function makeDoc(code) {
         cell => output.push(processOutput[cell.cell_type](cell.source))
     )
     return output.join('\n')
-}
-
-onmessage = function (oEvent) {
-    const inputs = JSON.parse(oEvent.data);
-    const response = {
-        outputs: makeDoc(inputs.expr),
-        mathState: getMathState(),
-        parserState: parser.getAll()
-    }
-    postMessage(JSON.stringify(response));
 }
 
 function getMathState(){
