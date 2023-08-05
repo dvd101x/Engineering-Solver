@@ -49,7 +49,7 @@ for (ID of listOfSessions) {
 }
 
 function setSessionName(ID) {
-  const firstLineComment = /^\s*#\s*.*?(\w.*?)\s*\n/
+  const firstLineComment = /^\s*#\s*.*?(\w.*?)\s*(?:\n|$)/
   const thisSession = 'localSession' + ID;
   let noteBookName
   if (localStorage.getItem(thisSession)) {
