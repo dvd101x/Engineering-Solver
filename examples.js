@@ -356,7 +356,7 @@ print('Condenser heat out : $0 \t$1\t$2', Q_h    to [W, BTU/h, TR], 4)
 print('Evaporator heat in : $0 \t$1\t$2', Q_c    to [W, BTU/h, TR], 4)
 
 print('COP(cooling)       : $0', [evap_COP], 3)
-print('COP(heating)       : $0', [cond_COP], 3)`),
+print('COP(heating)       : $0', [cond_COP], 3)`,
   odeSolver: String.raw`# # Rocket Trajectory Optimization
 # 
 # > **reference:** [mathjs](https://mathjs.org/examples/browser/rocket_trajectory_optimization.html)
