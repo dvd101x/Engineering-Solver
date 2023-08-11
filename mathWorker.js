@@ -87,12 +87,12 @@ function evalBlock(block) {
         if (typeof mathResult === 'object') {
             if (mathResult.entries && Array.isArray(mathResult.entries)) {
                 return mathResult.entries
-                    .filter(x => typeof x != 'undefined')
+                    .filter(x => typeof x !== 'undefined')
                     .map(x => math2str(x)).join("\n")
             }
         }
-        return math2str(mathResult)
     }
+    return math2str(mathResult)
 }
 
 function evalBlocks(blocks) {
@@ -134,10 +134,10 @@ function makeDoc(code) {
         math: mathCell => {
             const blocks = mathCell.join('\n')
                 .split(/\n\s*\n/g)
-                .filter(x => x.trim())
+                .filter(x => x.trim().length > 0)
             const results = evalBlocks(blocks)
             return results
-                .filter(x => x)
+                .filter(x => typeof x !== 'undefined')
                 .map(
                     result => result.length ? '<pre>' + result + '</pre>' : '').join('\n')
         },
