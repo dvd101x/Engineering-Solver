@@ -22,7 +22,7 @@ const functionsToVectorize =
         "sin", "cos", "tan", "csc", "sec", "cot",
         "sinh", "cosh", "tanh", "csch", "sech", "coth",
         "asin", "acos", "atan", "acsc", "asec", "acot",
-        "asinh", "acosh", "atanh", "acsch", "asech"
+        "asinh", "acosh", "atanh", "acsch", "asech", "acoth"
     ]
 
 math.import(
