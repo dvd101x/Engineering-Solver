@@ -1,5 +1,5 @@
 importScripts(
-    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.9.1/math.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.js",
     "coolprop.js",
     "ext/fluidProperties.js",
     "ext/molecularMass.js",
