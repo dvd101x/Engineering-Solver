@@ -22,21 +22,6 @@ acceleration to yard/s^2
 
 You will notice you get instant results as you are typing your expressions.
 
-# To-Do
-- [ ] Migrate to codemirror 6 with a build tool like Vite
-- [ ] Migrate the language definition to CM6
-- [ ] Better state documents/tabas management
-- [ ] Scroll outputs into view and highlight them
-- [ ] Not only text outputs (allow for latex)
-- [ ] More efficient math evaluation (only update state when inputs change)
-- [ ] Evaluate expression by expression (not necessarly block by block)
-- [ ] Use Alpinejs to reduce code
-- [ ] Add plots
-- [ ] Include section for variables in scope
-- [ ] Include help file
-- [ ] Include special functions in help file
-- [ ] Reevaluate markdown + math syntax
-
 ## Interface
 
 There are two main areas, the input on the left and output on the right. A top navigation bar with 9 tabs and an example selector.
