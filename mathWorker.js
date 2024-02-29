@@ -1,10 +1,10 @@
 importScripts(
-    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.0/math.js",
     "coolprop.js",
     "ext/fluidProperties.js",
     "ext/molecularMass.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/14.0.0/markdown-it.min.js",
     "https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js",
 )
 const parser = math.parser()
