@@ -4,7 +4,7 @@ importScripts(
     "ext/fluidProperties.js",
     "ext/molecularMass.js",
     "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/14.0.0/markdown-it.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.2/markdown-it.min.js",
     "https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js",
 )
 const parser = math.parser()
