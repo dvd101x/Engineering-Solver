@@ -286,7 +286,7 @@ noIHX_COP = qNoIHX / wNoIHX
 improvementFactor = evap_COP / noIHX_COP
 
 "Improvement with recuperator"
-print("$0 %", [(improvementFactor - 1) * 100], 3)`
+print("$1 %", [(improvementFactor - 1) * 100], 3)`
   ,
   'VaporCompressionCycle':String.raw`# # Vapor Compression Cycle
 
@@ -351,12 +351,12 @@ cond_COP = Q_h/W_comp;
 
 # ## Work and Energy
 
-print('Compressor power   : $0 \t$1\t$2', W_comp to [W, BTU/h, TR], 4)
-print('Condenser heat out : $0 \t$1\t$2', Q_h    to [W, BTU/h, TR], 4)
-print('Evaporator heat in : $0 \t$1\t$2', Q_c    to [W, BTU/h, TR], 4)
+print('Compressor power   : $1 \t$2\t$3', W_comp to [W, BTU/h, TR], 4)
+print('Condenser heat out : $1 \t$2\t$3', Q_h    to [W, BTU/h, TR], 4)
+print('Evaporator heat in : $1 \t$2\t$3', Q_c    to [W, BTU/h, TR], 4)
 
-print('COP(cooling)       : $0', [evap_COP], 3)
-print('COP(heating)       : $0', [cond_COP], 3)`,
+print('COP(cooling)       : $1', [evap_COP], 3)
+print('COP(heating)       : $1', [cond_COP], 3)`,
   odeSolver: String.raw`# # Rocket Trajectory Optimization
 # 
 # > **reference:** [mathjs](https://mathjs.org/examples/browser/rocket_trajectory_optimization.html)
@@ -448,10 +448,8 @@ x = flatten(result_insertion.y[end,:])
 result_unpowered2 = solveODE(dydt, [t_insertion, t_unpowered2, dt], x, method)`
 }
 
-// To get a new examples use editor.getValue().replace(/\r?\n/g,'\n').split('\n')
+// To get a new examples use editor.state.doc.toString().replace(/\r?\n/g,'\n').split('\n')
 
-function insertExampleFunc(ID) {
-  const mathExampleCode = Array.isArray(mathExamples[ID]) ? mathExamples[ID].join("\n") : mathExamples[ID];
-  editor.replaceRange('\n' + mathExampleCode, {line:editor.lastLine(), ch:0}, {line:editor.lastLine(), ch:0})
-  editor.focus()
+export function insertExampleFunc(ID) {
+  return Array.isArray(mathExamples[ID]) ? mathExamples[ID].join("\n") : mathExamples[ID];
 }

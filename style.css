@@ -29,11 +29,13 @@ main>.markdown-body {
 
 #INPUT {
 	flex: 1;
+	display: flex;
+	overflow: auto;
 }
 
-main>div.CodeMirror {
+#INPUT>div.cm-editor {
 	flex: 1;
-	height: auto;
+	overflow-y: scroll;
 }
 
 [name=topBar] {

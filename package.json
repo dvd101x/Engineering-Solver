@@ -1,0 +1,23 @@
+{
+  "name": "engineering-solver",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.1.4"
+  },
+  "dependencies": {
+    "alpinejs": "^3.13.5",
+    "codemirror": "^6.0.1",
+    "github-markdown-css": "^5.5.1",
+    "katex": "^0.16.9",
+    "markdown-it": "^14.0.0",
+    "markdown-it-texmath": "^1.0.0",
+    "mathjs": "^12.4.0"
+  }
+}

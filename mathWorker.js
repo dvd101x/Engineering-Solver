@@ -1,12 +1,12 @@
-importScripts(
-    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.0/math.js",
-    "coolprop.js",
-    "ext/fluidProperties.js",
-    "ext/molecularMass.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.2/markdown-it.min.js",
-    "https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js",
-)
+import { create, all } from "mathjs"
+import markdownit from 'markdown-it'
+import texmath from 'markdown-it-texmath'
+import katex from 'katex'
+import { props, phase, HAprops } from "/ext/fluidProperties"
+import { MM } from "/ext/molecularMass.js"
+
+const math = create(all)
+
 const parser = math.parser()
 
 function mapped(f) {
@@ -173,14 +173,14 @@ function getMathState(){
         }
     }
 
-    prefixes = []
-    for (category in math.Unit.PREFIXES) {
+    let prefixes = []
+    for (const category in math.Unit.PREFIXES) {
         prefixes.push(...Object.keys(math.Unit.PREFIXES[category]))
     }
     prefixes = Array.from(new Set(prefixes))
 
-    units = {}
-    for (unit in math.Unit.UNITS) {
+    const units = {}
+    for (const unit in math.Unit.UNITS) {
         units[unit] = Object.keys(math.Unit.UNITS[unit].prefixes).map(prefix => prefixes.indexOf(prefix))
     }
 
