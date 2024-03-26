@@ -40,10 +40,10 @@ You can work on any of the 9 tabs and your progress will be saved automatically 
 
 ## [MathJS](https://mathjs.org/)
 
-Does all the calculations and unit conversions. Here are some usefull topics from the [docs](https://mathjs.org/docs/index.html).
+Does all the calculations and unit conversions. Here are some useful topics from the [docs](https://mathjs.org/docs/index.html).
 * [Expressions](https://mathjs.org/docs/expressions/index.html)
   * [Syntax](https://mathjs.org/docs/expressions/syntax.html)
-  * [Albegra](https://mathjs.org/docs/expressions/algebra.html)
+  * [Algebra](https://mathjs.org/docs/expressions/algebra.html)
 * [Data Types](https://mathjs.org/docs/datatypes/index.html)
   * [Numbers](https://mathjs.org/docs/datatypes/numbers.html)
   * [BigNumbers](https://mathjs.org/docs/datatypes/bignumbers.html)
@@ -58,7 +58,7 @@ Does all the calculations and unit conversions. Here are some usefull topics fro
 
 ## Chemistry molar mass: MM()
 
-To call this function use `MM('H2O')` and this will get an object with the data of the compund, including totalMass, number of atoms of each element, mass fraction for each element, etc. The formula can include a notation with parenthesis and dot notation for hydrates.
+To call this function use `MM('H2O')` and this will get an object with the data of the compound, including totalMass, number of atoms of each element, mass fraction for each element, etc. The formula can include a notation with parenthesis and dot notation for hydrates.
 
 In:
 ``` jl
@@ -124,8 +124,8 @@ Out: `50423.45039102888 J / kg`
 ## [CodeMirror 5](https://codemirror.net/5/)
 
 CodeMirror is used for editing the mathjs code in the browser and includes:
-- Syntax Highligting
-- Automcpletion with <kbd>Ctrl</kbd> + <kbd>Space</kbd>
+- Syntax Highlighting
+- Autocompletion with <kbd>Ctrl</kbd> + <kbd>Space</kbd>
   - Functions
   - Physical Constants
   - Prefixed Units
