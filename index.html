@@ -11,6 +11,9 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="manifest" href="/site.webmanifest">
 </head>
+<script>
+  let mathWorker = new Worker("mathWorker.js");
+</script>
 
 <body>
   <nav class="markdown-body">
@@ -95,7 +98,7 @@
     <article id="OUTPUT" class="markdown-body">
     </article>
   </main>
-<script type="module" src="/main.js"> </script>
+  <script type="module" src="/main.js"> </script>
 </body>
 
 </html>

@@ -16,10 +16,6 @@ import 'markdown-it-texmath/css/texmath.css'
 
 import { insertExampleFunc } from "./examples.js";
 
-const mathWorker = new Worker(
-  new URL('./mathWorker.js', import.meta.url),
-  { type: 'module' })
-
 const wait = 300;
 const tabIDs = document.forms.topBar.elements.sessionTab
 const tabsField = document.getElementById("tabs")
