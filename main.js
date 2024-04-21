@@ -16,6 +16,19 @@ import 'markdown-it-texmath/css/texmath.css'
 
 import { insertExampleFunc } from "./examples.js";
 
+import markdownit from 'markdown-it'
+
+import texmath from 'markdown-it-texmath'
+
+import katex from 'katex'
+
+const md = markdownit({ html: true })
+  .use(texmath, {
+    engine: katex,
+    delimiters: ['dollars', 'beg_end'],
+    katexOptions: { macros: { "\\RR": "\\mathbb{R}" } }
+  })
+
 const wait = 300;
 const tabIDs = document.forms.topBar.elements.sessionTab
 const tabsField = document.getElementById("tabs")
@@ -147,7 +160,8 @@ const waitToSave = 1000;
 mathWorker.onmessage = function (oEvent) {
   const results = JSON.parse(oEvent.data)
   const tabToSave = tabIDs.value;
-  outputs.innerHTML = results.outputs;
+  const out = results.outputs.map(formatOutput).join("\n")
+  outputs.innerHTML = out;
   clearTimeout(timerSave);
   sessions[lastTab] = editor.state
   timerSave = setTimeout(saveSession, waitToSave, tabToSave)
@@ -158,3 +172,12 @@ mathWorker.onmessage = function (oEvent) {
     parserState = results.parserState
   }
 };
+
+function formatOutput(x) {
+  switch (x.type) {
+    case "math":
+      return x.text;
+    case "markdown":
+      return md.render(x.text);
+  }
+}

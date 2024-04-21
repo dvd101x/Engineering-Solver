@@ -1,11 +1,8 @@
 importScripts(
-    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.0/math.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.js",
     "coolprop.js",
     "fluidProperties.js",
-    "molecularMass.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.2/markdown-it.min.js",
-    "https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js",
+    "molecularMass.js"
 )
 const parser = math.parser()
 
@@ -38,13 +35,6 @@ math.import(
 
 math.createUnit('TR', '12e3 BTU/h')
 
-const md = markdownit({ html: true })
-    .use(texmath, {
-        engine: katex,
-        delimiters: ['dollars', 'beg_end'],
-        katexOptions: { macros: { "\\RR": "\\mathbb{R}" } }
-    })
-
 const intro = `# Intro
 
 * Type on the input to get results
@@ -57,7 +47,7 @@ const intro = `# Intro
 `
 
 const firstResponse = {
-    outputs: [md.render(intro)]
+    outputs: [{ type: "markdown", text: intro }]
 }
 
 postMessage(JSON.stringify(firstResponse));
@@ -130,27 +120,30 @@ function makeDoc(code) {
 
     let output = [];
 
-    const processOutput = {
-        math: mathCell => {
-            const blocks = mathCell.join('\n')
-                .split(/\n\s*\n/g)
-                .filter(x => x.trim().length > 0)
-            const results = evalBlocks(blocks)
-            return results
-                .filter(x => typeof x !== 'undefined')
-                .map(
-                    result => result.length ? '<pre>' + result + '</pre>' : '').join('\n')
-        },
-        md: markdown => md.render(markdown.join('\n'))
+    function processOutput(content, type) {
+        switch (type) {
+            case "math":
+                const blocks = content.join('\n')
+                    .split(/\n\s*\n/g)
+                    .filter(x => x.trim().length > 0)
+                const results = evalBlocks(blocks)
+                const formatedResult = results
+                    .filter(x => typeof x !== 'undefined')
+                    .map(
+                        result => result.length ? '<pre>' + result + '</pre>' : '').join('\n')
+                return { type: "math", text: formatedResult }
+            case "md":
+                return { type: "markdown", text: content.join('\n') }
+        }
     }
 
     cleanCells.forEach(
-        cell => output.push(processOutput[cell.cell_type](cell.source))
+        cell => output.push(processOutput(cell.source, cell.cell_type))
     )
-    return output.join('\n')
+    return output
 }
 
-function getMathState(){
+function getMathState() {
     // will return
     // number literals, physicalConstants, functions, units, prefixes
     const ignore = ['expr', 'type']

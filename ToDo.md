@@ -1,8 +1,5 @@
 ToDo
 ====
-- [ ] Minimize mathWorker use
-  - [ ] Remove markdown + latex from worker 
-- Remove unused dependancies
 - [ ] Details
   - [ ] Cleanup
   - [ ] JS docs
