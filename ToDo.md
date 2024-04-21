@@ -1,24 +1,8 @@
 ToDo
 ====
-- [x] Update to CM6
-- [x] Build with Vite
-- [x] Import into web worker
-- [x] Fix examples
-  - [x] Focus
-  - [x] Split
-- [x] Fix Local Storage
-  - [x] Load from local storage
-  - [x] Save to local storage 
-- [x] Fix session tabs
-  - [x] Make all states
-  - [x] Save state content to local storage
-  - [x] Fix quirks (is not working properly with local storage)
-  - [x] Fix names
-  - [x] Fix autosave
-- [x] Fix mathjs mode
-  - [x] Fix Autocomplete
-- [x] Fix chemistry
-- [x] Fix build error
+- [ ] Minimize mathWorker use
+  - [ ] Remove markdown + latex from worker 
+- Remove unused dependancies
 - [ ] Details
   - [ ] Cleanup
   - [ ] JS docs
@@ -26,17 +10,24 @@ ToDo
     - [ ] Sessions to Editor States
     - [ ] 0 index Sessions
     - [ ] Array fill null for initial EditorStates
-    - [ ] Ask copilot
-  - [ ] Update documentation
-- [ ] gh-pages
-  - [ ] test build
-  - [ ] config pages
-  - [ ] done
+- [ ] Custom help
+- [ ] Function finder
+- [ ] Variable finder
+- [ ] Drag and Drop
+- [ ] Download text
+
+# Plots
+- [ ] Import plotly
+- [ ] Return objects
+  - [ ] plot types
+  - [ ] doc types
+  - [ ] result type
   
 ## Extra 
 - [ ] Match outputs
 - [ ] Include dates (to work with multiple tabs) 
 - [ ] Variables in scope
+- [ ] Help files
 - [ ] GUI with Alpinejs
   - [ ] Tabs
   - [ ] Examples

@@ -445,7 +445,29 @@ dm = 0 kg / s
 t_unpowered2 = t_insertion + 250 s
 dt = 10 s
 x = flatten(result_insertion.y[end,:])
-result_unpowered2 = solveODE(dydt, [t_insertion, t_unpowered2, dt], x, method)`
+result_unpowered2 = solveODE(dydt, [t_insertion, t_unpowered2, dt], x, method)`,
+quadraticFormula: String.raw`# # Quadratic Formula
+# 
+# In algebra, a quadratic equation is any equation that can be rearranged in standard form as
+# 
+# $$ ax^{2}+bx+c=0 $$
+# 
+# The quadratic formula is
+# 
+# $$ x=\frac {-b \pm \sqrt {b^{2}-4ac}}{2a} $$
+
+a = 1;
+b = 5;
+c = 3;
+x = (-b + [1,-1] sqrt(b^2-4 a c)) / (2 a);
+print('With a = $a, b=$b, and c=$c', {a:a, b:b, c:c})
+print('x has two solutions $0 and $1', x, 4) 
+
+# ## Proof
+
+proof = a x.^2 + b x + c;
+print('Using x = $0 we get $1', [x[1], proof[1]], 4)
+print('Using x = $0 we get $1', [x[2], proof[2]], 4)`
 }
 
 // To get a new examples use editor.state.doc.toString().replace(/\r?\n/g,'\n').split('\n')

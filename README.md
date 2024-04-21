@@ -1,6 +1,6 @@
 # Engineering-Solver
 
-Is a tool for doing numerical calculations fast. It includes units, thermodynamic properties and many more.
+Is a tool for doing numerical calculations fast and easy. It includes units, thermodynamic properties and many more.
 
 [![MainFigure](Engineering-Calculator.png)](https://dvd101x.github.io/Engineering-Solver/)
 
@@ -22,9 +22,24 @@ acceleration to yard/s^2
 
 You will notice you get instant results as you are typing your expressions.
 
+# Getting started
+
+Clone this repository and run the following command to install dependencies.
+```
+npm install
+```
+To test
+```
+npm run dev
+````
+To build 
+````
+npm run build
+````
+
 ## Interface
 
-There are two main areas, the input on the left and output on the right. A top navigation bar with 9 tabs and an example selector.
+There are two main areas, the input on the left and output on the right. A top navigation bar with 20 tabs and an example selector.
 
 In the example selector you can find:
 
@@ -36,7 +51,7 @@ In the example selector you can find:
 * Thermodynamic properties
 * Psychrometric properties
 
-You can work on any of the 9 tabs and your progress will be saved automatically on a successful execution of your commands or a new line.
+You can work on any of the 20 tabs and your progress will be saved automatically after a few seconds of inactivity.
 
 ## [MathJS](https://mathjs.org/)
 
@@ -121,17 +136,16 @@ Out: `50423.45039102888 J / kg`
 * [Humid Air: Sample Code](http://coolprop.sourceforge.net/fluid_properties/HumidAir.html#sample-hapropssi-code)
 * [Humid Air: List of Parameters (Properties)](http://coolprop.sourceforge.net/fluid_properties/HumidAir.html#table-of-inputs-outputs-to-hapropssi)
 
-## [CodeMirror 5](https://codemirror.net/5/)
+## [CodeMirror](https://codemirror.net)
 
 CodeMirror is used for editing the mathjs code in the browser and includes:
 - Syntax Highlighting
-- Autocompletion with <kbd>Ctrl</kbd> + <kbd>Space</kbd>
+- Autocompletion
   - Functions
   - Physical Constants
   - Prefixed Units
   - Variables in Scope
 - Drag and Drop text documents
 - Other key bindings
-  - Find with <kbd>Ctrl</kbd> + <kbd>F</kbd>
-  - Replace with <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd>
-  - The rest can be found in [CodeMirror: Sublime Text bindings demo](https://codemirror.net/5/demo/sublime.html)
+  - Find and replace <kbd>Ctrl</kbd> + <kbd>F</kbd>
+  - The rest can be found in [CodeMirror: Reference Manual](https://codemirror.net/docs/ref/)
