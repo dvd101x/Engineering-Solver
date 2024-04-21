@@ -1,8 +1,8 @@
 importScripts(
     "https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.0/math.js",
-    "/coolprop.js",
-    "/fluidProperties.js",
-    "/molecularMass.js",
+    "coolprop.js",
+    "fluidProperties.js",
+    "molecularMass.js",
     "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.2/markdown-it.min.js",
     "https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js",
