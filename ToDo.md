@@ -18,7 +18,7 @@ ToDo
 - [x] Fix mathjs mode
   - [x] Fix Autocomplete
 - [x] Fix chemistry
-- [ ] Fix build error
+- [x] Fix build error
 - [ ] Details
   - [ ] Cleanup
   - [ ] JS docs
