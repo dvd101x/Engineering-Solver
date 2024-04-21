@@ -448,10 +448,8 @@ x = flatten(result_insertion.y[end,:])
 result_unpowered2 = solveODE(dydt, [t_insertion, t_unpowered2, dt], x, method)`
 }
 
-// To get a new examples use editor.getValue().replace(/\r?\n/g,'\n').split('\n')
+// To get a new examples use editor.state.doc.toString().replace(/\r?\n/g,'\n').split('\n')
 
-function insertExampleFunc(ID) {
-  const mathExampleCode = Array.isArray(mathExamples[ID]) ? mathExamples[ID].join("\n") : mathExamples[ID];
-  editor.replaceRange('\n' + mathExampleCode, {line:editor.lastLine(), ch:0}, {line:editor.lastLine(), ch:0})
-  editor.focus()
+export function insertExampleFunc(ID) {
+  return Array.isArray(mathExamples[ID]) ? mathExamples[ID].join("\n") : mathExamples[ID];
 }
