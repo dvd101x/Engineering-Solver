@@ -1,0 +1,1 @@
+const mathWorker = new Worker("mathWorker.js");
