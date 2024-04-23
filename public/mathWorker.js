@@ -1,3 +1,4 @@
+
 importScripts(
     "https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.js",
     "coolprop.js",
@@ -6,6 +7,12 @@ importScripts(
 )
 const parser = math.parser()
 
+/**
+ * Applies a given function to each element of an array or matrix.
+ *
+ * @param {Function} f - The function to apply to each element.
+ * @returns {Function} - A new function that applies the given function to each element of an array or matrix.
+ */
 function mapped(f) {
     return math.typed({
         'Array | Matrix': X => math.map(X, x => f(x))

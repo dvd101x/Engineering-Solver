@@ -1,12 +1,12 @@
 ToDo
 ====
 - [ ] Details
-  - [ ] Cleanup
-  - [ ] JS docs
+  - [x] Cleanup
+  - [x] JS docs
   - [ ] Rename variables
     - [ ] Sessions to Editor States
-    - [ ] 0 index Sessions
-    - [ ] Array fill null for initial EditorStates
+    - [x] 0 index Sessions
+    - [x] Array fill null for initial EditorStates
 - [ ] Custom help
 - [ ] Function finder
 - [ ] Variable finder
@@ -34,4 +34,4 @@ ToDo
 ## Decisions
 - [ ] New nomeclature like pyodide
 - [ ] File names
-- [ ] Dropdown
+- [ ] Dropdown or tabs
