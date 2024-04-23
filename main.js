@@ -53,7 +53,7 @@ for (let ID of listOfSessions) {
   radioInput.id = 'tab' + ID;
   radioInput.checked = lastTab == ID ? true : false;
   tabsField.appendChild(radioInput);
-  
+
   const label = document.createElement('label');
   label.htmlFor = 'tab' + ID;
   label.id = 'tabL' + ID;
@@ -69,7 +69,7 @@ for (let ID of listOfSessions) {
   if (sessionText && !sessionText.trim()) {
     localStorage.removeItem(thisSession)
   }
-  
+
   sessionNames[ID] = setSessionName(ID);
 }
 
@@ -115,8 +115,12 @@ const waitToSave = 1000;
 mathWorker.onmessage = function (oEvent) {
   const results = JSON.parse(oEvent.data)
   const tabToSave = tabIDs.value;
-  const out = results.outputs.map(formatOutput).join("\n")
-  outputs.innerHTML = out;
+  outputs.innerHTML = "";
+  results.outputs.forEach(out => {
+    const div = document.createElement("div");
+    div.innerHTML = formatOutput(out);
+    outputs.appendChild(div);
+  });
   clearTimeout(timerSave);
   sessions[lastTab] = editor.state
   timerSave = setTimeout(saveSession, waitToSave, tabToSave)
