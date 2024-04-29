@@ -117,9 +117,40 @@ mathWorker.onmessage = function (oEvent) {
   const tabToSave = tabIDs.value;
   outputs.innerHTML = "";
   results.outputs.forEach(out => {
-    const div = document.createElement("div");
-    div.innerHTML = formatOutput(out);
-    outputs.appendChild(div);
+
+    switch (out.type) {
+      case "math":
+        out.text.forEach(e => {
+          const pre = document.createElement("pre");
+          if (e.visible) {
+            const div = document.createElement("div");
+            const type = e.outputs.type;
+            const value = e.outputs.value;
+            switch (type) {
+              case "number":
+                div.textContent = value;
+                break;
+              case "html":
+                div.innerHTML = value;
+                break;
+              case "plot":
+                Plotly.newPlot(div, e.outputs.data, e.outputs.layout)
+                break;
+              case "object":
+                div.textContent = value;
+                break;
+            }
+            pre.appendChild(div);
+          }
+          outputs.appendChild(pre);
+        });
+        break;
+      case "markdown":
+        const div = document.createElement("div");
+        div.innerHTML = md.render(out.text);
+        outputs.appendChild(div);
+        break;
+    }
   });
   clearTimeout(timerSave);
   sessions[lastTab] = editor.state
@@ -194,14 +225,5 @@ function sendWorkToMathWorker(mathExpressoins) {
       .trim()
     const request = { expr: expressions }
     mathWorker.postMessage(JSON.stringify(request))
-  }
-}
-
-function formatOutput(x) {
-  switch (x.type) {
-    case "math":
-      return x.text;
-    case "markdown":
-      return md.render(x.text);
   }
 }

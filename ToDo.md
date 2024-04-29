@@ -1,3 +1,20 @@
+Temp
+====
+
+
+Fix formats for special cases.
+- Errors
+- Units
+- Help
+- Plot
+- Matrix
+- Sparse Matrix
+- Etc.
+
+Make react plots
+
+plot(data,layout)
+
 ToDo
 ====
 - [ ] Details

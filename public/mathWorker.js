@@ -6,6 +6,7 @@ importScripts(
     "molecularMass.js"
 )
 const parser = math.parser()
+const digits = 14
 
 /**
  * Applies a given function to each element of an array or matrix.
@@ -32,6 +33,11 @@ const functionsToVectorize =
 math.import(
     {
         props, HAprops, phase, MM,
+        plot: math.typed({
+            'Array, Object, Object': plot,
+            'Array, Object': (data, layout) => plot(data, layout, {}),
+            'Array': data => plot(data, {}, {}),
+        }),
         ...Object.fromEntries(functionsToVectorize.map(f => [f, mapped(math[f])])),
         log: math.typed({
             'Array | Matrix': x => math.map(x, x1 => math.log(x1, math.e)),
@@ -69,33 +75,6 @@ onmessage = (oEvent) => {
     postMessage(JSON.stringify(response));
 }
 
-function math2str(x) {
-    return typeof x == "string" ? x : math.format(x, 14)
-}
-
-function evalBlock(block) {
-    let mathResult
-    try {
-        mathResult = parser.evaluate(block)
-    } catch (error) {
-        return error.toString()
-    }
-    if (typeof mathResult != 'undefined' && mathResult) {
-        if (typeof mathResult === 'object') {
-            if (mathResult.entries && Array.isArray(mathResult.entries)) {
-                return mathResult.entries
-                    .filter(x => typeof x !== 'undefined')
-                    .map(x => math2str(x)).join("\n")
-            }
-        }
-    }
-    return math2str(mathResult)
-}
-
-function evalBlocks(blocks) {
-    return blocks.map(block => evalBlock(block))
-}
-
 function makeDoc(code) {
     const splitCode = code.split('\n');
     const lineTypes = splitCode.map(line => line.startsWith('# ') ? 'md' : 'math');
@@ -130,17 +109,13 @@ function makeDoc(code) {
     function processOutput(content, type) {
         switch (type) {
             case "math":
-                const blocks = content.join('\n')
-                    .split(/\n\s*\n/g)
-                    .filter(x => x.trim().length > 0)
-                const results = evalBlocks(blocks)
-                const formatedResult = results
-                    .filter(x => typeof x !== 'undefined')
-                    .map(
-                        result => result.length ? '<pre>' + result + '</pre>' : '').join('\n')
-                return { type: "math", text: formatedResult }
+                const expressions = getExpressions(content.join('\n'));
+                const results = processExpressions(expressions)
+                return { type: "math", text: results }
+                break;
             case "md":
                 return { type: "markdown", text: content.join('\n') }
+                break;
         }
     }
 
@@ -191,4 +166,140 @@ function getMathState() {
         functions,
         physicalConstants
     }
+}
+
+/**
+ * Extracts parsable expressions from a multiline string.
+ *
+ * @param {string} str - The multiline string containing expressions.
+ * @returns {Array<{from: number, to: number, source: string}>} An array of objects,
+ *   where each object represents a parsable expression and contains:
+ *   - from: The starting line number of the expression within the original string.
+ *   - to: The ending line number of the expression within the original string.
+ *   - source: The actual string content of the expression.
+ */
+function getExpressions(str) {
+    const lines = str.split('\n');
+    let nextLineToParse = 0;
+    const result = [];
+
+    for (let lineID = 0; lineID < lines.length; lineID++) {
+        const linesToTest = lines.slice(nextLineToParse, lineID + 1).join('\n');
+        if (canBeParsed(linesToTest)) {
+            if (!isEmptyString(linesToTest)) {
+                result.push({ from: nextLineToParse, to: lineID, source: linesToTest });
+            }
+            // Start the next parsing attempt from the line after the successfully parsed expression.
+            nextLineToParse = lineID + 1;
+        }
+    }
+    // Handle any remaining lines that couldn't be parsed as expressions.
+    const linesToTest = lines.slice(nextLineToParse).join('\n');
+    if (!isEmptyString(linesToTest)) {
+        result.push({ from: nextLineToParse, to: lines.length - 1, source: linesToTest });
+    }
+    return result;
+}
+
+/**
+ * Determines whether a given expression can be successfully parsed.
+ *
+ * @param {string} expression - The expression to parse.
+ * @returns {boolean} True if the expression can be parsed, false otherwise.
+ */
+function canBeParsed(expression) {
+    try {
+        math.parse(expression)
+        return true
+    } catch (error) {
+        return false
+    }
+}
+
+/**
+ * Checks if a given string is empty or only contains whitespace characters.
+ *
+ * @param {string} str - The string to check.
+ * @returns {boolean} True if the string is empty or only contains whitespace, false otherwise.
+ */
+function isEmptyString(str) {
+    return str.trim() === ""
+}
+
+/**
+ * Formats result depending on the type of result
+ *
+ * @param {number, string, Help, any} result - The result to format
+ * @returns {Object} The formatted result  
+ */
+const formatResult = math.typed({
+    'number': result => ({ type: "number", value: math.format(result, { precision: digits }) }),
+    'string': result => ({ type: 'string', value: result }),
+    'Help': result => ({ type: "help", value: math.format(result) }),
+    'Object': result => {
+        if (result.isPlot) {
+            return { type: "plot", ...result }
+        } else {
+            return ({ type: "object", value:math.format(result) })
+        }
+    },
+    'any': math.typed.referTo(
+        'number',
+        fnumber => result => ({ type: "any", value: fnumber(result).value })
+    )
+})
+
+/**
+ * Processes an array of expressions by evaluating them, formatting the results,
+ * and determining their visibility.
+ *
+ * @param {Array<{from: number, to: number, source: string}>} expressions - An array of objects representing expressions,
+ *   where each object has `from`, `to`, and `source` properties.
+ * @returns {Array<{from: number, to: number, source: string, outputs: any, visible: boolean}>} An array of processed expressions,
+ *   where each object has additional `outputs` and `visible` properties.
+ */
+function processExpressions(expressions) {
+    return expressions.map(expression => {
+        const result = calc(expression.source)
+        const outputs = formatResult(result)
+        // Determine visibility based on the result type:
+        // - Undefined results are hidden.
+        // - Results with an `isResultSet` property are hidden when empty.
+        // - All other results are visible.
+        const visible = result === undefined ? false : (result.isResultSet && result.entries.length === 0) ? false : true
+        return ({
+            ...expression,
+            outputs,
+            visible
+        })
+    })
+}
+
+/**
+ * Evaluates a given expression using a parser.
+ *
+ * @param {string} expression - The expression to evaluate.
+ * @returns {any} The result of the evaluation, or the error message if an error occurred.
+*/
+function calc(expression) {
+    let result
+    let error
+    try {
+        result = parser.evaluate(expression)
+    } catch (error) {
+        error = error.toString()
+    }
+    return { result, error }
+}
+
+/**
+ * Creates a plot object.
+ *
+ * @param {Array<Object>} data - The data to plot.
+ * @param {Object} layout - The layout of the plot.
+ * @param {Object} config - The configuration of the plot.
+ * @returns {Object} The plot object.
+ */
+function plot(data, layout, config) {
+    return { isPlot: true, data, layout, config }
 }
