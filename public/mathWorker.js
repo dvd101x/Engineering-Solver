@@ -1,10 +1,12 @@
 
+
 importScripts(
     "https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.js",
     "coolprop.js",
     "fluidProperties.js",
     "molecularMass.js"
 )
+
 const parser = math.parser()
 const digits = 14
 
@@ -106,19 +108,6 @@ function makeDoc(code) {
 
     let output = [];
 
-    function processOutput(content, type) {
-        switch (type) {
-            case "math":
-                const expressions = getExpressions(content.join('\n'));
-                const results = processExpressions(expressions)
-                return { type: "math", text: results }
-                break;
-            case "md":
-                return { type: "markdown", text: content.join('\n') }
-                break;
-        }
-    }
-
     cleanCells.forEach(
         cell => output.push(processOutput(cell.source, cell.cell_type))
     )
@@ -167,6 +156,7 @@ function getMathState() {
         physicalConstants
     }
 }
+
 
 /**
  * Extracts parsable expressions from a multiline string.
@@ -226,28 +216,9 @@ function isEmptyString(str) {
     return str.trim() === ""
 }
 
-/**
- * Formats result depending on the type of result
- *
- * @param {number, string, Help, any} result - The result to format
- * @returns {Object} The formatted result  
- */
-const formatResult = math.typed({
-    'number': result => ({ type: "number", value: math.format(result, { precision: digits }) }),
-    'string': result => ({ type: 'string', value: result }),
-    'Help': result => ({ type: "help", value: math.format(result) }),
-    'Object': result => {
-        if (result.isPlot) {
-            return { type: "plot", ...result }
-        } else {
-            return ({ type: "object", value:math.format(result) })
-        }
-    },
-    'any': math.typed.referTo(
-        'number',
-        fnumber => result => ({ type: "any", value: fnumber(result).value })
-    )
-})
+function formatResult(result) {
+    return math.format(result)
+}
 
 /**
  * Processes an array of expressions by evaluating them, formatting the results,
@@ -260,19 +231,44 @@ const formatResult = math.typed({
  */
 function processExpressions(expressions) {
     return expressions.map(expression => {
+        // returns an object with isError and result properties
+        const visible = expression.source.trim().endsWith(';') ? false : true
         const result = calc(expression.source)
-        const outputs = formatResult(result)
-        // Determine visibility based on the result type:
-        // - Undefined results are hidden.
-        // - Results with an `isResultSet` property are hidden when empty.
-        // - All other results are visible.
-        const visible = result === undefined ? false : (result.isResultSet && result.entries.length === 0) ? false : true
+        let outputs
+        if (result.isError) {
+            outputs = { type: "error", result: result.result }
+        } if (result.result.isPlot) {
+            const { data, layout, config } = result.result
+            
+            outputs = { type: "plot", result: { data: formatObject(data), layout: formatObject(layout), config: formatObject(config) } }
+        } else {
+            outputs = { type: "any", result: formatResult(result.result) }
+        }
+
         return ({
             ...expression,
-            outputs,
+            type: outputs.type,
+            result: outputs.result,
             visible
         })
     })
+}
+
+function formatObject (obj) {
+    return eval(math.format(obj).toString())
+}
+
+function processOutput(content, type) {
+    switch (type) {
+        case "math":
+            const expressions = getExpressions(content.join('\n'));
+            const results = processExpressions(expressions)
+            return { type: "math", text: results }
+            break;
+        case "md":
+            return { type: "markdown", text: content.join('\n') }
+            break;
+    }
 }
 
 /**
@@ -282,14 +278,12 @@ function processExpressions(expressions) {
  * @returns {any} The result of the evaluation, or the error message if an error occurred.
 */
 function calc(expression) {
-    let result
-    let error
     try {
-        result = parser.evaluate(expression)
+        const result = parser.evaluate(expression)
+        return { isError: false, result: result }
     } catch (error) {
-        error = error.toString()
+        return { isError: true, result: error.toString() }
     }
-    return { result, error }
 }
 
 /**
@@ -303,3 +297,4 @@ function calc(expression) {
 function plot(data, layout, config) {
     return { isPlot: true, data, layout, config }
 }
+

@@ -124,25 +124,22 @@ mathWorker.onmessage = function (oEvent) {
           const pre = document.createElement("pre");
           if (e.visible) {
             const div = document.createElement("div");
-            const type = e.outputs.type;
-            const value = e.outputs.value;
+            const type = e.type;
+            const value = e.result;
             switch (type) {
-              case "number":
+              case "any":
                 div.textContent = value;
                 break;
-              case "html":
-                div.innerHTML = value;
+              case "error":
+                div.innerHTML = 'myError:'+ value;
                 break;
               case "plot":
-                Plotly.newPlot(div, e.outputs.data, e.outputs.layout)
-                break;
-              case "object":
-                div.textContent = value;
+                Plotly.newPlot(div, e.result.data, e.result.layout, e.result.config)
                 break;
             }
             pre.appendChild(div);
+            outputs.appendChild(pre);
           }
-          outputs.appendChild(pre);
         });
         break;
       case "markdown":

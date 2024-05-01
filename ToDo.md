@@ -1,19 +1,8 @@
 Temp
 ====
 
-
-Fix formats for special cases.
-- Errors
-- Units
-- Help
-- Plot
-- Matrix
-- Sparse Matrix
-- Etc.
-
-Make react plots
-
-plot(data,layout)
+Fix error.
+Format help
 
 ToDo
 ====
@@ -31,11 +20,11 @@ ToDo
 - [ ] Download text
 
 # Plots
-- [ ] Import plotly
-- [ ] Return objects
-  - [ ] plot types
+- [x] Import plotly
+- [x] Return objects
+  - [x] plot types
   - [ ] doc types
-  - [ ] result type
+  - [x] result type
   
 ## Extra 
 - [ ] Match outputs

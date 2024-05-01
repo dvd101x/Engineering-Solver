@@ -467,7 +467,15 @@ print('x has two solutions $0 and $1', x, 4)
 
 proof = a x.^2 + b x + c;
 print('Using x = $1 we get $2', [x[1], proof[1]], 4)
-print('Using x = $1 we get $2', [x[2], proof[2]], 4)`
+print('Using x = $1 we get $2', [x[2], proof[2]], 4)`,
+simplePlot:`# Plot
+
+x=0:pi/8: 4*pi;
+
+plot([
+  {x:x, y:sin(x), name:"sin"},
+  {x:x, y:atan(x), name:"atan"}
+])`
 }
 
 // To get a new examples use editor.state.doc.toString().replace(/\r?\n/g,'\n').split('\n')
