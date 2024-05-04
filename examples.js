@@ -511,7 +511,37 @@ trace2 = {
 
 data = [trace1, trace2];
 
-plot(data)`
+plot(data)`,
+lorenz:String.raw`# # Lorenz attractor
+
+# Define the functions
+# $$
+# {\displaystyle {\begin{aligned}{\frac {\mathrm {d} x}{\mathrm {d} t}}&=\sigma (y-x),\\[6pt]{\frac {\mathrm {d} y}{\mathrm {d} t}}&=x(\rho -z)-y,\\[6pt]{\frac {\mathrm {d} z}{\mathrm {d} t}}&=xy-\beta z.\end{aligned}}}
+# $$
+
+#| u is [x, y, z]
+sigma = 10;
+beta = 2.7;
+rho = 28;
+
+lorenz(t, u) = 
+  [
+    sigma * (u[2] - u[1]),
+    u[1] * (rho - u[3]) - u[2],
+    u[1] * u[2] - beta * u[3]
+  ];
+
+sol = solveODE(lorenz, [0, 100], [1, 1, 1]);
+
+plot(
+ [{
+    x: flatten(sol.y[:,1]),
+    y: flatten(sol.y[:,2]),
+    z: flatten(sol.y[:,3]),
+    type: "scatter3d",
+    mode: "lines"
+}])
+`
 }
 
 // To get a new examples use editor.state.doc.toString().replace(/\r?\n/g,'\n').split('\n')

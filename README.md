@@ -22,7 +22,7 @@ acceleration to yard/s^2
 
 You will notice you get instant results as you are typing your expressions.
 
-# Getting started
+# Install and develop locally
 
 Clone this repository and run the following command to install dependencies.
 ```
@@ -149,3 +149,58 @@ CodeMirror is used for editing the mathjs code in the browser and includes:
 - Other key bindings
   - Find and replace <kbd>Ctrl</kbd> + <kbd>F</kbd>
   - The rest can be found in [CodeMirror: Reference Manual](https://codemirror.net/docs/ref/)
+
+## [Plotly](https://plotly.com/javascript/)
+
+Is used to do plots. Uses the main interface of plotly without many changes, but running first through mathjs simplifications.
+
+### Plot hello world [example](https://plotly.com/javascript/getting-started/)
+```jl
+plot([{x:1:5, y:2.^(1:5)}])
+```
+![HelloWorldPlot](img/helloWorldPlot.png)
+
+### Plot functions
+
+```jl
+x = 0: pi/8: 2 pi;
+
+plot([
+  {x:x, y:sin(x), name:"sin"},
+  {x:x, y:atan(x), name:"atan"}
+])
+```
+![Two traces plot](img/twoTracesPlot.png)
+
+### Plot advanced functions
+
+```jl
+sigma = 10;
+beta = 2.7;
+rho = 28;
+
+lorenz(t, u) = 
+  [ 
+    sigma * (u[2] - u[1]),
+    u[1] * (rho - u[3]) - u[2],
+    u[1] * u[2] - beta * u[3]
+  ];
+
+sol = solveODE(lorenz, [0, 100], [1, 1, 1]);
+
+plot(
+ [{
+    x: flatten(sol.y[:,1]),
+    y: flatten(sol.y[:,2]),
+    z: flatten(sol.y[:,3]),
+    type: "scatter3d",
+    mode: "lines"
+}])
+```
+![Lorenz Plot](img/lorenz.png)
+
+# Warnings
+
+- All calculations are done locally
+- There is no server saving your calculations
+- Don't run code that you don't trust 
