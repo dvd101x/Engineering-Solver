@@ -234,16 +234,16 @@ function processExpressions(expressions) {
         // returns an object with isError and result properties
         const result = calc(expression.source)
         const visible = expression.source.trim().endsWith(';') ? false :
-            result.result === undefined ? false : true
+            result.value === undefined ? false : true
         let outputs
         if (result.isError) {
-            outputs = { type: "error", result: result.result }
-        } else if (result.result && result.result.isPlot) {
-            const { data, layout, config } = result.result
+            outputs = { type: "error", result: result.value }
+        } else if (result.value && result.value.isPlot) {
+            const { data, layout, config } = result.value
 
             outputs = { type: "plot", result: { data: formatObject(data), layout: formatObject(layout), config: formatObject(config) } }
         } else {
-            outputs = { type: "any", result: formatResult(result.result) }
+            outputs = { type: "any", result: formatResult(result.value) }
         }
 
         return ({
@@ -281,9 +281,9 @@ function processOutput(content, type) {
 function calc(expression) {
     try {
         const result = parser.evaluate(expression)
-        return { isError: false, result: result }
+        return { isError: false, value: result }
     } catch (error) {
-        return { isError: true, result: error.toString() }
+        return { isError: true, value: error.toString() }
     }
 }
 
