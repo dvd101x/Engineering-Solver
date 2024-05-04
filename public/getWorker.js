@@ -1,1 +1,1 @@
-const mathWorker = new Worker("mathWorker.js");
+const mathWorker = new Worker("mathWorker.js", {type: "classic"});

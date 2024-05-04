@@ -10,6 +10,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="manifest" href="/site.webmanifest">
+  <script src="https://cdn.plot.ly/plotly-2.31.1.min.js" charset="utf-8"></script>
 </head>
 <script src="/getWorker.js"></script>
 <body>
@@ -29,6 +30,12 @@
             <optgroup label="Data">
               <option value="strings">Strings</option>
               <option value="objects">Objects</option>
+            </optgroup>
+            <optgroup label="Plot">
+              <option value="simplePlot">Plot</option>
+              <option value="plot3D">3D Plot</option>
+              <option value="statPlot">Statistic Plots</option>
+              <option value="lorenz">Lorenz attractor</option>
             </optgroup>
             <optgroup label="Thermodynamics">
               <option value="coolprop">Fluid Properties</option>

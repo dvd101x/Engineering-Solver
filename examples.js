@@ -467,7 +467,81 @@ print('x has two solutions $0 and $1', x, 4)
 
 proof = a x.^2 + b x + c;
 print('Using x = $1 we get $2', [x[1], proof[1]], 4)
-print('Using x = $1 we get $2', [x[2], proof[2]], 4)`
+print('Using x = $1 we get $2', [x[2], proof[2]], 4)`,
+simplePlot:String.raw`# Plot
+
+x=0:pi/8: 4*pi;
+
+plot([
+  {x:x, y:sin(x), name:"sin"},
+  {x:x, y:atan(x), name:"atan"}
+])`,
+plot3D:String.raw`# 3d plot
+
+data = [
+    {
+        type: "isosurface",
+        x: [0,0,0,0,1,1,1,1],
+        y: [0,1,0,1,0,1,0,1],
+        z: [1,1,0,0,1,1,0,0],
+        value: 1:8,
+        isomin: 2,
+        isomax: 6,
+        colorscale: "Reds"
+    }
+]
+
+plot(data)`,
+statPlot:String.raw`# Statistical plots
+
+y0 = random([50]);
+y1 = random([50])+1;
+
+trace1 = {
+  y: y0,
+  type: 'box',
+  name:'y0'
+};
+
+trace2 = {
+  y: y1,
+  type: 'box',
+  name: 'y1'
+};
+
+data = [trace1, trace2];
+
+plot(data)`,
+lorenz:String.raw`# # Lorenz attractor
+
+# Define the functions
+# $$
+# {\displaystyle {\begin{aligned}{\frac {\mathrm {d} x}{\mathrm {d} t}}&=\sigma (y-x),\\[6pt]{\frac {\mathrm {d} y}{\mathrm {d} t}}&=x(\rho -z)-y,\\[6pt]{\frac {\mathrm {d} z}{\mathrm {d} t}}&=xy-\beta z.\end{aligned}}}
+# $$
+
+#| u is [x, y, z]
+sigma = 10;
+beta = 2.7;
+rho = 28;
+
+lorenz(t, u) = 
+  [
+    sigma * (u[2] - u[1]),
+    u[1] * (rho - u[3]) - u[2],
+    u[1] * u[2] - beta * u[3]
+  ];
+
+sol = solveODE(lorenz, [0, 100], [1, 1, 1]);
+
+plot(
+ [{
+    x: flatten(sol.y[:,1]),
+    y: flatten(sol.y[:,2]),
+    z: flatten(sol.y[:,3]),
+    type: "scatter3d",
+    mode: "lines"
+}])
+`
 }
 
 // To get a new examples use editor.state.doc.toString().replace(/\r?\n/g,'\n').split('\n')
