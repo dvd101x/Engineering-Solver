@@ -1,9 +1,3 @@
-Temp
-====
-
-Fix error.
-Format help
-
 ToDo
 ====
 - [ ] Details
@@ -18,6 +12,7 @@ ToDo
 - [ ] Variable finder
 - [ ] Drag and Drop
 - [ ] Download text
+- [ ] Format help
 
 # Plots
 - [x] Import plotly
@@ -25,6 +20,10 @@ ToDo
   - [x] plot types
   - [ ] doc types
   - [x] result type
+- [ ] Document plots
+- [ ] Add plotly
+- [ ] More tests
+- [ ] Format plot output
   
 ## Extra 
 - [ ] Match outputs
@@ -38,6 +37,6 @@ ToDo
 - [ ] Eval expressions vs blocks
 
 ## Decisions
-- [ ] New nomeclature like pyodide
+- [ ] New nomeclature like iodide
 - [ ] File names
 - [ ] Dropdown or tabs

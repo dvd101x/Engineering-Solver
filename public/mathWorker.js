@@ -232,14 +232,15 @@ function formatResult(result) {
 function processExpressions(expressions) {
     return expressions.map(expression => {
         // returns an object with isError and result properties
-        const visible = expression.source.trim().endsWith(';') ? false : true
         const result = calc(expression.source)
+        const visible = expression.source.trim().endsWith(';') ? false :
+            result.result === undefined ? false : true
         let outputs
         if (result.isError) {
             outputs = { type: "error", result: result.result }
-        } if (result.result.isPlot) {
+        } else if (result.result && result.result.isPlot) {
             const { data, layout, config } = result.result
-            
+
             outputs = { type: "plot", result: { data: formatObject(data), layout: formatObject(layout), config: formatObject(config) } }
         } else {
             outputs = { type: "any", result: formatResult(result.result) }
@@ -254,7 +255,7 @@ function processExpressions(expressions) {
     })
 }
 
-function formatObject (obj) {
+function formatObject(obj) {
     return eval(math.format(obj).toString())
 }
 

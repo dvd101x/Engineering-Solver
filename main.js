@@ -131,10 +131,15 @@ mathWorker.onmessage = function (oEvent) {
                 div.textContent = value;
                 break;
               case "error":
-                div.innerHTML = 'myError:'+ value;
+                div.style.color = "red";
+                div.innerHTML = value;
                 break;
               case "plot":
-                Plotly.newPlot(div, e.result.data, e.result.layout, e.result.config)
+                try {
+                  Plotly.newPlot(div, e.result.data, e.result.layout, e.result.config)
+                } catch (error) {
+                  div.innerHTML = 'myError:'+ error.toString();
+                }
                 break;
             }
             pre.appendChild(div);
