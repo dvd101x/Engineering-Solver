@@ -533,11 +533,15 @@ lorenz(t, u) =
 
 sol = solveODE(lorenz, [0, 100], [1, 1, 1]);
 
+diff = diff(sol.t);
+color = concat([diff[1]], diff, 1);
+
 plot(
  [{
     x: flatten(sol.y[:,1]),
     y: flatten(sol.y[:,2]),
     z: flatten(sol.y[:,3]),
+    line:{color:color, colorscale:"Jet"},
     type: "scatter3d",
     mode: "lines"
 }])
