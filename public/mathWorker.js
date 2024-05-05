@@ -1,5 +1,3 @@
-
-
 importScripts(
     "https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.js",
     "coolprop.js",
@@ -256,7 +254,12 @@ function processExpressions(expressions) {
 }
 
 function formatObject(obj) {
-    return eval(math.format(obj).toString())
+    const matrix = math.config().matrix
+    const formatedObject = math.format(obj)
+    math.config({ matrix: 'Array' })
+    const objResult = math.evaluate(formatedObject)
+    math.config({matrix: matrix})
+    return objResult
 }
 
 function processOutput(content, type) {
