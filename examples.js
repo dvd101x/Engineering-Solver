@@ -286,102 +286,101 @@ noIHX_COP = qNoIHX / wNoIHX
 improvementFactor = evap_COP / noIHX_COP
 
 "Improvement with recuperator"
-print("$1 %", [(improvementFactor - 1) * 100], 3)`
-  ,
-  'VaporCompressionCycle':String.raw`# # Vapor Compression Cycle
+print("$1 %", [(improvementFactor - 1) * 100], 3)`,
+  VaporCompressionCycle:String.raw`# # Vapor Compression Cycle
+
+# ## Fluid input
+fluid = 'R134a'
+mDot  = 1 kg/minute
+
+# ## Components input
+# Evaporator
+evap  = {T: -20 degC, P_drop: 0 Pa, superHeating: 10 K}
+# Condenser
+cond  = {T:  40 degC, P_drop: 0 Pa, subCooling  : 10 K}
+# Compressor
+etaS  = 0.75
+
+#Define an array of empty states as objects
+c = [{},{},{},{}];
+
+#Short function to get fluid properties
+p(DesiredProperty, FluidState) = props(DesiredProperty, fluid, FluidState);
   
-  # ## Fluid input
-  fluid = 'R134a'
-  mDot  = 1 kg/minute
+#Define low and high pressure
+pLow  = p('P', {'T|gas': evap.T, Q: 100%});
+pHigh = p('P', {'T|liquid': cond.T, Q: 0%  });
+
+t_crit = p('Tcrit', {});
+
+#4 to 1 Evaporation
+c[1].P = pLow;
+c[1].T = evap.T+ evap.superHeating;
+c[1].D = p('D', {'T|gas':c[1].T, P:c[1].P});
+c[1].H = p('H', {'T|gas':c[1].T, P:c[1].P});
+c[1].S = p('S', {'T|gas':c[1].T, P:c[1].P});
+
+#1 to 2 Compression of vapor
+c[2].P = pHigh;
+H_i    = p('H',{P:c[2].P, S:c[1].S});
+c[2].H = (H_i-c[1].H)/etaS + c[1].H;
+c[2].T = p('T', c[2]);
+c[2].D = p('D', c[2]);
+c[2].S = p('S', c[2]);
+
+#2 to 3 Condensation
+c[3].P = c[2].P - cond.P_drop;
+c[3].T = cond.T-cond.subCooling;
+c[3].D = p('D', {'T|liquid':c[3].T, P:c[3].P});
+c[3].H = p('H', {'T|liquid':c[3].T, P:c[3].P});
+c[3].S = p('S', {'T|liquid':c[3].T, P:c[3].P});
+
+#3 to 4 Expansion
+c[4].H = c[3].H;
+c[4].P = c[1].P + evap.P_drop;
+c[4].T = p('T', c[4]);
+c[4].D = p('D', c[4]);
+c[4].S = p('S', c[4]);
+
+#Work, Energy and Performance
+W_comp   = mDot*(c[2].H - c[1].H);
+Q_h      = mDot*(c[2].H - c[3].H);
+Q_c      = mDot*(c[1].H - c[4].H);
+
+evap_COP = Q_c/W_comp;
+cond_COP = Q_h/W_comp;
+
+# ## Work and Energy
+
+print('Compressor power   : $1 \t$2\t$3', W_comp to [W, BTU/h, TR], 4)
+print('Condenser heat out : $1 \t$2\t$3', Q_h    to [W, BTU/h, TR], 4)
+print('Evaporator heat in : $1 \t$2\t$3', Q_c    to [W, BTU/h, TR], 4)
+
+print('COP(cooling)       : $1', [evap_COP], 3)
+print('COP(heating)       : $1', [cond_COP], 3)
   
-  # ## Components input
-  # Evaporator
-  evap  = {T: -20 degC, P_drop: 0 Pa, superHeating: 10 K}
-  # Condenser
-  cond  = {T:  40 degC, P_drop: 0 Pa, subCooling  : 10 K}
-  # Compressor
-  etaS  = 0.75
-  
-  #Define an array of empty states as objects
-  c = [{},{},{},{}];
-  
-  #Short function to get fluid properties
-  p(DesiredProperty, FluidState) = props(DesiredProperty, fluid, FluidState);
-   
-  #Define low and high pressure
-  pLow  = p('P', {'T|gas': evap.T, Q: 100%});
-  pHigh = p('P', {'T|liquid': cond.T, Q: 0%  });
-  
-  t_crit = p('Tcrit', {});
-  
-  #4 to 1 Evaporation
-  c[1].P = pLow;
-  c[1].T = evap.T+ evap.superHeating;
-  c[1].D = p('D', {'T|gas':c[1].T, P:c[1].P});
-  c[1].H = p('H', {'T|gas':c[1].T, P:c[1].P});
-  c[1].S = p('S', {'T|gas':c[1].T, P:c[1].P});
-  
-  #1 to 2 Compression of vapor
-  c[2].P = pHigh;
-  H_i    = p('H',{P:c[2].P, S:c[1].S});
-  c[2].H = (H_i-c[1].H)/etaS + c[1].H;
-  c[2].T = p('T', c[2]);
-  c[2].D = p('D', c[2]);
-  c[2].S = p('S', c[2]);
-  
-  #2 to 3 Condensation
-  c[3].P = c[2].P - cond.P_drop;
-  c[3].T = cond.T-cond.subCooling;
-  c[3].D = p('D', {'T|liquid':c[3].T, P:c[3].P});
-  c[3].H = p('H', {'T|liquid':c[3].T, P:c[3].P});
-  c[3].S = p('S', {'T|liquid':c[3].T, P:c[3].P});
-  
-  #3 to 4 Expansion
-  c[4].H = c[3].H;
-  c[4].P = c[1].P + evap.P_drop;
-  c[4].T = p('T', c[4]);
-  c[4].D = p('D', c[4]);
-  c[4].S = p('S', c[4]);
-  
-  #Work, Energy and Performance
-  W_comp   = mDot*(c[2].H - c[1].H);
-  Q_h      = mDot*(c[2].H - c[3].H);
-  Q_c      = mDot*(c[1].H - c[4].H);
-  
-  evap_COP = Q_c/W_comp;
-  cond_COP = Q_h/W_comp;
-  
-  # ## Work and Energy
-  
-  print('Compressor power   : $1 \t$2\t$3', W_comp to [W, BTU/h, TR], 4)
-  print('Condenser heat out : $1 \t$2\t$3', Q_h    to [W, BTU/h, TR], 4)
-  print('Evaporator heat in : $1 \t$2\t$3', Q_c    to [W, BTU/h, TR], 4)
-  
-  print('COP(cooling)       : $1', [evap_COP], 3)
-  print('COP(heating)       : $1', [cond_COP], 3)
-   
-  layout = {yaxis:{type:"log"}};
-  enthalpy = map(c, _(x) = number(x.H, 'J/kg'));
-  pressure = map(c, _(x) = number(x.P, 'Pa'));
-  temperatures = (evap.T - 5 K) : 3 K: t_crit;
-  liquidP = map(temperatures, _(t)=number(p('P',  {"T|liquid":t, Q:0%}),'Pa'));
-  liquidH = map(temperatures, _(t)=number(p('H',  {"T|liquid":t, Q:0%}),'J/kg'));
-  gasP = map(temperatures, _(t)=number(p('P',  {"T|gas":t, Q:100%}),'Pa'));
-  gasH = map(temperatures, _(t)=number(p('H',  {"T|gas":t, Q:100%}),'J/kg'));
-  
-  
-  plot([
-    {
-      x: concat(enthalpy, [enthalpy[1]]),
-      y: concat(pressure, [pressure[1]]),
-      name:'cycle'
-    },{
-      x: liquidH, y:liquidP, name:'liquid'
-    },{
-      x: gasH, y:gasP, name:'gas'
-    }],
-    layout
-  )`,
+layout = {yaxis:{type:"log"}};
+enthalpy = map(c, _(x) = number(x.H, 'J/kg'));
+pressure = map(c, _(x) = number(x.P, 'Pa'));
+temperatures = (evap.T - 5 K) : 3 K: t_crit;
+liquidP = map(temperatures, _(t)=number(p('P',  {"T|liquid":t, Q:0%}),'Pa'));
+liquidH = map(temperatures, _(t)=number(p('H',  {"T|liquid":t, Q:0%}),'J/kg'));
+gasP = map(temperatures, _(t)=number(p('P',  {"T|gas":t, Q:100%}),'Pa'));
+gasH = map(temperatures, _(t)=number(p('H',  {"T|gas":t, Q:100%}),'J/kg'));
+
+
+plot([
+  {
+    x: concat(enthalpy, [enthalpy[1]]),
+    y: concat(pressure, [pressure[1]]),
+    name:'cycle'
+  },{
+    x: liquidH, y:liquidP, name:'liquid'
+  },{
+    x: gasH, y:gasP, name:'gas'
+  }],
+  layout
+)`,
   odeSolver: String.raw`# # Rocket Trajectory Optimization
 # 
 # > **reference:** [mathjs](https://mathjs.org/examples/browser/rocket_trajectory_optimization.html)
