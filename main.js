@@ -123,26 +123,37 @@ mathWorker.onmessage = function (oEvent) {
         out.text.forEach(e => {
           const pre = document.createElement("pre");
           if (e.visible) {
-            const div = document.createElement("div");
             const type = e.type;
             const value = e.result;
+            let div
             switch (type) {
+              case "string":
+                div = document.createElement("code");
+                div.innerHTML = value;
+                pre.appendChild(div);
+                break;
               case "any":
+                div = document.createElement("div");
                 div.textContent = value;
+                pre.appendChild(div);
                 break;
               case "error":
+                div = document.createElement("div");
                 div.style.color = "red";
                 div.innerHTML = value;
+                pre.appendChild(div);
                 break;
               case "plot":
+                div = document.createElement("div");
                 try {
                   Plotly.newPlot(div, e.result.data, e.result.layout, e.result.config)
                 } catch (error) {
                   div.innerHTML = 'myError:'+ error.toString();
                 }
+                pre.appendChild(div);
                 break;
             }
-            pre.appendChild(div);
+  
             outputs.appendChild(pre);
           }
         });
