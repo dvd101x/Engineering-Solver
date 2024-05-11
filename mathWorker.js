@@ -240,7 +240,10 @@ function processExpressions(expressions) {
             const { data, layout, config } = result.value
 
             outputs = { type: "plot", result: { data: formatObject(data), layout: formatObject(layout), config: formatObject(config) } }
-        } else {
+        } else if (result.value && typeof result.value == "string") {
+            outputs = { type: "string", result: result.value }
+        }
+        else {
             outputs = { type: "any", result: formatResult(result.value) }
         }
 
@@ -258,7 +261,7 @@ function formatObject(obj) {
     const formatedObject = math.format(obj)
     math.config({ matrix: 'Array' })
     const objResult = math.evaluate(formatedObject)
-    math.config({matrix: matrix})
+    math.config({ matrix: matrix })
     return objResult
 }
 
