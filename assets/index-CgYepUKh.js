@@ -351,7 +351,7 @@ print('COP(heating)       : $1', [cond_COP], 3)
 layout = {yaxis:{type:"log"}};
 enthalpy = map(c, _(x) = number(x.H, 'J/kg'));
 pressure = map(c, _(x) = number(x.P, 'Pa'));
-temperatures = (evap.T - 5 K) : 3 K: t_crit;
+temperatures = concat(((evap.T to K) - 5 K) : 3 K: t_crit, [t_crit]);
 liquidP = map(temperatures, _(t)=number(p('P',  {"T|liquid":t, Q:0%}),'Pa'));
 liquidH = map(temperatures, _(t)=number(p('H',  {"T|liquid":t, Q:0%}),'J/kg'));
 gasP = map(temperatures, _(t)=number(p('P',  {"T|gas":t, Q:100%}),'Pa'));
