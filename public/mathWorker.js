@@ -77,36 +77,25 @@ onmessage = (oEvent) => {
 
 function makeDoc(code) {
     const splitCode = code.split('\n');
-    const lineTypes = splitCode.map(line => line.startsWith('# ') ? 'md' : 'math');
-    let cells = [];
+    const cells = [];
     let lastType = '';
     parser.clear()
     splitCode
         .forEach((line, lineNum) => {
-            if (lastType === lineTypes[lineNum]) {
-                cells[cells.length - 1].source.push(line)
+            const lineType = line.startsWith('# ') ? 'md' : 'math';
+            const formatedLine = lineType === 'md' ? line.slice(2) : line
+            if (lastType === lineType) {
+                cells[cells.length - 1].source.push(formatedLine)
             }
             else {
-                cells.push({ cell_type: lineTypes[lineNum], source: [line] })
+                cells.push({ cell_type: lineType, source: [formatedLine] })
             }
-            lastType = lineTypes[lineNum]
+            lastType = lineType
         })
-    let cleanCells = []
-    cells.forEach(x => {
-        if (x.cell_type === 'md') {
-            cleanCells.push({ cell_type: 'md', source: x.source.map(e => e.slice(2)) })
-        }
-        else {
-            const thereIsSomething = x.source.join('\n').trim();
-            if (thereIsSomething) {
-                cleanCells.push({ cell_type: 'math', source: x.source })
-            }
-        }
-    })
 
     let output = [];
 
-    cleanCells.forEach(
+    cells.forEach(
         cell => output.push(processOutput(cell.source, cell.cell_type))
     )
     return output

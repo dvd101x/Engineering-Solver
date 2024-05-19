@@ -148,12 +148,11 @@ mathWorker.onmessage = function (oEvent) {
                 try {
                   Plotly.newPlot(div, e.result.data, e.result.layout, e.result.config)
                 } catch (error) {
-                  div.innerHTML = 'myError:'+ error.toString();
+                  div.innerHTML = 'myError:' + error.toString();
                 }
                 pre.appendChild(div);
                 break;
             }
-  
             outputs.appendChild(pre);
           }
         });
