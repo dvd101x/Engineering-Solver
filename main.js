@@ -117,7 +117,6 @@ mathWorker.onmessage = function (oEvent) {
   const tabToSave = tabIDs.value;
   outputs.innerHTML = "";
   results.outputs.forEach(out => {
-
     switch (out.type) {
       case "math":
         out.text.forEach(e => {

@@ -79,6 +79,7 @@ function makeDoc(code) {
     const splitCode = code.split('\n');
     const cells = [];
     let lastType = '';
+    let lastLineNum = 0;
     parser.clear()
     splitCode
         .forEach((line, lineNum) => {
@@ -88,7 +89,8 @@ function makeDoc(code) {
                 cells[cells.length - 1].source.push(formatedLine)
             }
             else {
-                cells.push({ cell_type: lineType, source: [formatedLine] })
+                cells.push({ cell_type: lineType, source: [formatedLine], from: lastLineNum, to: lineNum })
+                lastLineNum = lineNum
             }
             lastType = lineType
         })
@@ -124,7 +126,7 @@ function getMathState() {
         }
     }
 
-    prefixes = []
+    let prefixes = []
     for (category in math.Unit.PREFIXES) {
         prefixes.push(...Object.keys(math.Unit.PREFIXES[category]))
     }
@@ -208,41 +210,42 @@ function formatResult(result) {
 }
 
 /**
- * Processes an array of expressions by evaluating them, formatting the results,
+ * Processes an expression by evaluating it, formatting the results,
  * and determining their visibility.
  *
- * @param {Array<{from: number, to: number, source: string}>} expressions - An array of objects representing expressions,
+ * @param {Object{from: number, to: number, source: string}} expression - An object representing expressions,
  *   where each object has `from`, `to`, and `source` properties.
- * @returns {Array<{from: number, to: number, source: string, outputs: any, visible: boolean}>} An array of processed expressions,
+ * @returns {Object{type:string, outputs: any, visible: boolean}} A processed expressions,
  *   where each object has additional `outputs` and `visible` properties.
  */
-function processExpressions(expressions) {
-    return expressions.map(expression => {
-        // returns an object with isError and result properties
-        const result = calc(expression.source)
-        const visible = expression.source.trim().endsWith(';') ? false :
-            result.value === undefined ? false : true
-        let outputs
-        if (result.isError) {
-            outputs = { type: "error", result: result.value }
-        } else if (result.value && result.value.isPlot) {
-            const { data, layout, config } = result.value
+function processExpression(expression) {
+    // returns an object with isError and result properties
+    const result = calc(expression.source)
+    const visible = expression.source.trim().endsWith(';') ? false :
+        result.value === undefined ? false : true
+    let type = undefined
+    let outputResult = undefined
 
-            outputs = { type: "plot", result: { data: formatObject(data), layout: formatObject(layout), config: formatObject(config) } }
-        } else if (result.value && typeof result.value == "string") {
-            outputs = { type: "string", result: result.value }
-        }
-        else {
-            outputs = { type: "any", result: formatResult(result.value) }
-        }
-
-        return ({
-            ...expression,
-            type: outputs.type,
-            result: outputs.result,
-            visible
-        })
-    })
+    if (result.isError) {
+        type = "error"
+        outputResult = result.value
+    } else if (result.value && result.value.isPlot) {
+        const { data, layout, config } = result.value
+        type = "plot"
+        outputResult = { data: formatObject(data), layout: formatObject(layout), config: formatObject(config) }
+    } else if (result.value && typeof result.value == "string") {
+        type = "string"
+        outputResult = result.value
+    }
+    else {
+        type = "any"
+        outputResult = formatResult(result.value)
+    }
+    return {
+        result: outputResult,
+        type,
+        visible
+    }
 }
 
 function formatObject(obj) {
@@ -258,7 +261,10 @@ function processOutput(content, type) {
     switch (type) {
         case "math":
             const expressions = getExpressions(content.join('\n'));
-            const results = processExpressions(expressions)
+            const results = expressions.map(expression => {
+                const result = processExpression(expression)
+                return { ...expression, ...result }
+            })
             return { type: "math", text: results }
             break;
         case "md":
