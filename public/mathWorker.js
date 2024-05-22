@@ -223,28 +223,29 @@ function processExpression(expression) {
     const result = calc(expression.source)
     const visible = expression.source.trim().endsWith(';') ? false :
         result.value === undefined ? false : true
-    let type = undefined
-    let outputResult = undefined
 
     if (result.isError) {
-        type = "error"
-        outputResult = result.value
+        return { type: "error", result: result.value, visible }
     } else if (result.value && result.value.isPlot) {
         const { data, layout, config } = result.value
-        type = "plot"
-        outputResult = { data: formatObject(data), layout: formatObject(layout), config: formatObject(config) }
+        return {
+            type: "plot",
+            result: formatObject({ data, layout, config }),
+            visible
+        }
     } else if (result.value && typeof result.value == "string") {
-        type = "string"
-        outputResult = result.value
+        return {
+            type: "string",
+            result: result.value,
+            visible
+        }
     }
     else {
-        type = "any"
-        outputResult = formatResult(result.value)
-    }
-    return {
-        result: outputResult,
-        type,
-        visible
+        return {
+            type: "any",
+            result: formatResult(result.value),
+            visible
+        }
     }
 }
 
