@@ -77,36 +77,27 @@ onmessage = (oEvent) => {
 
 function makeDoc(code) {
     const splitCode = code.split('\n');
-    const lineTypes = splitCode.map(line => line.startsWith('# ') ? 'md' : 'math');
-    let cells = [];
+    const cells = [];
     let lastType = '';
+    let lastLineNum = 0;
     parser.clear()
     splitCode
         .forEach((line, lineNum) => {
-            if (lastType === lineTypes[lineNum]) {
-                cells[cells.length - 1].source.push(line)
+            const lineType = line.startsWith('# ') ? 'md' : 'math';
+            const formatedLine = lineType === 'md' ? line.slice(2) : line
+            if (lastType === lineType) {
+                cells[cells.length - 1].source.push(formatedLine)
             }
             else {
-                cells.push({ cell_type: lineTypes[lineNum], source: [line] })
+                cells.push({ cell_type: lineType, source: [formatedLine], from: lastLineNum, to: lineNum })
+                lastLineNum = lineNum
             }
-            lastType = lineTypes[lineNum]
+            lastType = lineType
         })
-    let cleanCells = []
-    cells.forEach(x => {
-        if (x.cell_type === 'md') {
-            cleanCells.push({ cell_type: 'md', source: x.source.map(e => e.slice(2)) })
-        }
-        else {
-            const thereIsSomething = x.source.join('\n').trim();
-            if (thereIsSomething) {
-                cleanCells.push({ cell_type: 'math', source: x.source })
-            }
-        }
-    })
 
     let output = [];
 
-    cleanCells.forEach(
+    cells.forEach(
         cell => output.push(processOutput(cell.source, cell.cell_type))
     )
     return output
@@ -135,7 +126,7 @@ function getMathState() {
         }
     }
 
-    prefixes = []
+    let prefixes = []
     for (category in math.Unit.PREFIXES) {
         prefixes.push(...Object.keys(math.Unit.PREFIXES[category]))
     }
@@ -219,41 +210,43 @@ function formatResult(result) {
 }
 
 /**
- * Processes an array of expressions by evaluating them, formatting the results,
+ * Processes an expression by evaluating it, formatting the results,
  * and determining their visibility.
  *
- * @param {Array<{from: number, to: number, source: string}>} expressions - An array of objects representing expressions,
+ * @param {Object{from: number, to: number, source: string}} expression - An object representing expressions,
  *   where each object has `from`, `to`, and `source` properties.
- * @returns {Array<{from: number, to: number, source: string, outputs: any, visible: boolean}>} An array of processed expressions,
+ * @returns {Object{type:string, outputs: any, visible: boolean}} A processed expressions,
  *   where each object has additional `outputs` and `visible` properties.
  */
-function processExpressions(expressions) {
-    return expressions.map(expression => {
-        // returns an object with isError and result properties
-        const result = calc(expression.source)
-        const visible = expression.source.trim().endsWith(';') ? false :
-            result.value === undefined ? false : true
-        let outputs
-        if (result.isError) {
-            outputs = { type: "error", result: result.value }
-        } else if (result.value && result.value.isPlot) {
-            const { data, layout, config } = result.value
+function processExpression(expression) {
+    // returns an object with isError and result properties
+    const result = calc(expression.source)
+    const visible = expression.source.trim().endsWith(';') ? false :
+        result.value === undefined ? false : true
 
-            outputs = { type: "plot", result: { data: formatObject(data), layout: formatObject(layout), config: formatObject(config) } }
-        } else if (result.value && typeof result.value == "string") {
-            outputs = { type: "string", result: result.value }
-        }
-        else {
-            outputs = { type: "any", result: formatResult(result.value) }
-        }
-
-        return ({
-            ...expression,
-            type: outputs.type,
-            result: outputs.result,
+    if (result.isError) {
+        return { type: "error", result: result.value, visible }
+    } else if (result.value && result.value.isPlot) {
+        const { data, layout, config } = result.value
+        return {
+            type: "plot",
+            result: formatObject({ data, layout, config }),
             visible
-        })
-    })
+        }
+    } else if (result.value && typeof result.value == "string") {
+        return {
+            type: "string",
+            result: result.value,
+            visible
+        }
+    }
+    else {
+        return {
+            type: "any",
+            result: formatResult(result.value),
+            visible
+        }
+    }
 }
 
 function formatObject(obj) {
@@ -269,7 +262,10 @@ function processOutput(content, type) {
     switch (type) {
         case "math":
             const expressions = getExpressions(content.join('\n'));
-            const results = processExpressions(expressions)
+            const results = expressions.map(expression => {
+                const result = processExpression(expression)
+                return { ...expression, ...result }
+            })
             return { type: "math", text: results }
             break;
         case "md":
