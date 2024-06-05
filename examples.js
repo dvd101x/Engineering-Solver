@@ -160,11 +160,11 @@ cos(45 deg)
 (2 == 3) == false
 22e-3`,
   'refCycleWithRecuperator':
-    String.raw`# Vapor compression cycle with recuperator(IHX)
+    String.raw`# # Vapor compression cycle with recuperator(IHX)
 fluid = 'R404a';
 mDot = 233 lb / h;
 
-# Evaporator
+#Evaporator
 evap = {
     T: 25 degF,
     P_drop: 1.93 psi,
@@ -186,19 +186,19 @@ IHX = {
     k: 230 W/ (m K)
 };
 
-# Define initial states
+#Define initial states
 cycle = [{}, {}, {}, {}, {}, {}];
 
-# Define the fluid function
+#Define the fluid function
 p(prop, state) = props(prop, fluid, state);
 
-# Define low and high pressure
-"P_low"
+#Define low and high pressure
+# P_low
 P_low = p('P', { 'T|gas': evap.T, Q: 1 })
-"P high"
+# P high
 P_high = p('P', { 'T|liquid': cond.T, Q: 0 })
 
-# 4 to 1 Evaporation
+#4 to 1 Evaporation
 cycle[1].P = P_low;
 cycle[1].T = evap.T + evap.superHeating;
 
@@ -206,7 +206,7 @@ cycle[1].D = p('D', {"T|gas":cycle[1].T, P:cycle[1].P});
 cycle[1].H = p('H', {"T|gas":cycle[1].T, P:cycle[1].P});
 cycle[1].S = p('S', {"T|gas":cycle[1].T, P:cycle[1].P});
 
-# 1 to 2 IHX low
+#1 to 2 IHX low
 cycle[2].P = cycle[1].P;
 cycle[4].T = cond.T - cond.subCooling;
 H_eta = p('H', { 'T': cycle[4].T, 'P': cycle[2].P });
@@ -216,7 +216,7 @@ cycle[2].T = p('T', cycle[2]);
 cycle[2].D = p('D', cycle[2]);
 cycle[2].S = p('S', cycle[2]);
 
-# 2 to 3 Compression
+#2 to 3 Compression
 cycle[3].P = P_high;
 H_i = p('H', { 'P': cycle[3].P, 'S': cycle[2].S });
 cycle[3].H = (H_i - cycle[2].H) / etaS + cycle[2].H;
@@ -224,20 +224,20 @@ cycle[3].T = p('T', cycle[3]);
 cycle[3].D = p('D', cycle[3]);
 cycle[3].S = p('S', cycle[3]);
 
-# 3 to 4 Condensation
+#3 to 4 Condensation
 cycle[4].P = cycle[3].P - cond.P_drop;
 cycle[4].D = p('D', {"T|liquid":cycle[4].T, P:cycle[4].P});
 cycle[4].H = p('H', {"T|liquid":cycle[4].T, P:cycle[4].P});
 cycle[4].S = p('S', {"T|liquid":cycle[4].T, P:cycle[4].P});
 
-# 4 to 5 IHX high
+#4 to 5 IHX high
 cycle[5].H = cycle[1].H - cycle[2].H + cycle[4].H;
 cycle[5].P = cycle[4].P;
 cycle[5].T = p('T', cycle[5]);
 cycle[5].D = p('D', cycle[5]);
 cycle[5].S = p('S', cycle[5]);
 
-# 5 to 6 Expansion
+#5 to 6 Expansion
 cycle[6].H = cycle[5].H;
 cycle[6].P = cycle[1].P + evap.P_drop;
 cycle[6].T = p('T', cycle[5]);
@@ -245,13 +245,13 @@ cycle[6].D = p('D', cycle[5]);
 cycle[6].S = p('S', cycle[5]);
 
 # Display results
-"Compressor's power:"
+# Compressor's power:
 W_comp = mDot * (cycle[3].H - cycle[2].H)
-"Condenser heat out:"
+# Condenser heat out:
 Q_h = mDot * (cycle[4].H - cycle[3].H)
-"Recuperator heat exchange:"
+# Recuperator heat exchange:
 Q_IHX = mDot * (cycle[2].H - cycle[1].H)
-"Evaporator heat in:"
+# Evaporator heat in:
 Q_c = mDot * (cycle[1].H - cycle[6].H)
 IHX.T = [cycle[1].T, cycle[2].T, cycle[3].T, cycle[4].T];
 deltaA = IHX.T[3] - IHX.T[2];
@@ -263,30 +263,53 @@ IHX.cellVol = IHX.cellSize ^ 3;
 cellSizeToAreaFactor = 3.8424;
 IHX.cellArea = cellSizeToAreaFactor * IHX.cellSize ^ 2;
 
-"Recuprator's Volume"
+# Recuprator's Volume
 IHX.Volume = IHX.A * IHX.cellVol / IHX.cellArea to mm ^ 3
 
-"Side of a IHX Cube"
+# Side of a IHX Cube
 IHX.Volume ^ (1 / 3)
 
-"Evap COP with recuperator"
+# Evap COP with recuperator
 evap_COP = Q_c / W_comp
 
-"Cond COP";
 cond_COP = Q_h / W_comp;
 H_i_w = p('H', { 'P': cycle[3].P, 'S': cycle[1].S });
 H_w = (H_i_w - cycle[1].H) / etaS + cycle[1].H;
 qNoIHX = cycle[1].H - cycle[4].H;
 wNoIHX = H_w - cycle[1].H;
 
-"Evap COP without recuperator"
+# Evap COP without recuperator
 noIHX_COP = qNoIHX / wNoIHX
 
-"evap_COP/noIHX_COP"
+# Improvement Factor $\frac{evap_{COP}}{noIHX_{COP}}$
 improvementFactor = evap_COP / noIHX_COP
 
-"Improvement with recuperator"
-print("$1 %", [(improvementFactor - 1) * 100], 3)`,
+# Improvement with recuperator
+print("$1 %", [(improvementFactor - 1) * 100], 3)
+
+#Prepare plots
+t_crit = p('Tcrit', {});
+layout = {yaxis:{type:"log"}};
+enthalpy = map(cycle, _(x) = number(x.H, 'J/kg'));
+pressure = map(cycle, _(x) = number(x.P, 'Pa'));
+temperatures = concat(((evap.T to K) - 5 K) : 3 K: t_crit, [t_crit]);
+liquidP = map(temperatures, _(t)=number(p('P',  {"T|liquid":t, Q:0%}),'Pa'));
+liquidH = map(temperatures, _(t)=number(p('H',  {"T|liquid":t, Q:0%}),'J/kg'));
+gasP = map(temperatures, _(t)=number(p('P',  {"T|gas":t, Q:100%}),'Pa'));
+gasH = map(temperatures, _(t)=number(p('H',  {"T|gas":t, Q:100%}),'J/kg'));
+
+plot([
+  {
+    x: concat(enthalpy, [enthalpy[1]]),
+    y: concat(pressure, [pressure[1]]),
+    name:'cycle'
+  },{
+    x: liquidH, y:liquidP, name:'liquid'
+  },{
+    x: gasH, y:gasP, name:'gas'
+  }],
+  layout
+)`,
   VaporCompressionCycle:String.raw`# # Vapor Compression Cycle
 
 # ## Fluid input
