@@ -35,7 +35,6 @@ main>.markdown-body {
 
 #INPUT>div.cm-editor {
 	flex: 1;
-	overflow-y: scroll;
 }
 
 [name=topBar] {
