@@ -221,7 +221,8 @@ function formatResult(result) {
 function processExpression(expression) {
     // returns an object with isError and result properties
     const result = calc(expression.source)
-    const visible = (result && result.value !== undefined && result.value.isResultSet && result.value.entries.length == 0) ? false : true
+    const visible = (result && result.value && result.value.isResultSet && (result.value.entries.length == 0)) ? false :
+        (result.value === undefined) ? false : true
 
     if (result.isError) {
         return { type: "error", result: result.value, visible }
