@@ -17,6 +17,6 @@
     "katex": "^0.16.9",
     "markdown-it": "^14.0.0",
     "markdown-it-texmath": "^1.0.0",
-    "mathjs": "^13.0.0"
+    "mathjs": "^13.0.2"
   }
 }

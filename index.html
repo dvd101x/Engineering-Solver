@@ -12,7 +12,9 @@
   <link rel="manifest" href="/site.webmanifest">
   <script src="https://cdn.plot.ly/plotly-2.31.1.min.js" charset="utf-8"></script>
 </head>
-<script src="/getWorker.js"></script>
+<script>
+  const mathWorker = new Worker("mathWorker.js", {type: "classic"});
+</script>
 <body>
   <nav class="markdown-body">
     <form name="topBar">
