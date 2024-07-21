@@ -1,10 +1,9 @@
 importScripts(
-    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.0.0/math.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.0.3/math.js",
     "coolprop.js",
     "fluidProperties.js",
     "molecularMass.js"
 )
-
 const parser = math.parser()
 const digits = 14
 
@@ -98,7 +97,7 @@ function makeDoc(code) {
     let output = [];
 
     cells.forEach(
-        cell => output.push(processOutput(cell.source, cell.cell_type))
+        cell => output.push(processOutput(cell.source, cell.cell_type, cell.from, cell.to))
     )
     return output
 }
@@ -258,18 +257,23 @@ function formatObject(obj) {
     return objResult
 }
 
-function processOutput(content, type) {
+function processOutput(content, type, from, to) {
     switch (type) {
         case "math":
             const expressions = getExpressions(content.join('\n'));
             const results = expressions.map(expression => {
                 const result = processExpression(expression)
-                return { ...expression, ...result }
+                return { 
+                    source: expression.source,
+                    from: expression.from + from,
+                    to: expression.to + from,
+                    ...result
+                }
             })
             return { type: "math", text: results }
             break;
         case "md":
-            return { type: "markdown", text: content.join('\n') }
+            return { type: "markdown", text: content.join('\n'), from, to }
             break;
     }
 }
