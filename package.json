@@ -12,6 +12,7 @@
     "vite": "^5.1.4"
   },
   "dependencies": {
-    "codemirror": "^6.0.1"
+    "codemirror": "^6.0.1",
+    "mathjs": "^13.0.3"
   }
 }
