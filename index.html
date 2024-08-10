@@ -11,15 +11,35 @@
   <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16-C1m-SE63.png">
   <link rel="manifest" href="./assets/site-BwHFeIBa.webmanifest">
   <script src="https://cdn.plot.ly/plotly-2.31.1.min.js" charset="utf-8"></script>
-  <script type="module" crossorigin src="./assets/index-CJNO_hNG.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-Clt42072.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+    integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"
+    integrity="sha256-OMcKHnypGrQOLZ5uYBKYUacX7Rx9Ssu91Bv5UDeRz2g=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markdown-it-texmath/css/texmath.min.css">
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.6.1/github-markdown-light.css"
+    integrity="sha512-tVO0ZLV54CEoiM+i1hvfZGcopGR3rxyyC3L2/P/6NRTVXlrp4OKyTFunluVG1BRNasDLnm6ZRPDKBGM0CkS99Q=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="//unpkg.com/alpinejs" defer></script>
+
+  
+  <script type="module" crossorigin src="./assets/index-BDmQkz_S.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-VbVw7RfQ.css">
 </head>
 <script>
-  const mathWorker = new Worker("mathWorker.js", {type: "classic"});
+  const mathWorker = new Worker("mathWorker.js", { type: "classic" });
 </script>
-<body>
+
+<body x-data="{showCode:true, showReport:true}">
   <nav class="markdown-body">
     <form name="topBar">
+      <button type='button' x-on:click="showCode = !showCode"
+    x-text="showCode?'<':'>'"
+    x-bind:title="showCode?'hide code':'show code'"></button>
       <fieldset id='tabs'></fieldset>
       <span>
         <fieldset id="examples" style="float: right;">
@@ -55,15 +75,19 @@
             </optgroup>
           </select>
           <button type="button" id="exampleInsert" name="insertExample">+</button>
+          <button type="button"
+          x-on:click="showReport = !showReport"
+          x-text="showReport ? '>':'<'"
+          x-bind:title="showReport?'hide report':'show report'"></button>
         </fieldset>
       </span>
-
+      
     </form>
   </nav>
 
   <main>
-    <div id="INPUT"></div>
-    <article id="OUTPUT" class="markdown-body">
+    <div id="INPUT" x-show="showCode"></div>
+    <article id="OUTPUT" class="markdown-body" x-show="showReport">
     </article>
   </main>
 </body>
