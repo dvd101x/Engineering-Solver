@@ -1,5 +1,4 @@
 import './style.css'
-import 'github-markdown-css/github-markdown-light.css'
 
 import initialState from "./ext/initialState.js"
 
@@ -11,16 +10,7 @@ import { EditorView, basicSetup } from "codemirror"
 
 import { mathjs } from './mathjs.js'
 
-import 'katex/dist/katex.min.css'
-import 'markdown-it-texmath/css/texmath.css'
-
 import { insertExampleFunc } from "./examples.js";
-
-import markdownit from 'markdown-it'
-
-import texmath from 'markdown-it-texmath'
-
-import katex from 'katex'
 
 const md = markdownit({ html: true })
   .use(texmath, {
