@@ -217,7 +217,7 @@ cycle[2].D = p('D', cycle[2]);
 cycle[2].S = p('S', cycle[2]);
 
 #2 to 3 Compression
-cycle[3].P = P_high;
+cycle[3].P = P_high + cond.P_drop;
 H_i = p('H', { 'P': cycle[3].P, 'S': cycle[2].S });
 cycle[3].H = (H_i - cycle[2].H) / etaS + cycle[2].H;
 cycle[3].T = p('T', cycle[3]);
@@ -225,7 +225,7 @@ cycle[3].D = p('D', cycle[3]);
 cycle[3].S = p('S', cycle[3]);
 
 #3 to 4 Condensation
-cycle[4].P = cycle[3].P - cond.P_drop;
+cycle[4].P = P_high;
 cycle[4].D = p('D', {"T|liquid":cycle[4].T, P:cycle[4].P});
 cycle[4].H = p('H', {"T|liquid":cycle[4].T, P:cycle[4].P});
 cycle[4].S = p('S', {"T|liquid":cycle[4].T, P:cycle[4].P});
@@ -240,9 +240,9 @@ cycle[5].S = p('S', cycle[5]);
 #5 to 6 Expansion
 cycle[6].H = cycle[5].H;
 cycle[6].P = cycle[1].P + evap.P_drop;
-cycle[6].T = p('T', cycle[5]);
-cycle[6].D = p('D', cycle[5]);
-cycle[6].S = p('S', cycle[5]);
+cycle[6].T = p('T', cycle[6]);
+cycle[6].D = p('D', cycle[6]);
+cycle[6].S = p('S', cycle[6]);
 
 # Display results
 # Compressor's power:
@@ -344,7 +344,7 @@ c[1].H = p('H', {'T|gas':c[1].T, P:c[1].P});
 c[1].S = p('S', {'T|gas':c[1].T, P:c[1].P});
 
 #1 to 2 Compression of vapor
-c[2].P = pHigh;
+c[2].P = pHigh + cond.P_drop;
 H_i    = p('H',{P:c[2].P, S:c[1].S});
 c[2].H = (H_i-c[1].H)/etaS + c[1].H;
 c[2].T = p('T', c[2]);
@@ -352,7 +352,7 @@ c[2].D = p('D', c[2]);
 c[2].S = p('S', c[2]);
 
 #2 to 3 Condensation
-c[3].P = c[2].P - cond.P_drop;
+c[3].P = pHigh;
 c[3].T = cond.T-cond.subCooling;
 c[3].D = p('D', {'T|liquid':c[3].T, P:c[3].P});
 c[3].H = p('H', {'T|liquid':c[3].T, P:c[3].P});
