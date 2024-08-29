@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "codemirror": "^6.0.1",
-    "mathjs": "^13.0.3"
+    "mathjs": "^13.1.1",
+    "upgrade": "^1.1.0"
   }
 }
