@@ -2,13 +2,12 @@
 ToDo
 ====
 - [ ] Match inputs and outputs
-- [ ] Change worker to modules
+- [x] ~~Change worker to modules~~ (tried several attempts can't make it work wit coolprop.wasm and vite)
 - [ ] Details
   - [x] Cleanup
   - [x] JS docs
   - [ ] Rename variables
     - [ ] Sessions to Editor States
-
 
 # Plots
 - [x] Import plotly
@@ -22,7 +21,6 @@ ToDo
   - [ ] Format plot output
   
 ## Extra 
-- [ ] Match outputs
 - [ ] Include dates (to work with multiple tabs) 
 - [ ] Variables in scope
 - [ ] Help files
@@ -30,7 +28,7 @@ ToDo
 - [ ] Custom help
 - [ ] Function finder
 - [ ] Variable finder
-- [ ] Drag and Drop
+- [x] Drag and Drop documents
 - [ ] Download text
 - [ ] Format help
 
