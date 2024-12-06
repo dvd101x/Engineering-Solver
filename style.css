@@ -14,6 +14,10 @@ main {
 	overflow: hidden;
 }
 
+div[data-from-line = "1"] {
+	background-color: pink;
+}
+
 main>article.markdown-body {
 	flex: 1;
 	overflow: auto;

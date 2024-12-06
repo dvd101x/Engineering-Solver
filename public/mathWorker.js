@@ -1,5 +1,5 @@
 importScripts(
-    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.1.1/math.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/14.0.0/math.js",
     "coolprop.js",
     "fluidProperties.js",
     "molecularMass.js"
@@ -86,8 +86,7 @@ function makeDoc(code) {
             const formatedLine = lineType === 'md' ? line.slice(2) : line
             if (lastType === lineType) {
                 cells[cells.length - 1].source.push(formatedLine)
-            }
-            else {
+            } else {
                 cells.push({ cell_type: lineType, source: [formatedLine], from: lastLineNum, to: lineNum })
                 lastLineNum = lineNum
             }

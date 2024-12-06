@@ -119,21 +119,29 @@ mathWorker.onmessage = function (oEvent) {
               case "string":
                 div = document.createElement("code");
                 div.innerHTML = value;
+                div.setAttribute('data-from-line', e.from)
+                div.setAttribute('data-to-line', e.to)
                 pre.appendChild(div);
                 break;
               case "any":
                 div = document.createElement("div");
                 div.textContent = value;
+                div.setAttribute('data-from-line', e.from)
+                div.setAttribute('data-to-line', e.to)
                 pre.appendChild(div);
                 break;
               case "error":
                 div = document.createElement("div");
                 div.style.color = "red";
                 div.innerHTML = value;
+                div.setAttribute('data-from-line', e.from)
+                div.setAttribute('data-to-line', e.to)
                 pre.appendChild(div);
                 break;
               case "plot":
                 div = document.createElement("div");
+                div.setAttribute('data-from-line', e.from)
+                div.setAttribute('data-to-line', e.to)
                 try {
                   Plotly.newPlot(div, e.result.data, e.result.layout, e.result.config)
                 } catch (error) {
@@ -148,6 +156,8 @@ mathWorker.onmessage = function (oEvent) {
         break;
       case "markdown":
         const div = document.createElement("div");
+        div.setAttribute('data-from-line', out.from)
+        div.setAttribute('data-to-line', out.to)
         div.innerHTML = md.render(out.text);
         outputs.appendChild(div);
         break;
