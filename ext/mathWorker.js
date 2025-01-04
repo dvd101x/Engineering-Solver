@@ -1,9 +1,18 @@
+import { create, all } from "mathjs"
+
+import { MM } from "./molecularMass.js"
+
+/*
 importScripts(
     "https://cdnjs.cloudflare.com/ajax/libs/mathjs/14.0.1/math.js",
     "coolprop.js",
     "fluidProperties.js",
     "molecularMass.js"
 )
+*/
+
+const math = create(all)
+
 const parser = math.parser()
 const digits = 14
 
@@ -31,7 +40,8 @@ const functionsToVectorize =
 
 math.import(
     {
-        props, HAprops, phase, MM,
+        //  props, HAprops, phase,
+        MM,
         plot: math.typed({
             'Array, Object, Object': plot,
             'Array, Object': (data, layout) => plot(data, layout, {}),
@@ -125,13 +135,13 @@ function getMathState() {
     }
 
     let prefixes = []
-    for (category in math.Unit.PREFIXES) {
+    for (let category in math.Unit.PREFIXES) {
         prefixes.push(...Object.keys(math.Unit.PREFIXES[category]))
     }
     prefixes = Array.from(new Set(prefixes))
 
-    units = {}
-    for (unit in math.Unit.UNITS) {
+    const units = {}
+    for (let unit in math.Unit.UNITS) {
         units[unit] = Object.keys(math.Unit.UNITS[unit].prefixes).map(prefix => prefixes.indexOf(prefix))
     }
 

@@ -12,6 +12,8 @@ import { mathjs } from './mathjs.js'
 
 import { insertExampleFunc } from "./examples.js";
 
+const mathWorker = new Worker(new URL('./ext/mathWorker.js', import.meta.url), {type: 'module'})
+
 const md = markdownit({ html: true })
   .use(texmath, {
     engine: katex,
