@@ -2,14 +2,7 @@ import { create, all } from "mathjs"
 
 import { MM } from "./molecularMass.js"
 
-/*
-importScripts(
-    "https://cdnjs.cloudflare.com/ajax/libs/mathjs/14.0.1/math.js",
-    "coolprop.js",
-    "fluidProperties.js",
-    "molecularMass.js"
-)
-*/
+import { props, HAprops, phase } from "./fluidProperties.js"
 
 const math = create(all)
 
@@ -40,7 +33,7 @@ const functionsToVectorize =
 
 math.import(
     {
-        //  props, HAprops, phase,
+        props, HAprops, phase,
         MM,
         plot: math.typed({
             'Array, Object, Object': plot,

@@ -1,3 +1,6 @@
+import { number, unit } from 'mathjs'
+import { PropsSI, HAPropsSI } from './coolprop.js'
+
 // List of units from coolprop
 const propUnit = {
   '': '',
@@ -253,12 +256,12 @@ function calcPropUnits(prop) {
   }
 }
 
-// This is created only bacuse math.number(value,'') is not valid as '' can't be the unit
-toValue = (v, u) => u ? math.number(v, u) : math.number(v)
-// This is crate only becous math.unit(value,'') is not valid as '' can't be the unit
-toUnit = (v, u) => u ? math.unit(v, u) : math.unit(v)
+// This is created only bacuse number(value,'') is not valid as '' can't be the unit
+function toValue(v, u){return u ? number(v, u) : number(v) }
+// This is crate only becous unit(value,'') is not valid as '' can't be the unit
+function toUnit(v, u){return u ? unit(v, u) : unit(v) }
 
-function props(desiredProperty, fluidName, fluidProperties) {
+export function props(desiredProperty, fluidName, fluidProperties) {
   const calcPropUnit = calcPropUnits(desiredProperty)
   let prop  = Object.keys(fluidProperties).slice(0,2)
   let value = Object.values(fluidProperties).slice(0,2)
@@ -272,7 +275,7 @@ function props(desiredProperty, fluidName, fluidProperties) {
     value = [0, 0]
   }
 
-  const calcValue = Module.PropsSI(desiredProperty,
+  const calcValue = PropsSI(desiredProperty,
     prop[0], value[0],
     prop[1], value[1],
     fluidName)
@@ -280,7 +283,7 @@ function props(desiredProperty, fluidName, fluidProperties) {
   return toUnit(calcValue, calcPropUnit)
 }
 
-function HAprops(calcProp, fluidProperties) {
+export function HAprops(calcProp, fluidProperties) {
   const calcPropUnit = HApropUnit[calcProp]
   const arrayProperties = Object.entries(fluidProperties)
 
@@ -296,7 +299,7 @@ function HAprops(calcProp, fluidProperties) {
   toValue(arrayProperties[1][1], units[1]),
   toValue(arrayProperties[2][1], units[2])]
 
-  const calcValue = Module.HAPropsSI(calcProp,
+  const calcValue = HAPropsSI(calcProp,
     prop[0], value[0],
     prop[1], value[1],
     prop[2], value[2])
@@ -304,7 +307,7 @@ function HAprops(calcProp, fluidProperties) {
   return toUnit(calcValue, calcPropUnit)
 }
 
-function phase(fluid, fluidProperties) {
+export function phase(fluid, fluidProperties) {
   return phases[props('Phase',
     fluid,
     fluidProperties)]
