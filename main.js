@@ -207,11 +207,7 @@ function updateSelection() {
     const thisNode = code;
     const fromLine = parseInt(thisNode.getAttribute('data-from-line'), 10);
     const toLine = parseInt(thisNode.getAttribute('data-to-line'), 10);
-    if (
-      (fromLine >= selectedFrom) && (fromLine <= selectedTo)
-      ||
-      (toLine >= selectedFrom) && (toLine <= selectedTo)
-    ) {
+    if ((fromLine <= selectedTo) && (toLine >= selectedFrom)) {
       code.classList.add('highlight');
       code.scrollIntoView({ block: 'nearest', inline: 'start' });
     } else {
