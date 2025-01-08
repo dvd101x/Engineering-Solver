@@ -111,6 +111,8 @@ mathWorker.onmessage = function (oEvent) {
       case "math":
         out.text.forEach(e => {
           const pre = document.createElement("pre");
+          pre.setAttribute('data-from-line', e.from);
+          pre.setAttribute('data-to-line', e.to);
           if (e.visible) {
             const type = e.type;
             const value = e.result;
@@ -119,29 +121,21 @@ mathWorker.onmessage = function (oEvent) {
               case "string":
                 div = document.createElement("code");
                 div.innerHTML = value;
-                div.setAttribute('data-from-line', e.from)
-                div.setAttribute('data-to-line', e.to)
                 pre.appendChild(div);
                 break;
               case "any":
                 div = document.createElement("div");
                 div.textContent = value;
-                div.setAttribute('data-from-line', e.from)
-                div.setAttribute('data-to-line', e.to)
                 pre.appendChild(div);
                 break;
               case "error":
                 div = document.createElement("div");
                 div.style.color = "red";
                 div.innerHTML = value;
-                div.setAttribute('data-from-line', e.from)
-                div.setAttribute('data-to-line', e.to)
                 pre.appendChild(div);
                 break;
               case "plot":
                 div = document.createElement("div");
-                div.setAttribute('data-from-line', e.from)
-                div.setAttribute('data-to-line', e.to)
                 try {
                   Plotly.newPlot(div, e.result.data, e.result.layout, e.result.config)
                 } catch (error) {
@@ -150,8 +144,10 @@ mathWorker.onmessage = function (oEvent) {
                 pre.appendChild(div);
                 break;
             }
-            outputs.appendChild(pre);
+          } else {
+            pre.style.display = 'none'
           }
+          outputs.appendChild(pre);
         });
         break;
       case "markdown":
@@ -163,6 +159,7 @@ mathWorker.onmessage = function (oEvent) {
         break;
     }
   });
+  updateSelection()
   clearTimeout(timerSave);
   sessions[lastTab] = editor.state
   timerSave = setTimeout(saveSession, waitToSave, tabToSave)
@@ -187,10 +184,40 @@ function createState(ID) {
           const text = update.state.doc.toString()
           clearTimeout(timer);
           timer = setTimeout(sendWorkToMathWorker, wait, text);
+        } else if (update.selectionSet) {
+          updateSelection()
         }
       })
     ]
   })
+}
+
+function updateSelection() {
+  const selectedFrom = editor.state.doc.lineAt(
+    editor.state.selection.ranges[editor.state.selection.mainIndex].from
+  ).number - 1;
+
+  const selectedTo = editor.state.doc.lineAt(
+    editor.state.selection.ranges[editor.state.selection.mainIndex].to
+  ).number - 1;
+
+  const outputs = document.querySelector('#OUTPUT').childNodes;
+
+  outputs.forEach(code => {
+    const thisNode = code;
+    const fromLine = parseInt(thisNode.getAttribute('data-from-line'), 10);
+    const toLine = parseInt(thisNode.getAttribute('data-to-line'), 10);
+    if (
+      (fromLine >= selectedFrom) && (fromLine <= selectedTo)
+      ||
+      (toLine >= selectedFrom) && (toLine <= selectedTo)
+    ) {
+      code.classList.add('highlight');
+      code.scrollIntoView({ block: 'nearest', inline: 'start' });
+    } else {
+      code.classList.remove('highlight');
+    }
+  });
 }
 
 function getSessionName(ID) {
@@ -233,7 +260,7 @@ function sendWorkToMathWorker(mathExpressoins) {
   if (mathExpressoins != "") {
     const expressions = mathExpressoins
       .replace(/\r?\n/g, '\n')
-      .trim()
+    //.trim()
     const request = { expr: expressions }
     mathWorker.postMessage(JSON.stringify(request))
   }

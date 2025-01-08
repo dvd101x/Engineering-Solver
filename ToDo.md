@@ -1,13 +1,13 @@
 
 ToDo
 ====
-- [ ] Match inputs and outputs
-- [x] ~~Change worker to modules~~ (tried several attempts can't make it work wit coolprop.wasm and vite)
 - [ ] Details
   - [x] Cleanup
   - [x] JS docs
   - [ ] Rename variables
     - [ ] Sessions to Editor States
+- [x] Match inputs and outputs
+- [x] ~~Change worker to modules~~ (tried several attempts can't make it work wit coolprop.wasm and vite)
 
 # Plots
 - [x] Import plotly
@@ -37,6 +37,6 @@ ToDo
   - [ ] Tabs
   - [ ] Examples
   - [ ] IO
-- [ ] New nomeclature like iodide
+- [ ] New nomenclature like iodide
 - [ ] File names
 - [ ] Dropdown or tabs

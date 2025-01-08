@@ -27,6 +27,10 @@ main>.markdown-body {
 	padding: 1em;
 }
 
+main>.markdown-body .highlight {
+	background-color: yellowgreen;
+}
+
 #INPUT {
 	flex: 1;
 	display: flex;

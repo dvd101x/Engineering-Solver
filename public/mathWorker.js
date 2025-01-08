@@ -78,7 +78,6 @@ function makeDoc(code) {
     const splitCode = code.split('\n');
     const cells = [];
     let lastType = '';
-    let lastLineNum = 0;
     parser.clear()
     splitCode
         .forEach((line, lineNum) => {
@@ -86,9 +85,9 @@ function makeDoc(code) {
             const formatedLine = lineType === 'md' ? line.slice(2) : line
             if (lastType === lineType) {
                 cells[cells.length - 1].source.push(formatedLine)
+                cells[cells.length - 1].to = lineNum
             } else {
-                cells.push({ cell_type: lineType, source: [formatedLine], from: lastLineNum, to: lineNum })
-                lastLineNum = lineNum
+                cells.push({ cell_type: lineType, source: [formatedLine], from: lineNum, to: lineNum })
             }
             lastType = lineType
         })
@@ -262,7 +261,7 @@ function processOutput(content, type, from, to) {
             const expressions = getExpressions(content.join('\n'));
             const results = expressions.map(expression => {
                 const result = processExpression(expression)
-                return { 
+                return {
                     source: expression.source,
                     from: expression.from + from,
                     to: expression.to + from,
