@@ -44,7 +44,7 @@ function MM(formula) {
   let total = null
   let numMatch = null
 
-  const formula = formula.replace(/\s/g, '');
+  formula = formula.replace(/\s/g, '');
   chemArray.forEach(x => {
     if (simpleFormula.test(x)) {
       elmass[level] = addMolecules(elmass[level], chemEval(x), 1)
