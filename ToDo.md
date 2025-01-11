@@ -15,8 +15,8 @@ ToDo
   - [x] plot types
   - [ ] doc types
   - [x] result type
-- [ ] Document plots
-  - [ ] Add plotly
+- [x] Document plots
+  - [x] Add plotly
   - [x] More tests
   - [ ] Format plot output
   
@@ -25,7 +25,7 @@ ToDo
 - [ ] Variables in scope
 - [ ] Help files
 - [x] Eval expressions vs blocks
-- [ ] Custom help
+- [x] Custom help
 - [ ] Function finder
 - [ ] Variable finder
 - [x] Drag and Drop documents
