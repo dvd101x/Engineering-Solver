@@ -7,6 +7,95 @@ importScripts(
 const parser = math.parser()
 const digits = 14
 
+function createNewHelp() {
+    const oldHelp = math.help
+    const newDocs = {
+        props: {
+            name: 'props',
+            category: 'physics',
+            description: 'Get properties of pure fluids, pseudo-pure fluids and mixtures according to coolprop.',
+            syntax: [
+                "props(desired property, name of fluid, an object with two physical properties)"
+            ],
+            examples: [
+                "props('D','Water',{T:0 degC,'P|liquid':1atm })",
+                "props('D', 'CO2', {T:298.15 K, P:100e5 Pa})"
+            ],
+            seealso: ['HAprops', 'phase', 'MM']
+        },
+        HAprops: {
+            name: 'HAprops',
+            category: 'physics',
+            description: 'Get properties of pure humid air according to coolprop.',
+            syntax: [
+                "HAprops(desired property, an object with three physical properties)"
+            ],
+            examples: [
+                "HAprops('H',{T:298.15 K, P:101325 Pa, R:0.5})",
+                "HAprops('T',{P:1 atm, H:50 kJ/kg, R:1.0})",
+                "HAprops('T',{H: 50 kJ/kg, R:50%, P:1 atm})"
+            ],
+            seealso: ['props', 'phase', 'MM']
+        },
+        phase: {
+            name: 'phase',
+            category: 'physics',
+            description: 'Get the phase of pure fluids, pseudo-pure fluids and mixtures according to coolprop.',
+            syntax: [
+                "phase( name of fluid, an object with two physical properties)"
+            ],
+            examples: [
+                "phase('Water',{T:0 degC,'P|liquid':1atm })",
+                "phase('CO2', {T:298.15 K, P:100e5 Pa})"
+            ],
+            seealso: ['props', 'HAprops', 'MM']
+        },
+        MM: {
+            name: 'MM',
+            category: 'chemistry',
+            description: 'Get the molecular mass of a chemical formula and a list of properties.',
+            syntax: [
+                "MM(chemical formula)"
+            ],
+            examples: [
+                "water = MM('H2O')",
+                "water.fraction.O",
+                "MM('C6H12O6')"
+            ],
+            seealso: ['props', 'HAprops', 'phase']
+        },
+        plot: {
+            name: 'plot',
+            category: 'plotting',
+            description: 'Create a plot according to ploty syntax.',
+            syntax: [
+                "plot(data, layout, config)",
+                "plot(data, layout)",
+                "plot(data)"
+            ],
+            examples: [
+                "plot([{x: [1, 2, 3], y: [2, 1, 3]}])",
+                "plot([{x: [1, 2, 3], y: [2, 1, 3]}], {title: 'My plot'})",
+                "plot([{x: [1, 2, 3], y: [2, 1, 3]}], {title: 'My plot'}, {responsive: true})"
+            ],
+            seealso: ['sin', 'cos', 'tan']
+        }
+    }
+
+    return function help(x) {
+        const nameString = typeof x === 'function' ? x.name : x
+        if (nameString in newDocs) {
+            return new math.Help(newDocs[nameString])
+        } else {
+            return oldHelp(x)
+        }
+    }
+}
+
+math.import({
+    help: createNewHelp()
+}, { override: true })
+
 /**
  * Applies a given function to each element of an array or matrix.
  *
@@ -32,13 +121,13 @@ const functionsToVectorize =
 math.import(
     {
         props, HAprops, phase, MM,
-        plot: math.typed({
+        plot: math.typed('plot',{
             'Array, Object, Object': plot,
             'Array, Object': (data, layout) => plot(data, layout, {}),
             'Array': data => plot(data, {}, {}),
         }),
         ...Object.fromEntries(functionsToVectorize.map(f => [f, mapped(math[f])])),
-        log: math.typed({
+        log: math.typed('log',{
             'Array | Matrix': x => math.map(x, x1 => math.log(x1, math.e)),
             'Array | Matrix, number': (x, base) => math.map(x, x1 => math.log(x1, base))
         })
