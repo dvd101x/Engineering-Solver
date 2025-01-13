@@ -10,7 +10,24 @@ import { EditorView, basicSetup } from "codemirror"
 
 import { mathjs } from './mathjs.js'
 
+import Plotly from 'plotly.js-dist-min'
+
+import katex from 'katex'
+import 'katex/dist/katex.min.css'
+
+import texmath from 'markdown-it-texmath'
+import markdownit from 'markdown-it'
+import 'markdown-it-texmath/css/texmath.css'
+
+import 'github-markdown-css/github-markdown.css'
+
 import { insertExampleFunc } from "./examples.js";
+
+import Alpine from 'alpinejs'
+ 
+window.Alpine = Alpine
+ 
+Alpine.start()
 
 const md = markdownit({ html: true })
   .use(texmath, {
