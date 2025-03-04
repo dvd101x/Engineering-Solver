@@ -12,7 +12,13 @@
     "vite": "^6.0.7"
   },
   "dependencies": {
+    "alpinejs": "^3.14.8",
     "codemirror": "^6.0.1",
-    "mathjs": "^14.0.1"
+    "github-markdown-css": "^5.8.1",
+    "katex": "^0.16.20",
+    "markdown-it": "^14.1.0",
+    "markdown-it-texmath": "^1.0.0",
+    "mathjs": "^14.0.1",
+    "plotly.js-dist-min": "^2.35.3"
   }
 }
