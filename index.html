@@ -10,8 +10,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="manifest" href="/site.webmanifest">
-  
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.6/dist/cdn.min.js" defer></script>
 </head>
 <script>
   const mathWorker = new Worker("mathWorker.js", { type: "classic" });
@@ -20,9 +18,8 @@
 <body x-data="{showCode:true, showReport:true}">
   <nav class="markdown-body">
     <form name="topBar">
-      <button type='button' x-on:click="showCode = !showCode"
-    x-text="showCode?'<':'>'"
-    x-bind:title="showCode?'hide code':'show code'"></button>
+      <button type='button' x-on:click="showCode = !showCode" x-text="showCode?'<':'>'"
+        x-bind:title="showCode?'hide code':'show code'"></button>
       <fieldset id='tabs'></fieldset>
       <span>
         <fieldset id="examples" style="float: right;">
@@ -58,13 +55,11 @@
             </optgroup>
           </select>
           <button type="button" id="exampleInsert" name="insertExample">+</button>
-          <button type="button"
-          x-on:click="showReport = !showReport"
-          x-text="showReport ? '>':'<'"
-          x-bind:title="showReport?'hide report':'show report'"></button>
+          <button type="button" x-on:click="showReport = !showReport" x-text="showReport ? '>':'<'"
+            x-bind:title="showReport?'hide report':'show report'"></button>
         </fieldset>
       </span>
-      
+
     </form>
   </nav>
 
