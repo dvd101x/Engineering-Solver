@@ -222,13 +222,15 @@ function updateSelection() {
 
   outputs.forEach(code => {
     const thisNode = code;
-    const fromLine = parseInt(thisNode.getAttribute('data-from-line'), 10);
-    const toLine = parseInt(thisNode.getAttribute('data-to-line'), 10);
-    if ((fromLine <= selectedTo) && (toLine >= selectedFrom)) {
-      code.classList.add('highlight');
-      code.scrollIntoView({ block: 'nearest', inline: 'start' });
-    } else {
-      code.classList.remove('highlight');
+    if (thisNode.getAttribute){
+      const fromLine = parseInt(thisNode.getAttribute('data-from-line'), 10);
+      const toLine = parseInt(thisNode.getAttribute('data-to-line'), 10);
+      if ((fromLine <= selectedTo) && (toLine >= selectedFrom)) {
+        code.classList.add('highlight');
+        code.scrollIntoView({ block: 'nearest', inline: 'start' });
+      } else {
+        code.classList.remove('highlight');
+      }
     }
   });
 }
