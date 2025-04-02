@@ -199,6 +199,51 @@ plot(
 ```
 ![Lorenz Plot](img/lorenz.png)
 
+Plot iso surfaces for TPMS
+
+```jl
+# Diamond
+
+dx = pi/8;
+Xlims = [0, 4pi];
+X = Xlims[1]:dx:Xlims[2];
+Y = reshape(X, [-1, 1]);
+Z = reshape(X, [-1, 1, 1]);
+
+diamond(x,y,z) = cos(x)cos(y)cos(z)-sin(x)sin(y)sin(z);
+
+iso = map(X, Y, Z, _(x,y,z) = {x:x, y:y, z:z, v:diamond(x,y,z)});
+iso = flatten(iso);
+
+data = [
+  {
+    type: "isosurface",
+    x: map(iso, _(point) = point.x),
+    y: map(iso, _(point) = point.y),
+    z: map(iso, _(point) = point.z),
+    value: map(iso, _(point) = point.v),
+    isomin: -1/16,
+    isomax: 1/18,
+  }
+];
+
+layout = ({
+  margin: { t: 0, l: 0, b: 0 },
+  scene: {
+    camera: {
+      eye: {
+        x: 1.88,
+        y: -2.12,
+        z: 0.96
+      }
+    }
+  }
+});
+
+plot(data, layout)
+```
+![TPMS](img/TPMS.png)
+
 # Warnings
 
 - All calculations are done locally
