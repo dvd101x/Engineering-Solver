@@ -1,6 +1,7 @@
 
 ToDo
 ====
+- [ ] Update syntax to resemble ["the light format"](https://jupytext.readthedocs.io/en/latest/formats-scripts.html#the-light-format)
 - [ ] Details
   - [x] Cleanup
   - [x] JS docs
