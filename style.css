@@ -71,6 +71,11 @@ main>.markdown-body .highlight {
 	/* box with rounded corner */
 	border: 1px solid #ececec;
 	background: #ececec;
+	border-color: #ececec;
+	color-scheme: light dark;
+	background: light-dark(#ececec, #2b2b2b);
+	border-color: light-dark(#ececec, #444);
+	color: light-dark(#000, #eee);
 	margin: 4px 2px;
 	padding: 4px 8px;
 	border-radius: 1em;
@@ -79,8 +84,10 @@ main>.markdown-body .highlight {
 
 #tabs input:checked+label {
 	/* white background for selected tab */
-	background: #FFF;
-	border: 1px solid #ccc;
+	background: #fff;
+	border-color: #ccc;
+	background: light-dark(#fff, #3a3a3a);
+	border: 1px solid light-dark(#ccc, #666);
 	font-weight: bolder;
 }
 
