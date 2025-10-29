@@ -93,6 +93,7 @@ main>.markdown-body .highlight {
 
 #tabs input:hover+label {
 	background-color: #ddd;
+	background-color: light-dark(#ddd, #555);
 }
 
 fieldset {
