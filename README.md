@@ -244,6 +244,46 @@ plot(data, layout)
 ```
 ![TPMS](img/TPMS.png)
 
+Chaos game
+
+```jl
+# # Chaos game
+#. Configure to use Arrays
+config({matrix:"Array"});
+
+#. Define tetrahedron vertices
+x = [cos(pi/6), 0, -cos(pi/6), 0];
+y = [-sin(pi/6), 1, -sin(pi/6), 0];
+z = [0, 0, 0, 1 + sin(pi/6)];
+
+#. Initial point (could be random)
+x.push(0); y.push(0); z.push(sin(pi/6));
+
+#. Generate random sequence
+randomPoints = randomInt([2000], 1, 5);
+
+#. Midpoint between current point and random
+rule(id) = [
+  x.push((x[end] + x[id]) / 2),
+  y.push((y[end] + y[id]) / 2),
+  z.push((z[end] + z[id]) / 2),
+];
+
+#. Chaos game iterations
+forEach(randomPoints, rule)
+
+#. Plot
+trace = {
+  x: x, y: y, z: z,
+  type: "scatter3d",
+  mode: "markers",
+  marker: { size: 1, color: z, colorscale: "Viridis" }
+};
+
+plot([trace])
+```
+![Chaos game](img/chaos.png)
+
 # Warnings
 
 - All calculations are done locally
