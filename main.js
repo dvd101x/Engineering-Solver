@@ -24,9 +24,12 @@ import 'github-markdown-css/github-markdown.css'
 import { insertExampleFunc } from "./examples.js";
 
 import Alpine from 'alpinejs'
+
+// En tu archivo principal (e.g., app.js o index.js)
+import { clearFragment, loadFromFragment, createFragmentLink, onFragmentChange } from './fragmentLoader.js';
  
 window.Alpine = Alpine
- 
+
 Alpine.start()
 
 const md = markdownit({ html: true })
@@ -41,6 +44,7 @@ const tabsField = document.getElementById("tabs")
 const insertButton = document.getElementById('exampleInsert')
 const exampleSelect = document.getElementById('exampleSelector')
 const outputs = document.getElementById("OUTPUT")
+const shareLinkButton = document.getElementById("shareLink")
 const numberOfSessions = 20
 const listOfSessions = Array.from({ length: numberOfSessions }, (_, i) => i + 1)
 let workerState = initialState
@@ -50,7 +54,52 @@ let lastTab = localStorage.getItem("lastTab") === null ? 1 : localStorage.getIte
 
 let sessions = []
 let sessionNames = []
+let firstEmptySession = findEmptySession()
+// Phase 1: cleanup, dedupe and compact sessions in localStorage
+const seen = new Set();
+const nonEmptyUnique = [];
 
+// Gather, remove empties and duplicates
+for (let ID of listOfSessions) {
+  const key = getSessionName(ID);
+  const text = localStorage.getItem(key);
+
+  if (text === null) continue;
+
+  if (text.trim() === "") {
+    localStorage.removeItem(key);
+    continue;
+  }
+
+  if (seen.has(text)) {
+    localStorage.removeItem(key);
+    continue;
+  }
+
+  seen.add(text);
+  nonEmptyUnique.push({text, ID, isCurrent: ID == lastTab});
+}
+
+// Reassign compacted non-empty sessions to lowest IDs, clear the rest
+for (let idx = 0; idx < listOfSessions.length; idx++) {
+  const ID = listOfSessions[idx];
+  const key = getSessionName(ID);
+  if (idx < nonEmptyUnique.length) {
+    if (nonEmptyUnique[idx].isCurrent){
+      lastTab = idx + 1;
+    }
+    localStorage.setItem(key, nonEmptyUnique[idx].text);
+  } else {
+    localStorage.removeItem(key);
+  }
+}
+
+// First empty session is right after the last non-empty one (if any space left)
+firstEmptySession = nonEmptyUnique.length < listOfSessions.length
+  ? listOfSessions[nonEmptyUnique.length]
+  : null;
+
+// Phase 2: create HTML elements and initialize session arrays
 for (let ID of listOfSessions) {
   // Create tabs
   const radioInput = document.createElement('input');
@@ -67,16 +116,8 @@ for (let ID of listOfSessions) {
   label.textContent = ID;
   tabsField.appendChild(label);
 
-  // Create sessions
-  const thisSession = getSessionName(ID);
-  const sessionText = localStorage.getItem(thisSession)
-  sessions[ID] = null
-
-  // Remove empty sessions
-  if (sessionText && !sessionText.trim()) {
-    localStorage.removeItem(thisSession)
-  }
-
+  // Initialize session slots; names after label exists
+  sessions[ID] = null;
   sessionNames[ID] = setSessionName(ID);
 }
 
@@ -85,7 +126,16 @@ tabIDs.value = lastTab
 
 let timer;
 
+const codeFromUrl = loadFromFragment();
+if(codeFromUrl){
+  lastTab = firstEmptySession !== null ? firstEmptySession : lastTab
+  localStorage.setItem("lastTab", lastTab)
+  localStorage.setItem(getSessionName(lastTab), codeFromUrl)
+  tabIDs.value = lastTab
+  clearFragment()
+}
 sessions[lastTab] = createState(lastTab)
+
 let editor = new EditorView({
   state: sessions[lastTab],
   parent: document.querySelector('#INPUT')
@@ -102,6 +152,16 @@ tabsField.addEventListener('change', () => {
   editor.focus()
   localStorage.setItem("lastTab", ID)
   lastTab = ID
+})
+
+shareLinkButton.addEventListener('click', () => {
+  const code = editor.state.doc.toString();
+  const shareableLink = createFragmentLink(code);
+  navigator.clipboard.writeText(shareableLink).then(() => {
+    alert('Shareable link copied to clipboard!');
+  }, (err) => {
+    alert('Failed to copy link: ', err);
+  });
 })
 
 insertButton.addEventListener('click', () => {
@@ -200,7 +260,7 @@ function createState(ID) {
         if (update.docChanged) {
           const text = update.state.doc.toString()
           clearTimeout(timer);
-          timer = setTimeout(sendWorkToMathWorker, wait, text);
+          timer = setTimeout(sendWorkToMathWorker, wait, text); 
         } else if (update.selectionSet) {
           updateSelection()
         }
@@ -271,12 +331,34 @@ function saveSession(sessionID) {
   }
 }
 
-function sendWorkToMathWorker(mathExpressoins) {
-  if (mathExpressoins != "") {
-    const expressions = mathExpressoins
+function sendWorkToMathWorker(mathExpressions) {
+  if (mathExpressions != "") {
+    const expressions = mathExpressions
       .replace(/\r?\n/g, '\n')
     //.trim()
     const request = { expr: expressions }
     mathWorker.postMessage(JSON.stringify(request))
   }
+}
+
+
+onFragmentChange((code) => {
+  firstEmptySession = findEmptySession()
+  lastTab = firstEmptySession !== null ? firstEmptySession : lastTab
+  localStorage.setItem("lastTab", lastTab)
+  localStorage.setItem(getSessionName(lastTab), code)
+  tabIDs.value = lastTab
+  editor.setState(createState(lastTab))
+  clearFragment()
+});
+
+function findEmptySession() {
+  for (let ID of listOfSessions) {
+    const key = getSessionName(ID);
+    const text = localStorage.getItem(key);
+    if (text === null || text.trim() === "") {
+      return ID;
+    }
+  }
+  return null;
 }
