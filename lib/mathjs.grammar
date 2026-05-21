@@ -1,16 +1,196 @@
-@top Program { Item* }
+@top Program { StatementList? }
 
-@skip { space }
+@precedence {
+  cond @right,
+  range @right
+}
 
-Item {
-  Group |
+@skip { space | LineComment | BlockComment }
+
+StatementList {
+  Statement (StatementSeparator Statement)* StatementSeparator?
+}
+
+StatementSeparator {
+  ";"
+}
+
+Statement {
+  Expression
+}
+
+Expression {
+  AssignmentExpression
+}
+
+AssignmentExpression {
+  ConditionalExpression |
+  Identifier "=" AssignmentExpression
+}
+
+ConditionalExpression {
+  LogicalOrExpression |
+  LogicalOrExpression "?" Expression !cond ":" Expression
+}
+
+LogicalOrExpression {
+  LogicalXorExpression (OrOp LogicalXorExpression)*
+}
+
+LogicalXorExpression {
+  LogicalAndExpression (XorOp LogicalAndExpression)*
+}
+
+LogicalAndExpression {
+  BitwiseOrExpression (AndOp BitwiseOrExpression)*
+}
+
+BitwiseOrExpression {
+  BitwiseXorExpression ("|" BitwiseXorExpression)*
+}
+
+BitwiseXorExpression {
+  BitwiseAndExpression ("^|" BitwiseAndExpression)*
+}
+
+BitwiseAndExpression {
+  RelationalExpression ("&" RelationalExpression)*
+}
+
+RelationalExpression {
+  ShiftExpression (RelOp ShiftExpression)*
+}
+
+ShiftExpression {
+  ConversionExpression (ShiftOp ConversionExpression)*
+}
+
+ConversionExpression {
+  RangeExpression (ConversionOp RangeExpression)*
+}
+
+RangeExpression {
+  AdditiveExpression |
+  AdditiveExpression !range ":" AdditiveExpression? (!range ":" AdditiveExpression?)?
+}
+
+AdditiveExpression {
+  MultiplicativeExpression (AddOp MultiplicativeExpression)*
+}
+
+MultiplicativeExpression {
+  PowerExpression (MultiplyOp PowerExpression)*
+}
+
+PowerExpression {
+  NullishExpression |
+  NullishExpression PowOp UnaryExpression
+}
+
+NullishExpression {
+  UnaryExpression ("??" UnaryExpression)*
+}
+
+UnaryExpression {
+  PostfixExpression |
+  PrefixOp UnaryExpression
+}
+
+PostfixExpression {
+  PrimaryExpression PostfixPart*
+}
+
+PostfixPart {
+  PostfixOp |
+  AccessSuffix
+}
+
+AccessSuffix {
+  CallSuffix |
+  OptionalCallSuffix |
+  IndexSuffix |
+  OptionalIndexSuffix |
+  PropertySuffix |
+  OptionalPropertySuffix
+}
+
+CallSuffix {
+  "(" ArgumentList? ")"
+}
+
+OptionalCallSuffix {
+  "?." "(" ArgumentList? ")"
+}
+
+IndexSuffix {
+  "[" ArgumentList? "]"
+}
+
+OptionalIndexSuffix {
+  "?." "[" ArgumentList? "]"
+}
+
+PropertySuffix {
+  "." PropertyName
+}
+
+OptionalPropertySuffix {
+  "?." PropertyName
+}
+
+ArgumentList {
+  Expression ("," Expression)*
+}
+
+PropertyName {
+  Identifier |
+  Keyword |
+  String
+}
+
+PrimaryExpression {
+  GroupExpression |
+  MatrixExpression |
+  ObjectExpression |
   Number |
   String |
-  Keyword |
-  Identifier |
-  Operator |
-  LineComment |
-  BlockComment
+  BooleanLiteral |
+  NullLiteral |
+  UndefinedLiteral |
+  Identifier
+}
+
+GroupExpression {
+  "(" Expression ")"
+}
+
+MatrixExpression {
+  "[" ArgumentList? "]"
+}
+
+ObjectExpression {
+  "{" ObjectEntries? "}"
+}
+
+ObjectEntries {
+  ObjectEntry ("," ObjectEntry)*
+}
+
+ObjectEntry {
+  PropertyName ":" Expression
+}
+
+BooleanLiteral {
+  @specialize<Identifier, "true"> |
+  @specialize<Identifier, "false">
+}
+
+NullLiteral {
+  @specialize<Identifier, "null">
+}
+
+UndefinedLiteral {
+  @specialize<Identifier, "undefined">
 }
 
 Keyword {
@@ -23,33 +203,75 @@ Keyword {
   @specialize<Identifier, "mod">
 }
 
-Group {
-  "(" Item* ")" |
-  "[" Item* "]" |
-  "{" Item* "}"
+AndOp {
+  @specialize<Identifier, "and">
+}
+
+OrOp {
+  @specialize<Identifier, "or">
+}
+
+XorOp {
+  @specialize<Identifier, "xor">
+}
+
+ConversionOp {
+  @specialize<Identifier, "to"> |
+  @specialize<Identifier, "in">
+}
+
+PrefixOp {
+  "+" | "-" | "~" | NotOp
+}
+
+NotOp {
+  @specialize<Identifier, "not">
+}
+
+PostfixOp {
+  "!" | "'"
+}
+
+PowOp {
+  "^" | ".^"
+}
+
+MultiplyOp {
+  "*" | "/" | ".*" | "./" | "%" | ModOp
+}
+
+ModOp {
+  @specialize<Identifier, "mod">
+}
+
+AddOp {
+  "+" | "-" | ".+" | ".-"
+}
+
+ShiftOp {
+  "<<" | ">>" | ">>>"
+}
+
+RelOp {
+  "==" | "!=" | "<=" | ">=" | "<" | ">"
 }
 
 @tokens {
-  space { $[\u0009\u000a\u000d\u0020]+ }
+  space { $[\u0009\u000d\u0020]+ }
 
   Number {
-    "0x" $[0-9a-fA-F]+ $[ij]? |
+    "0x" $[0-9a-fA-F]+ ("." $[0-9a-fA-F]+)? $[ij]? |
+    "0o" $[0-7]+ ("." $[0-7]+)? $[ij]? |
+    "0b" $[0-1]+ ("." $[0-1]+)? $[ij]? |
     $[0-9]+ ("." $[0-9]+)? (("e"|"E"|"d"|"D") $[+\-]? $[0-9]+)? $[ij]?
   }
 
-  DoubleString { '"' (!["\n] | '""')* '"' }
-  SingleString { "'" (![\'\n] | "''")* "'" }
+  DoubleString { '"' (!["\n] | "\\" _ | '""')* '"' }
+  SingleString { "'" (![\'\n] | "\\" _ | "''")* "'" }
   String { DoubleString | SingleString }
 
   BlockComment { "#{" (![#}] | "#" ![}] | "}" ![#])* "#}" }
   LineComment { "#" ![\{\n] ![\n]* }
 
-  Identifier { $[_A-Za-z] $[_A-Za-z0-9]* }
-
-  Operator {
-    "==" | "!=" | "<=" | ">=" | "<<" | ">>" | ">>>" | "<<<" |
-    ".+" | ".-" | ".*" | "./" | ".^" |
-    "+" | "-" | "*" | "/" | "&" | "|" | "^" | "~" | "<" | ">" | "!" | "%" | "'"
-  }
-
+  Identifier { $[_$A-Za-z\u00C0-\u02AF\u0370-\u03FF\u2100-\u214F] $[_$A-Za-z0-9\u00C0-\u02AF\u0370-\u03FF\u2100-\u214F]* }
 }
