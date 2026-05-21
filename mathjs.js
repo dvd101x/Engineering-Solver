@@ -1,209 +1,354 @@
-import { parse } from "mathjs"
+import {
+    LRLanguage,
+    LanguageSupport,
+    foldInside,
+    foldNodeProp,
+    syntaxTree
+} from '@codemirror/language'
+import { styleTags, tags as t } from '@lezer/highlight'
+
+import { parser } from './lib/mathjs-parser.js'
+
+const KEYWORDS = ['to', 'in', 'and', 'not', 'or', 'xor', 'mod']
+const IDENTIFIER_START = /[_A-Za-z\xa1-\uffff]/
+const IDENTIFIER_BODY = /^[_A-Za-z\xa1-\uffff][_A-Za-z0-9\xa1-\uffff]*$/
+
+const mathjsParser = parser.configure({
+    props: [
+        foldNodeProp.add({
+            Group: foldInside
+        }),
+        styleTags({
+            Number: t.number,
+            String: t.string,
+            Keyword: t.keyword,
+            Identifier: t.variableName,
+            Operator: t.operator,
+            LineComment: t.lineComment,
+            BlockComment: t.blockComment
+        })
+    ]
+})
+
+export const mathjsLanguage = LRLanguage.define({
+    name: 'mathjs',
+    parser: mathjsParser,
+    languageData: {
+        closeBrackets: {
+            brackets: ['(', '[', '{', '"', "'"]
+        },
+        commentTokens: {
+            line: '#',
+            block: { open: '#{', close: '#}' }
+        },
+        indentOnInput: /^\s*[\]\)\}]$/,
+        // Math.js identifiers support '$', and expressions commonly use these as symbol suffixes.
+        wordChars: '$'
+    }
+})
 
 /**
- * Create mathjs syntax highlighting for CodeMirror
- *
- * TODO: this is using CodeMirror v5 functionality, upgrade this to v6
+ * Create a CodeMirror 6 language support extension for mathjs
  *
  * @param {function} getWorkerState - A function that gets a mathjs instance properties for the parser.
  * @param {function} getParserState - A function that returns a mathjs scope.
- * @returns {object} An object with properties and methods for mathjs syntax highlighting and autocompletion in CodeMirror.
+ * @returns {LanguageSupport} A CodeMirror 6 language support extension.
  */
 export function mathjs(getWorkerState, getParserState) {
-    const workerState = getWorkerState()
-    const parserState = getParserState()
+    let cachedWorkerState = null
+    let cachedWorkerData = null
 
-    function wordRegexp(words) {
-        return new RegExp('^((' + words.join(')|(') + '))\\b')
-    }
-
-    const singleOperators = new RegExp("^[-+*/&|^~<>!%']")
-    const singleDelimiters = new RegExp('^[([{},:=;.?]')
-    const doubleOperators = new RegExp('^((==)|(!=)|(<=)|(>=)|(<<)|(>>)|(\\.[-+*/^]))')
-    const doubleDelimiters = new RegExp('^((!=)|(^\\|))')
-    const tripleDelimiters = new RegExp('^((>>>)|(<<<))')
-    const expressionEnd = new RegExp('^[\\])]')
-    const identifiers = new RegExp('^[_A-Za-z\xa1-\uffff][_A-Za-z0-9\xa1-\uffff]*')
-
-    const mathFunctions = workerState.functions
-    const mathPhysicalConstants = workerState.physicalConstants
-    const numberLiterals = workerState.numberLiterals
-
-    // generates a list of all valid units in mathjs
-    let listOfUnits = []
-    for (const unit in workerState.units) {
-        listOfUnits.push(...workerState.units[unit].map(prefixIndex => workerState.prefixes[prefixIndex] + unit))
-    }
-
-    // remove duplicates
-    listOfUnits = Array.from(new Set(listOfUnits))
-
-    const builtins = wordRegexp(mathFunctions)
-
-    const keywords = wordRegexp(['to', 'in', 'and', 'not', 'or', 'xor', 'mod'])
-
-    const units = wordRegexp(Array.from(new Set(listOfUnits)))
-    const physicalConstants = wordRegexp(mathPhysicalConstants)
-
-    // tokenizers
-    function tokenTranspose(stream, state) {
-        if (!stream.sol() && stream.peek() === "'") {
-            stream.next()
-            state.tokenize = tokenBase
-            return 'operator'
-        }
-        state.tokenize = tokenBase
-        return tokenBase(stream, state)
-    }
-
-    function tokenComment(stream, state) {
-        if (stream.match(/^.*#}/)) {
-            state.tokenize = tokenBase
-            return 'comment'
-        }
-        stream.skipToEnd()
-        return 'comment'
-    }
-
-    function tokenBase(stream, state) {
-        // whitespaces
-        if (stream.eatSpace()) return null
-
-        // Handle one line Comments
-        if (stream.match('#{')) {
-            state.tokenize = tokenComment
-            stream.skipToEnd()
-            return 'comment'
-        }
-
-        if (stream.match(/^#/)) {
-            stream.skipToEnd()
-            return 'comment'
-        }
-
-        // Handle Number Literals
-        if (stream.match(/^[0-9.+-]/, false)) {
-            if (stream.match(/^[+-]?0x[0-9a-fA-F]+[ij]?/)) {
-                stream.tokenize = tokenBase
-                return 'number'
-            }
-            if (stream.match(/^[+-]?\d*\.\d+([EeDd][+-]?\d+)?[ij]?/)) {
-                return 'number'
-            }
-            if (stream.match(/^[+-]?\d+([EeDd][+-]?\d+)?[ij]?/)) {
-                return 'number'
-            }
-        }
-        if (stream.match(wordRegexp(numberLiterals))) {
-            return 'number'
-        }
-
-        // Handle Strings
-        let m = stream.match(/^"(?:[^"]|"")*("|$)/) || stream.match(/^'(?:[^']|'')*('|$)/)
-        if (m) {
-            return m[1] ? 'string' : 'string error'
-        }
-
-        // Handle words
-        if (stream.match(keywords)) {
-            return 'keyword'
-        }
-        if (stream.match(builtins)) {
-            return 'builtin'
-        }
-        if (stream.match(physicalConstants)) {
-            return 'tag'
-        }
-        if (stream.match(units)) {
-            return 'attribute'
-        }
-        if (stream.match(identifiers)) {
-            return 'variable'
-        }
-        if (stream.match(singleOperators) || stream.match(doubleOperators)) {
-            return 'operator'
-        }
-        if (
-            stream.match(singleDelimiters) ||
-            stream.match(doubleDelimiters) ||
-            stream.match(tripleDelimiters)
-        ) {
+    const autocompleteSource = (context) => {
+        if (isBlockedContext(context)) {
             return null
         }
-        if (stream.match(expressionEnd)) {
-            state.tokenize = tokenTranspose
+
+        const completionContext = getCompletionContext(context)
+        if (!completionContext) {
             return null
         }
-        // Handle non-detected items
-        stream.next()
-        return 'error'
-    }
 
-    return {
-        name: 'mathjs',
-
-        startState: function () {
-            return {
-                tokenize: tokenBase
-            }
-        },
-
-        token: function (stream, state) {
-            const style = state.tokenize(stream, state)
-            if (style === 'number' || style === 'variable') {
-                state.tokenize = tokenTranspose
-            }
-            return style
-        },
-
-        languageData: {
-            commentTokens: { line: '#' },
-            autocomplete: (context) => myCompletions(context, parserState)
+        const { from, prefix, propertyPath } = completionContext
+        if (prefix.length > 0 && !IDENTIFIER_START.test(prefix[0])) {
+            return null
         }
-    }
 
-    function myCompletions(context) {
-        let word = context.matchBefore(/\w*/)
-        if (word.from == word.to && !context.explicit) return null
-        let options = []
+        const workerData = getWorkerData()
+        const parserState = getParserState()
+        const parserSymbols = Object.keys(parserState)
+        const optionsByLabel = new Map()
 
-        mathFunctions.forEach((func) => options.push({ label: func, type: 'function' }))
+        const pushOption = (label, type, boost = 0) => {
+            if (!IDENTIFIER_BODY.test(label) || !label.startsWith(prefix)) {
+                return
+            }
 
-        mathPhysicalConstants.forEach((constant) => options.push({ label: constant, type: 'constant' }))
-
-        numberLiterals.forEach((number) => options.push({ label: number, type: 'variable' }))
-
-        Object.keys(getParserState()).forEach(symbol => options.push({ label: symbol, type: 'property' }))
-
-        const matchingUnits = []
-
-        for (const prefix of workerState.prefixes) {
-            if (prefix.startsWith(word.text)) {
-                matchingUnits.push(prefix)
-            } else if (word.text.startsWith(prefix)) {
-                const unitKeyword = word.text.substring(prefix.length)
-                for (const n in workerState.units) {
-                    const fullUnit = prefix + n
-                    if (hasOwnPropertySafe(workerState.units, n)) {
-
-                        if (
-                            !matchingUnits.includes(fullUnit) &&
-                            n.startsWith(unitKeyword) &&
-                            listOfUnits.includes(fullUnit)
-                        ) {
-                            matchingUnits.push(fullUnit)
-                        }
-                    }
-                }
+            const existing = optionsByLabel.get(label)
+            if (!existing || boost > (existing.boost || 0)) {
+                optionsByLabel.set(label, { label, type, boost })
             }
         }
 
-        matchingUnits.forEach((unit) => options.push({ label: unit, type: 'enum' }))
+        if (propertyPath) {
+            const target = resolvePropertyTarget(parserState, propertyPath)
+            const propertyKeys = getObjectCompletionKeys(target)
+            propertyKeys.forEach((key) => pushOption(key, 'property', 140))
+        } else {
+            KEYWORDS.forEach((keyword) => pushOption(keyword, 'keyword', 20))
+            parserSymbols.forEach((symbol) => pushOption(symbol, 'property', 100))
+            workerData.mathFunctions.forEach((func) => pushOption(func, 'function', 70))
+            workerData.mathPhysicalConstants.forEach((constant) => pushOption(constant, 'constant', 60))
+            workerData.numberLiterals.forEach((number) => pushOption(number, 'variable', 30))
+            workerData.listOfUnits.forEach((unit) => pushOption(unit, 'enum', 40))
+        }
+
+        const options = Array.from(optionsByLabel.values())
+        if (options.length === 0) {
+            return null
+        }
 
         return {
-            from: word.from,
-            options
+            from,
+            options,
+            validFor: /^[_A-Za-z\xa1-\uffff][_A-Za-z0-9\xa1-\uffff]*$/
         }
+    }
+
+    return new LanguageSupport(mathjsLanguage, [
+        mathjsLanguage.data.of({
+            autocomplete: autocompleteSource
+        })
+    ])
+
+    function isBlockedContext(context) {
+        const nodeName = syntaxTree(context.state).resolveInner(context.pos, -1).name
+        if (nodeName === 'LineComment' || nodeName === 'BlockComment' || nodeName === 'String') {
+            return true
+        }
+
+        return false
+    }
+
+    function getCompletionContext(context) {
+        const word = context.matchBefore(/[_A-Za-z\xa1-\uffff][_A-Za-z0-9\xa1-\uffff]*/)
+        const line = context.state.doc.lineAt(context.pos)
+        const linePrefix = line.text.slice(0, context.pos - line.from)
+
+        if (word && (word.from !== word.to || context.explicit)) {
+            const from = word.from
+            const prefix = word.text
+            const beforeWord = line.text.slice(0, from - line.from)
+            const propertyPath = extractPropertyPath(beforeWord)
+
+            return { from, prefix, propertyPath }
+        }
+
+        if (!context.explicit) {
+            return null
+        }
+
+        const propertyPath = extractPropertyPath(linePrefix)
+        if (!propertyPath) {
+            return null
+        }
+
+        return {
+            from: context.pos,
+            prefix: '',
+            propertyPath
+        }
+    }
+
+    function extractPropertyPath(textBeforeCursor) {
+        const normalized = textBeforeCursor.replace(/\s+$/, '')
+        if (!normalized.endsWith('.') && !normalized.endsWith('?.')) {
+            return null
+        }
+
+        const markerLength = normalized.endsWith('?.') ? 2 : 1
+        const expression = normalized.slice(0, -markerLength)
+
+        return parseResolvablePropertyExpression(expression)
+    }
+
+    function parseResolvablePropertyExpression(expression) {
+        let pos = 0
+        const parts = []
+
+        const skipSpaces = () => {
+            while (pos < expression.length && /\s/.test(expression[pos])) {
+                pos++
+            }
+        }
+
+        const parseIdentifierAt = () => {
+            const remaining = expression.slice(pos)
+            const match = remaining.match(/^[_A-Za-z\xa1-\uffff][_A-Za-z0-9\xa1-\uffff]*/)
+            if (!match) {
+                return null
+            }
+
+            pos += match[0].length
+            return match[0]
+        }
+
+        const parseQuotedString = (quote) => {
+            let value = ''
+            pos++
+
+            while (pos < expression.length) {
+                const char = expression[pos]
+                if (char === '\\') {
+                    if (pos + 1 >= expression.length) {
+                        return null
+                    }
+
+                    value += expression[pos + 1]
+                    pos += 2
+                    continue
+                }
+
+                if (char === quote) {
+                    pos++
+                    return value
+                }
+
+                value += char
+                pos++
+            }
+
+            return null
+        }
+
+        skipSpaces()
+        const first = parseIdentifierAt()
+        if (!first) {
+            return null
+        }
+        parts.push(first)
+
+        while (pos < expression.length) {
+            skipSpaces()
+            if (pos >= expression.length) {
+                break
+            }
+
+            if (expression.startsWith('?.', pos)) {
+                pos += 2
+                skipSpaces()
+                const id = parseIdentifierAt()
+                if (!id) {
+                    return null
+                }
+                parts.push(id)
+                continue
+            }
+
+            if (expression[pos] === '.') {
+                pos++
+                skipSpaces()
+                const id = parseIdentifierAt()
+                if (!id) {
+                    return null
+                }
+                parts.push(id)
+                continue
+            }
+
+            if (expression[pos] === '[') {
+                pos++
+                skipSpaces()
+
+                const quote = expression[pos]
+                if (quote !== '"' && quote !== "'") {
+                    return null
+                }
+
+                const key = parseQuotedString(quote)
+                if (key === null) {
+                    return null
+                }
+
+                skipSpaces()
+                if (expression[pos] !== ']') {
+                    return null
+                }
+                pos++
+
+                if (!IDENTIFIER_BODY.test(key)) {
+                    return null
+                }
+                parts.push(key)
+                continue
+            }
+
+            return null
+        }
+
+        return parts
+    }
+
+    function resolvePropertyTarget(scope, path) {
+        let target = scope
+        for (const segment of path) {
+            if (!isObjectLike(target) || !hasOwnPropertySafe(target, segment)) {
+                return null
+            }
+            target = target[segment]
+        }
+
+        return target
+    }
+
+    function getObjectCompletionKeys(value) {
+        if (!isObjectLike(value)) {
+            return []
+        }
+
+        return Object.keys(value).filter((key) => IDENTIFIER_BODY.test(key))
+    }
+
+    function isObjectLike(value) {
+        return value !== null && (typeof value === 'object' || typeof value === 'function')
+    }
+
+    function getWorkerData() {
+        const workerState = getWorkerState()
+        if (workerState === cachedWorkerState && cachedWorkerData !== null) {
+            return cachedWorkerData
+        }
+
+        const mathFunctions = workerState.functions || []
+        const mathPhysicalConstants = workerState.physicalConstants || []
+        const numberLiterals = workerState.numberLiterals || []
+
+        const listOfUnits = new Set()
+        const prefixes = workerState.prefixes || []
+        const units = workerState.units || {}
+
+        for (const unitName in units) {
+            if (!hasOwnPropertySafe(units, unitName)) {
+                continue
+            }
+
+            const unitPrefixes = units[unitName] || []
+            unitPrefixes.forEach((prefixIndex) => {
+                const prefix = prefixes[prefixIndex]
+                if (typeof prefix === 'string') {
+                    listOfUnits.add(prefix + unitName)
+                }
+            })
+        }
+
+        cachedWorkerState = workerState
+        cachedWorkerData = {
+            mathFunctions,
+            mathPhysicalConstants,
+            numberLiterals,
+            listOfUnits: Array.from(listOfUnits)
+        }
+
+        return cachedWorkerData
     }
 }
 

@@ -9,9 +9,12 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@lezer/generator": "^1.8.0",
     "vite": "^6.3.0"
   },
   "dependencies": {
+    "@lezer/highlight": "^1.2.3",
+    "@lezer/lr": "^1.4.10",
     "alpinejs": "^3.14.9",
     "codemirror": "^6.0.1",
     "github-markdown-css": "^5.8.1",

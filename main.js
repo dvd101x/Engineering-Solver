@@ -4,8 +4,6 @@ import initialState from "./ext/initialState.js"
 
 import { EditorState } from "@codemirror/state"
 
-import { StreamLanguage } from '@codemirror/language'
-
 import { EditorView, basicSetup } from "codemirror"
 
 import { mathjs } from './mathjs.js'
@@ -254,7 +252,7 @@ function createState(ID) {
     doc: getSessionText(ID),
     extensions: [
       basicSetup,
-      StreamLanguage.define(mathjs(() => workerState, () => parserState)),
+      mathjs(() => workerState, () => parserState),
       EditorView.lineWrapping,
       EditorView.updateListener.of(update => {
         if (update.docChanged) {

@@ -1,0 +1,55 @@
+@top Program { Item* }
+
+@skip { space }
+
+Item {
+  Group |
+  Number |
+  String |
+  Keyword |
+  Identifier |
+  Operator |
+  LineComment |
+  BlockComment
+}
+
+Keyword {
+  @specialize<Identifier, "to"> |
+  @specialize<Identifier, "in"> |
+  @specialize<Identifier, "and"> |
+  @specialize<Identifier, "not"> |
+  @specialize<Identifier, "or"> |
+  @specialize<Identifier, "xor"> |
+  @specialize<Identifier, "mod">
+}
+
+Group {
+  "(" Item* ")" |
+  "[" Item* "]" |
+  "{" Item* "}"
+}
+
+@tokens {
+  space { $[\u0009\u000a\u000d\u0020]+ }
+
+  Number {
+    "0x" $[0-9a-fA-F]+ $[ij]? |
+    $[0-9]+ ("." $[0-9]+)? (("e"|"E"|"d"|"D") $[+\-]? $[0-9]+)? $[ij]?
+  }
+
+  DoubleString { '"' (!["\n] | '""')* '"' }
+  SingleString { "'" (![\'\n] | "''")* "'" }
+  String { DoubleString | SingleString }
+
+  BlockComment { "#{" (![#}] | "#" ![}] | "}" ![#])* "#}" }
+  LineComment { "#" ![\{\n] ![\n]* }
+
+  Identifier { $[_A-Za-z] $[_A-Za-z0-9]* }
+
+  Operator {
+    "==" | "!=" | "<=" | ">=" | "<<" | ">>" | ">>>" | "<<<" |
+    ".+" | ".-" | ".*" | "./" | ".^" |
+    "+" | "-" | "*" | "/" | "&" | "|" | "^" | "~" | "<" | ">" | "!" | "%" | "'"
+  }
+
+}
