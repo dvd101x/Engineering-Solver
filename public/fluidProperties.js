@@ -254,9 +254,9 @@ function calcPropUnits(prop) {
 }
 
 // This is created only bacuse math.number(value,'') is not valid as '' can't be the unit
-toValue = (v, u) => u ? math.number(v, u) : math.number(v)
+const toValue = (v, u) => u ? math.number(v, u) : math.number(v)
 // This is crate only becous math.unit(value,'') is not valid as '' can't be the unit
-toUnit = (v, u) => u ? math.unit(v, u) : math.unit(v)
+const toUnit = (v, u) => u ? math.unit(v, u) : math.unit(v)
 
 function props(desiredProperty, fluidName, fluidProperties) {
   const calcPropUnit = calcPropUnits(desiredProperty)

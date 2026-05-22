@@ -5,7 +5,6 @@ importScripts(
     "molecularMass.js"
 )
 const parser = math.parser()
-const digits = 14
 
 function createNewHelp() {
     const oldHelp = math.help
@@ -213,13 +212,13 @@ function getMathState() {
     }
 
     let prefixes = []
-    for (category in math.Unit.PREFIXES) {
+    for (const category in math.Unit.PREFIXES) {
         prefixes.push(...Object.keys(math.Unit.PREFIXES[category]))
     }
     prefixes = Array.from(new Set(prefixes))
 
-    units = {}
-    for (unit in math.Unit.UNITS) {
+    const units = {}
+    for (const unit in math.Unit.UNITS) {
         units[unit] = Object.keys(math.Unit.UNITS[unit].prefixes).map(prefix => prefixes.indexOf(prefix))
     }
 
@@ -336,12 +335,24 @@ function processExpression(expression) {
 }
 
 function formatObject(obj) {
-    const matrix = math.config().matrix
     const formatedObject = math.format(obj)
-    math.config({ matrix: 'Array' })
-    const objResult = math.evaluate(formatedObject)
-    math.config({ matrix: matrix })
-    return objResult
+    return withMathConfig({ matrix: 'Array' }, () => math.evaluate(formatedObject))
+}
+
+function withMathConfig(tempConfig, fn) {
+    const previousConfig = math.config()
+    const restoreConfig = {}
+
+    for (const key of Object.keys(tempConfig)) {
+        restoreConfig[key] = previousConfig[key]
+    }
+
+    try {
+        math.config(tempConfig)
+        return fn()
+    } finally {
+        math.config(restoreConfig)
+    }
 }
 
 function processOutput(content, type, from, to) {
@@ -358,10 +369,8 @@ function processOutput(content, type, from, to) {
                 }
             })
             return { type: "math", text: results }
-            break;
         case "md":
             return { type: "markdown", text: content.join('\n'), from, to }
-            break;
     }
 }
 
