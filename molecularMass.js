@@ -12,10 +12,18 @@ function chemEval(formula) {
   const numberAfterElement = /\d+$/
   let molec = {}
   const chemArray = formula.match(/[A-Z][a-z]*\d*/g)
+  if (!chemArray) {
+    throw new Error('Invalid chemical formula fragment')
+  }
+
   chemArray.forEach(x => {
     const ele = x.match(element)[0]
+    if (!Object.hasOwn(atom, ele)) {
+      throw new Error(`Invalid element: ${ele}`)
+    }
+
     const elemNumMatch = x.match(numberAfterElement)
-    const atoms = elemNumMatch ? parseInt(elemNumMatch[0]) : 1
+    const atoms = elemNumMatch ? Number.parseInt(elemNumMatch[0], 10) : 1
     const elem = {}
     elem[ele] = atoms
     molec = addMolecules(molec, elem, 1)
@@ -25,26 +33,27 @@ function chemEval(formula) {
 
 function MM(formula) {
   // Creates an object with properties of the molecule specified by the chemical formula
-  const elementAndNumber = /[A-Z][a-z]{0,2}\d*/
-  const element = /[A-Z][a-z]{0,2}/
-  const numberAfterElement = /\d+$/
   const simpleFormula = /^([A-Z][a-z]{0,2}\d*)+/
   const validFormula = /([A-Z][a-z]{0,2}\d*)+|\(|\)\d*|\.\d*([A-Z][a-z]{0,2}\d*)+/g
   const formulaAfterDot = /\.\d*([A-Z][a-z]{0,2}\d*)+/
   const closingParenthesis = /^\)\d*$/
   const openingParenthesis = /^\($/
-  const chemArray = formula.match(validFormula)//splits string into valid values
 
-  let ele = ""
+  formula = formula.replace(/\s/g, '')
+  const chemArray = formula.match(validFormula) || [] // splits string into valid values
+  if (chemArray.length === 0) {
+    throw new Error('Invalid chemical formula')
+  }
+  if (chemArray.join('') !== formula) {
+    throw new Error('Invalid chemical formula syntax')
+  }
+
   let elmass = [{}]
   let level = 0
-  let atoms = 0
-  let parenNum = 0
   let multiplier = 0
   let total = null
   let numMatch = null
 
-  formula = formula.replace(/\s/g, '');
   chemArray.forEach(x => {
     if (simpleFormula.test(x)) {
       elmass[level] = addMolecules(elmass[level], chemEval(x), 1)
@@ -53,21 +62,33 @@ function MM(formula) {
       elmass[++level] = {}
     }
     else if (closingParenthesis.test(x)) {
+      if (level === 0) {
+        throw new Error('Unmatched closing parenthesis')
+      }
+
       numMatch = x.match(/\d+$/)
-      multiplier = numMatch ? parseInt(numMatch[0]) : 1
+      multiplier = numMatch ? Number.parseInt(numMatch[0], 10) : 1
       elmass[level - 1] = addMolecules(elmass[level - 1], elmass[level], multiplier)
       elmass[level--] = null
     }
     else if (formulaAfterDot.test(x)) {
       numMatch = x.match(/\.(\d+)[A-Z]/)
-      multiplier = numMatch ? parseInt(numMatch[1]) : 1
+      multiplier = numMatch ? Number.parseInt(numMatch[1], 10) : 1
       elmass[level] = addMolecules(elmass[level], chemEval(x), multiplier)
     }
   })
 
+  if (level !== 0) {
+    throw new Error('Unclosed parenthesis in chemical formula')
+  }
+
   let molecularMass = {}
 
   for (let [ele, atoms] of Object.entries(elmass[0])) {
+    if (!Object.hasOwn(atom, ele)) {
+      throw new Error(`Invalid element: ${ele}`)
+    }
+
     molecularMass[ele] = math.unit(atom[ele] * atoms, 'g/mol')
     total = total ? math.add(total, molecularMass[ele]) : molecularMass[ele]
   }
