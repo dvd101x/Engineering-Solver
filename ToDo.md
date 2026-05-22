@@ -38,6 +38,6 @@ ToDo
   - [ ] Tabs
   - [ ] Examples
   - [ ] IO
-- [ ] New nomenclature like iodide
+- [ ] New syntax like iodide
 - [ ] File names
 - [ ] Dropdown or tabs
