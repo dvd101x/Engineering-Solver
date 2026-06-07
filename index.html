@@ -15,60 +15,144 @@
   const mathWorker = new Worker("mathWorker.js", { type: "classic" });
 </script>
 
-<body x-data="{showCode:true, showReport:true}">
-  <nav class="markdown-body">
-    <form name="topBar">
-      <button type='button' x-on:click="showCode = !showCode" x-text="showCode?'<':'>'"
-        x-bind:title="showCode?'hide code':'show code'"></button>
-      <fieldset id='tabs'></fieldset>
-      <span>
-        <fieldset id="examples" style="float: right;">
-          <label for="exampleSelector">Examples:</label>
-          <select id="exampleSelector" name="example">
-            <optgroup label="Math">
-              <option value="basicUsage">Basic Usage</option>
-              <option value="units">Units</option>
-              <option value="matrices">Matrices</option>
-              <option value="quadraticFormula">Quadratic Formula</option>
-            </optgroup>
-            <optgroup label="Data">
-              <option value="strings">Strings</option>
-              <option value="objects">Objects</option>
-            </optgroup>
-            <optgroup label="Plot">
-              <option value="simplePlot">Plot</option>
-              <option value="plot3D">3D Plot</option>
-              <option value="statPlot">Statistic Plots</option>
-              <option value="lorenz">Lorenz attractor</option>
-            </optgroup>
-            <optgroup label="Thermodynamics">
-              <option value="coolprop">Fluid Properties</option>
-              <option value="coolpropHigh">coolprop website</option>
-              <option value="VaporCompressionCycle">Vapor Compression Cycle</option>
-              <option value="refCycleWithRecuperator">Recuperator</option>
-            </optgroup>
-            <optgroup label="Sciences">
-              <!--
-                <option value="odeSolver">Aerospace</option>
-              -->
-              <option value="chemistry">Chemistry</option>
-            </optgroup>
-          </select>
-          <button type="button" id="exampleInsert" name="insertExample">+</button>
-          <button type="button" id="shareLink" name="shareLink" title="Create shareable link">🔗</button>
-          <button type="button" x-on:click="showReport = !showReport" x-text="showReport ? '>':'<'"
-            x-bind:title="showReport?'hide report':'show report'"></button>
+<body x-data="{
+    menuOpen: localStorage.getItem('solver:menuOpen') !== '0',
+    showCode: localStorage.getItem('solver:showCode') !== '0',
+    showReport: localStorage.getItem('solver:showReport') !== '0',
+    autoRun: localStorage.getItem('solver:autoRun') !== '0',
+    themeMode: localStorage.getItem('solver:themeMode') || 'auto',
+    applyTheme() {
+      const isSystemDark = this.systemThemeMedia.matches
+      const resolved = this.themeMode === 'auto'
+        ? (isSystemDark ? 'dark' : 'light')
+        : this.themeMode
+      document.body.dataset.theme = resolved
+      this.$dispatch('solver-ui-theme-changed', { mode: this.themeMode, resolved })
+    },
+    init() {
+      this.systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)')
+      this.$watch('menuOpen', (value) => localStorage.setItem('solver:menuOpen', value ? '1' : '0'))
+      this.$watch('showCode', (value) => localStorage.setItem('solver:showCode', value ? '1' : '0'))
+      this.$watch('showReport', (value) => localStorage.setItem('solver:showReport', value ? '1' : '0'))
+      this.$watch('autoRun', (value) => {
+        localStorage.setItem('solver:autoRun', value ? '1' : '0')
+        this.$dispatch('solver-ui-autorun-changed', { value })
+      })
+      this.$watch('themeMode', () => {
+        localStorage.setItem('solver:themeMode', this.themeMode)
+        this.applyTheme()
+      })
+      const refreshTheme = () => {
+        if (this.themeMode === 'auto') {
+          this.applyTheme()
+        }
+      }
+      if (typeof this.systemThemeMedia.addEventListener === 'function') {
+        this.systemThemeMedia.addEventListener('change', refreshTheme)
+      } else if (typeof this.systemThemeMedia.addListener === 'function') {
+        this.systemThemeMedia.addListener(refreshTheme)
+      }
+      this.applyTheme()
+      this.$nextTick(() => this.$dispatch('solver-ui-autorun-changed', { value: this.autoRun }))
+    }
+  }" x-bind:class="{ 'menu-open': menuOpen }">
+  <div class="app-shell">
+    <aside class="app-sidebar markdown-body" x-show="menuOpen" x-transition:enter="sidebar-enter"
+      x-transition:enter-start="sidebar-enter-start" x-transition:enter-end="sidebar-enter-end"
+      x-transition:leave="sidebar-leave" x-transition:leave-start="sidebar-leave-start"
+      x-transition:leave-end="sidebar-leave-end">
+      <section class="sidebar-group">
+        <h3>Documents</h3>
+        <fieldset id="documentsManager">
+          <label for="documentsSelect">Documents:</label>
+          <select id="documentsSelect" name="documentsSelect"></select>
+          <button type="button" id="docOpen" title="Open selected document in current tab">Open</button>
+          <button type="button" id="docNew" title="Create new document">New</button>
+          <button type="button" id="docRename" title="Rename selected document">Rename</button>
+          <button type="button" id="docDelete" title="Delete selected document">Delete</button>
         </fieldset>
-      </span>
+        <button type="button" id="shareLink" name="shareLink" title="Create shareable link">Share Link</button>
+      </section>
 
-    </form>
-  </nav>
+      <section class="sidebar-group">
+        <h3>Examples</h3>
+        <label for="exampleSelector">Library:</label>
+        <select id="exampleSelector" name="example">
+          <optgroup label="Math">
+            <option value="basicUsage">Basic Usage</option>
+            <option value="units">Units</option>
+            <option value="matrices">Matrices</option>
+            <option value="quadraticFormula">Quadratic Formula</option>
+          </optgroup>
+          <optgroup label="Data">
+            <option value="strings">Strings</option>
+            <option value="objects">Objects</option>
+          </optgroup>
+          <optgroup label="Plot">
+            <option value="simplePlot">Plot</option>
+            <option value="plot3D">3D Plot</option>
+            <option value="statPlot">Statistic Plots</option>
+            <option value="lorenz">Lorenz attractor</option>
+          </optgroup>
+          <optgroup label="Thermodynamics">
+            <option value="coolprop">Fluid Properties</option>
+            <option value="coolpropHigh">coolprop website</option>
+            <option value="VaporCompressionCycle">Vapor Compression Cycle</option>
+            <option value="refCycleWithRecuperator">Recuperator</option>
+          </optgroup>
+          <optgroup label="Sciences">
+            <option value="chemistry">Chemistry</option>
+          </optgroup>
+        </select>
+        <div class="sidebar-row">
+          <button type="button" id="exampleInsert" name="insertExample">Insert</button>
+        </div>
+      </section>
 
-  <main>
-    <div id="INPUT" x-show="showCode"></div>
-    <article id="OUTPUT" class="markdown-body" x-show="showReport">
-    </article>
-  </main>
+      <section class="sidebar-group">
+        <h3>Execution</h3>
+        <label class="toggle-row" for="autoRunToggle">
+          <input type="checkbox" id="autoRunToggle" x-model="autoRun">
+          <span>Auto-run while typing</span>
+        </label>
+        <button type="button" id="runNowButton" title="Run now (Cmd/Ctrl+Enter)">Run now</button>
+        <small class="hint">Shortcut: Cmd+Enter (macOS) / Ctrl+Enter</small>
+      </section>
+
+      <section class="sidebar-group">
+        <h3>View</h3>
+        <label for="themeModeSelect">Theme mode</label>
+        <select id="themeModeSelect" x-model="themeMode">
+          <option value="auto">Automatic</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <label class="toggle-row" for="showCodeToggle">
+          <input type="checkbox" id="showCodeToggle" x-model="showCode">
+          <span>Show code panel</span>
+        </label>
+        <label class="toggle-row" for="showReportToggle">
+          <input type="checkbox" id="showReportToggle" x-model="showReport">
+          <span>Show output panel</span>
+        </label>
+      </section>
+    </aside>
+
+    <div class="app-content">
+      <header class="app-header markdown-body">
+        <button type="button" class="hamburger" x-on:click="menuOpen = !menuOpen"
+          x-bind:title="menuOpen ? 'Close menu' : 'Open menu'" x-text="menuOpen ? 'Close' : 'Menu'"></button>
+        <fieldset id="tabs"></fieldset>
+        <button type="button" id="tabAddButton" class="tab-add" title="Open new tab">+</button>
+      </header>
+
+      <main>
+        <div id="INPUT" x-show="showCode"></div>
+        <article id="OUTPUT" class="markdown-body" x-show="showReport">
+        </article>
+      </main>
+    </div>
+  </div>
   <script type="module" src="/main.js"> </script>
 </body>
 

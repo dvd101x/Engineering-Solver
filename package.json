@@ -13,6 +13,7 @@
     "vite": "^6.3.0"
   },
   "dependencies": {
+    "@codemirror/theme-one-dark": "^6.1.3",
     "@lezer/highlight": "^1.2.3",
     "@lezer/lr": "^1.4.10",
     "alpinejs": "^3.14.9",
