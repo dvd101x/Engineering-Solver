@@ -405,6 +405,7 @@ function updateSelection() {
 function renderTabs() {
   tabsField.innerHTML = ''
   const openSlots = getOpenSlots()
+  const canCloseTabs = openSlots.length > 1
 
   if (openSlots.length === 0) {
     return
@@ -432,13 +433,15 @@ function renderTabs() {
     label.id = 'tabL' + ID
     wrapper.appendChild(label)
 
-    const closeBtn = document.createElement('button')
-    closeBtn.type = 'button'
-    closeBtn.className = 'tab-close'
-    closeBtn.dataset.slot = String(ID)
-    closeBtn.title = 'Close tab'
-    closeBtn.textContent = 'x'
-    wrapper.appendChild(closeBtn)
+    if (canCloseTabs) {
+      const closeBtn = document.createElement('button')
+      closeBtn.type = 'button'
+      closeBtn.className = 'tab-close'
+      closeBtn.dataset.slot = String(ID)
+      closeBtn.title = 'Close tab'
+      closeBtn.textContent = 'x'
+      wrapper.appendChild(closeBtn)
+    }
 
     tabsField.appendChild(wrapper)
     sessionNames[ID] = setSessionName(ID)
@@ -450,6 +453,10 @@ function getOpenSlots() {
 }
 
 function closeTab(slot) {
+  if (getOpenSlots().length <= 1) {
+    return
+  }
+
   if (!beginStorageWrite()) {
     return
   }

@@ -115,7 +115,6 @@
           <input type="checkbox" id="autoRunToggle" x-model="autoRun">
           <span>Auto-run while typing</span>
         </label>
-        <button type="button" id="runNowButton" title="Run now (Cmd/Ctrl+Enter)">Run now</button>
         <small class="hint">Shortcut: Cmd+Enter (macOS) / Ctrl+Enter</small>
       </section>
 
@@ -144,6 +143,9 @@
           x-bind:title="menuOpen ? 'Close menu' : 'Open menu'" x-text="menuOpen ? 'Close' : 'Menu'"></button>
         <fieldset id="tabs"></fieldset>
         <button type="button" id="tabAddButton" class="tab-add" title="Open new tab">+</button>
+        <div class="header-actions">
+          <button type="button" id="runNowButton" x-show="!autoRun" title="Run now (Cmd/Ctrl+Enter)">Run now</button>
+        </div>
       </header>
 
       <main>

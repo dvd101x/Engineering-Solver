@@ -252,8 +252,17 @@ main > .markdown-body .highlight {
 	gap: 4px;
 	font-size: 12px;
 	margin: 0 2px;
+	flex: 1;
+	min-width: 0;
 	flex-wrap: wrap;
 	overflow: auto;
+}
+
+.header-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
 }
 
 .tab-pill {

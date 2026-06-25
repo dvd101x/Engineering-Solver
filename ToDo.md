@@ -27,6 +27,7 @@ ToDo
 - [ ] Help files
 - [x] Eval expressions vs blocks
 - [x] Custom help
+- [x] Keep sidebar close button accessible on narrow windows
 - [ ] Function finder
 - [ ] Variable finder
 - [x] Drag and Drop documents
