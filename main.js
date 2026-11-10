@@ -67,6 +67,7 @@ let themeMode = localStorage.getItem(THEME_MODE_STORAGE_KEY) || 'auto'
 const themeCompartment = new Compartment()
 const colorSchemeMedia = window.matchMedia('(prefers-color-scheme: dark)')
 let plotResizeTimer
+const tabUnsavedChanges = new Map() // Track unsaved changes per tab
 
 const storageController = createStorageV2({
   maxSlots: numberOfSessions,
@@ -122,7 +123,9 @@ tabsField.addEventListener('change', () => {
     sessions[ID] = createState(ID)
   }
 
+  // Save unsaved state of current tab before switching
   sessions[lastTab] = editor.state
+  tabUnsavedChanges.set(lastTab, hasPendingChanges)
   saveSession(lastTab)
 
   editor.setState(sessions[ID])
@@ -130,6 +133,11 @@ tabsField.addEventListener('change', () => {
 
   setActiveSlot(ID)
   lastTab = ID
+  
+  // Restore unsaved state for the new tab
+  hasPendingChanges = tabUnsavedChanges.get(ID) || false
+  updateRunButtonState()
+  
   renderTabs()
   refreshDocumentsMenu()
 })
@@ -142,6 +150,17 @@ tabsField.addEventListener('click', (event) => {
 
   event.preventDefault()
   const slot = Number.parseInt(closeButton.dataset.slot, 10)
+  
+  // Check if tab has unsaved changes
+  const hasUnsaved = tabUnsavedChanges.get(slot) || false
+  if (hasUnsaved) {
+    const docName = sessionNames[slot] || `Tab ${slot}`
+    const shouldClose = confirm(`"${docName}" has unsaved changes. Close anyway?`)
+    if (!shouldClose) {
+      return
+    }
+  }
+  
   closeTab(slot)
 })
 
@@ -198,7 +217,27 @@ docOpenButton.addEventListener('click', () => {
     return
   }
 
-  openDocumentInSlot(docId, Number.parseInt(lastTab, 10))
+  // Check if document is already open in another tab
+  const existingSlot = listOfSessions.find(ID => storageState.index.slotDocIds[ID - 1] === docId)
+  if (existingSlot) {
+    // Switch to existing tab
+    setActiveSlot(existingSlot)
+    lastTab = existingSlot
+    editor.setState(sessions[existingSlot])
+    editor.focus()
+    renderTabs()
+    refreshDocumentsMenu()
+    return
+  }
+
+  // Find empty tab or create new one
+  const emptySlot = findEmptySession()
+  if (emptySlot) {
+    openDocumentInSlot(docId, emptySlot)
+  } else {
+    // All tabs have content, create a new tab
+    openNewTab(docId)
+  }
 })
 
 docNewButton.addEventListener('click', () => {
@@ -363,11 +402,14 @@ function createState(ID) {
             clearTimeout(timer)
             timer = setTimeout(sendWorkToMathWorker, wait, text)
             hasPendingChanges = false
+            tabUnsavedChanges.set(slotAtChange, false)
           } else {
             hasPendingChanges = true
+            tabUnsavedChanges.set(slotAtChange, true)
           }
 
           updateRunButtonState()
+          renderTabs()
         } else if (update.selectionSet) {
           updateSelection()
         }
@@ -513,8 +555,10 @@ function setSessionName(ID) {
 
   if (doc) {
     const noteBookName = doc.name || `Notebook ${ID}`
-    label.innerHTML = noteBookName.length > 16 ? noteBookName.slice(0, 15).trim() + '…' : noteBookName
-    label.title = noteBookName
+    const unsavedIndicator = tabUnsavedChanges.get(ID) ? ' ●' : ''
+    const displayName = noteBookName.length > 16 ? noteBookName.slice(0, 15).trim() + '…' : noteBookName
+    label.innerHTML = displayName + unsavedIndicator
+    label.title = noteBookName + (unsavedIndicator ? ' (unsaved)' : '')
     return noteBookName
   }
 
@@ -594,7 +638,9 @@ function setActiveSlot(ID) {
 
 function sendWorkToMathWorker(mathExpressions) {
   hasPendingChanges = false
+  tabUnsavedChanges.set(lastTab, false)
   updateRunButtonState()
+  renderTabs()
 
   if (mathExpressions !== '') {
     const expressions = mathExpressions.replace(/\r?\n/g, '\n')
@@ -775,14 +821,35 @@ function openDocumentInSlot(docId, slot) {
   refreshDocumentsMenu()
 }
 
-function openNewTab() {
-  const slot = findEmptySession() || Number.parseInt(lastTab, 10)
-  const docId = createDocument(generateDefaultDocumentName(), '')
-  if (!docId) {
+function openNewTab(docIdToOpen = null) {
+  const slot = findEmptySession()
+  
+  // If no empty slot and we're trying to open an existing doc, 
+  // we need to handle this by using the current tab or closing one
+  if (!slot && docIdToOpen) {
+    // For safety, just use the current tab as fallback
+    // (User can see the "+" button to explicitly create new tabs)
+    openDocumentInSlot(docIdToOpen, Number.parseInt(lastTab, 10))
     return
   }
-
-  openDocumentInSlot(docId, slot)
+  
+  if (!slot) {
+    // No empty slot and no document to open - shouldn't happen with "+" button
+    // but handle it gracefully by using current tab
+    return
+  }
+  
+  if (docIdToOpen) {
+    // Opening an existing document in a new tab
+    openDocumentInSlot(docIdToOpen, slot)
+  } else {
+    // Creating a brand new document
+    const docId = createDocument(generateDefaultDocumentName(), '')
+    if (!docId) {
+      return
+    }
+    openDocumentInSlot(docId, slot)
+  }
 }
 
 function createDocument(name, content) {
