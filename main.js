@@ -301,15 +301,6 @@ mathWorker.onmessage = function (oEvent) {
   const tabToSave = lastTab
   outputs.innerHTML = ''
 
-  // Debug: Log block ranges and output line numbers
-  if (blockExecutionData && blockExecutionData.blockLineRanges) {
-    console.log('Block ranges:', blockExecutionData.blockLineRanges);
-    console.log('Block data:', blockExecutionData.blocks);
-    results.outputs.forEach((out, idx) => {
-      console.log(`Output ${idx}: from=${out.from}, to=${out.to}, type=${out.type}`);
-    });
-  }
-
   // Determine which block each output belongs to
   let currentBlockIndex = 0
   let lastDisplayedBlockIndex = -1
@@ -326,7 +317,6 @@ mathWorker.onmessage = function (oEvent) {
         // Check if the output's ending line falls within this block's range
         if (outputLine >= range.start && outputLine <= range.end) {
           currentBlockIndex = i
-          console.log(`Output ending at line ${outputLine} -> Block ${i + 1}`);
           break
         }
       }
