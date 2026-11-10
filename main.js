@@ -68,6 +68,7 @@ const themeCompartment = new Compartment()
 const colorSchemeMedia = window.matchMedia('(prefers-color-scheme: dark)')
 let plotResizeTimer
 const tabUnsavedChanges = new Map() // Track unsaved changes per tab
+let blockExecutionData = null // Track blocks and execution timing
 
 const storageController = createStorageV2({
   maxSlots: numberOfSessions,
@@ -300,7 +301,44 @@ mathWorker.onmessage = function (oEvent) {
   const tabToSave = lastTab
   outputs.innerHTML = ''
 
-  results.outputs.forEach(out => {
+  // Debug: Log block ranges and output line numbers
+  if (blockExecutionData && blockExecutionData.blockLineRanges) {
+    console.log('Block ranges:', blockExecutionData.blockLineRanges);
+    console.log('Block data:', blockExecutionData.blocks);
+    results.outputs.forEach((out, idx) => {
+      console.log(`Output ${idx}: from=${out.from}, to=${out.to}, type=${out.type}`);
+    });
+  }
+
+  // Determine which block each output belongs to
+  let currentBlockIndex = 0
+  let lastDisplayedBlockIndex = -1
+
+  results.outputs.forEach((out, outputIndex) => {
+    // Get the ending line of this output (that's where the actual code is)
+    const outputLine = out.to || out.from || 0
+    
+    // If we have block data, figure out which block this line belongs to
+    if (blockExecutionData && blockExecutionData.blockLineRanges) {
+      // Find which block this output belongs to based on where the output ends
+      for (let i = 0; i < blockExecutionData.blockLineRanges.length; i++) {
+        const range = blockExecutionData.blockLineRanges[i]
+        // Check if the output's ending line falls within this block's range
+        if (outputLine >= range.start && outputLine <= range.end) {
+          currentBlockIndex = i
+          console.log(`Output ending at line ${outputLine} -> Block ${i + 1}`);
+          break
+        }
+      }
+      
+      // Display block header if entering a new block
+      if (currentBlockIndex !== lastDisplayedBlockIndex) {
+        lastDisplayedBlockIndex = currentBlockIndex
+        displayBlockHeader(currentBlockIndex)
+      }
+    }
+
+    // Display the output
     switch (out.type) {
       case 'math':
         out.text.forEach(e => {
@@ -378,6 +416,33 @@ mathWorker.onmessage = function (oEvent) {
   if (results.parserState) {
     parserState = results.parserState
   }
+}
+
+function displayBlockHeader(blockIndex) {
+  if (!blockExecutionData || !blockExecutionData.blocks || blockIndex >= blockExecutionData.blocks.length) {
+    return
+  }
+
+  const block = blockExecutionData.blocks[blockIndex]
+  const header = document.createElement('div')
+  header.className = 'block-header'
+  header.style.cssText = `
+    margin: 12px 0 6px 0;
+    padding: 6px 8px;
+    background: rgba(0, 152, 255, 0.1);
+    border-left: 3px solid #0098ff;
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--tab-text);
+    line-height: 1.4;
+  `
+
+  const preview = block.length > 70 ? block.substring(0, 67) + '…' : block
+  const blockNum = blockIndex + 1
+  const executionTime = blockExecutionData.blockTimes ? blockExecutionData.blockTimes[blockIndex] : '?'
+  
+  header.innerHTML = `<strong>Block ${blockNum}</strong> • ${executionTime}ms • <code>${preview.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '; ')}</code>`
+  outputs.appendChild(header)
 }
 
 function createState(ID) {
@@ -644,6 +709,49 @@ function sendWorkToMathWorker(mathExpressions) {
 
   if (mathExpressions !== '') {
     const expressions = mathExpressions.replace(/\r?\n/g, '\n')
+    
+    // Parse blocks separated by empty lines
+    const lines = expressions.split('\n')
+    const blocks = []
+    const blockLineRanges = []
+    
+    let currentBlock = []
+    let currentBlockStartLine = 0
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim()
+      
+      if (line === '') {
+        // Empty line: end current block if it has content
+        if (currentBlock.length > 0) {
+          blocks.push(currentBlock.join('\n'))
+          blockLineRanges.push({ start: currentBlockStartLine, end: i - 1 })
+          currentBlock = []
+        }
+      } else {
+        // Non-empty line: add to current block
+        if (currentBlock.length === 0) {
+          currentBlockStartLine = i
+        }
+        currentBlock.push(lines[i])
+      }
+    }
+    
+    // Don't forget the last block
+    if (currentBlock.length > 0) {
+      blocks.push(currentBlock.join('\n'))
+      blockLineRanges.push({ start: currentBlockStartLine, end: lines.length - 1 })
+    }
+    
+    // Initialize block execution data with line ranges
+    blockExecutionData = {
+      blocks: blocks,
+      blockLineRanges: blockLineRanges,
+      blockTimes: new Array(blocks.length).fill(0),
+      startTime: Date.now(),
+      totalBlocks: blocks.length
+    }
+    
     const request = { expr: expressions }
     mathWorker.postMessage(JSON.stringify(request))
   }
