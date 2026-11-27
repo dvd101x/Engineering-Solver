@@ -32,3 +32,17 @@ export function splitIntoBlocks(code) {
 export function findBlockIndexForLine(blockLineRanges, line) {
   return blockLineRanges.findIndex(range => line >= range.start && line <= range.end)
 }
+
+export function sumExecutionTimesByBlock(blockLineRanges, expressions) {
+  const blockTimes = new Array(blockLineRanges.length).fill(0)
+
+  expressions.forEach((expression) => {
+    const line = expression.to ?? expression.from ?? 0
+    const blockIndex = findBlockIndexForLine(blockLineRanges, line)
+    if (blockIndex !== -1 && Number.isFinite(expression.executionTime)) {
+      blockTimes[blockIndex] += expression.executionTime
+    }
+  })
+
+  return blockTimes
+}

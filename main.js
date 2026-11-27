@@ -1,7 +1,7 @@
 import './style.css'
 
 import initialState from './ext/initialState.js'
-import { findBlockIndexForLine, splitIntoBlocks } from './ext/blockExecution.js'
+import { findBlockIndexForLine, splitIntoBlocks, sumExecutionTimesByBlock } from './ext/blockExecution.js'
 
 import { Compartment, EditorState } from '@codemirror/state'
 import { EditorView, basicSetup } from 'codemirror'
@@ -328,12 +328,12 @@ mathWorker.onmessage = function (oEvent) {
   const tabToSave = lastTab
   outputs.innerHTML = ''
 
-  // Calculate execution time for blocks
-  if (blockExecutionData && blockExecutionData.startTime) {
-    const totalTime = Date.now() - blockExecutionData.startTime
-    const blockCount = blockExecutionData.totalBlocks || 1
-    const avgTimePerBlock = Math.round(totalTime / blockCount)
-    blockExecutionData.blockTimes = new Array(blockCount).fill(avgTimePerBlock)
+  if (blockExecutionData) {
+    const expressions = results.outputs.flatMap(out => out.type === 'math' ? out.text : [])
+    blockExecutionData.blockTimes = sumExecutionTimesByBlock(
+      blockExecutionData.blockLineRanges,
+      expressions
+    )
   }
 
   // Match each rendered item to its source block.
@@ -455,7 +455,9 @@ function displayBlockHeader(blockIndex) {
 
   const preview = block.length > 70 ? block.substring(0, 67) + '…' : block
   const blockNum = blockIndex + 1
-  const executionTime = blockExecutionData.blockTimes ? blockExecutionData.blockTimes[blockIndex] : '?'
+  const executionTime = blockExecutionData.blockTimes
+    ? blockExecutionData.blockTimes[blockIndex].toFixed(2)
+    : '?'
 
   header.innerHTML = `<strong>Block ${blockNum}</strong> • ${executionTime}ms • <code>${preview.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '; ')}</code>`
   outputs.appendChild(header)

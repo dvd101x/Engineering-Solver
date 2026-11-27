@@ -317,33 +317,36 @@ function formatResult(result) {
  */
 function processExpression(expression) {
     // returns an object with isError and result properties
+    const startTime = performance.now()
     const result = calc(expression.source)
     const visible = (result && result.value && result.value.isResultSet && (result.value.entries.length == 0)) ? false :
         (result.value === undefined) ? false : true
 
+    let processed
     if (result.isError) {
-        return { type: "error", result: result.value, visible }
+        processed = { type: "error", result: result.value, visible }
     } else if (result.value && result.value.isPlot) {
         const { data, layout, config } = result.value
-        return {
+        processed = {
             type: "plot",
             result: formatObject({ data, layout, config }),
             visible
         }
     } else if (result.value && typeof result.value == "string") {
-        return {
+        processed = {
             type: "string",
             result: result.value,
             visible
         }
-    }
-    else {
-        return {
+    } else {
+        processed = {
             type: "any",
             result: formatResult(result.value),
             visible
         }
     }
+    processed.executionTime = performance.now() - startTime
+    return processed
 }
 
 function formatObject(obj) {
