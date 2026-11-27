@@ -419,7 +419,12 @@ mathWorker.onmessage = function (oEvent) {
   queuePlotResize()
   clearTimeout(timerSave)
   sessions[lastTab] = editor.state
-  timerSave = setTimeout(saveSession, waitToSave, tabToSave)
+  const docIdToSave = storageState.index.slotDocIds[tabToSave - 1]
+  timerSave = setTimeout(() => {
+    if (storageState.index.slotDocIds[tabToSave - 1] === docIdToSave) {
+      saveSession(tabToSave)
+    }
+  }, waitToSave)
 
   if (results.mathState) {
     workerState = results.mathState
@@ -468,8 +473,12 @@ function createState(ID) {
         if (update.docChanged) {
           const text = update.state.doc.toString()
           const slotAtChange = Number.parseInt(lastTab, 10)
+          const docIdAtChange = storageState.index.slotDocIds[slotAtChange - 1]
           clearTimeout(timerSave)
           timerSave = setTimeout(() => {
+            if (storageState.index.slotDocIds[slotAtChange - 1] !== docIdAtChange) {
+              return
+            }
             sessions[slotAtChange] = update.state
             saveSession(slotAtChange)
           }, waitToSave)
@@ -584,6 +593,20 @@ function closeTab(slot) {
     return
   }
 
+  const document = storageState.docsById[slotDocId]
+  const content = Number.parseInt(lastTab, 10) === slot
+    ? editor.state.doc.toString()
+    : sessions[slot]?.doc.toString() ?? document?.content ?? ''
+  if (content.trim() === '') {
+    localStorage.removeItem(getDocStorageKey(slotDocId))
+    delete storageState.docsById[slotDocId]
+    storageController.removeDocument(slotDocId)
+  } else if (document) {
+    document.content = content.replace(/\r\n/g, '\n')
+    document.updatedAt = Date.now()
+    localStorage.setItem(getDocStorageKey(slotDocId), JSON.stringify(document))
+  }
+
   storageState.index.slotDocIds[slot - 1] = null
   sessions[slot] = null
   sessionNames[slot] = null
@@ -664,6 +687,7 @@ function setSessionText(ID, text) {
     if (docId) {
       localStorage.removeItem(getDocStorageKey(docId))
       delete storageState.docsById[docId]
+      storageController.removeDocument(docId)
       storageState.index.slotDocIds[ID - 1] = null
       syncOpenTabsFromSlots()
     }
@@ -671,6 +695,7 @@ function setSessionText(ID, text) {
     if (!docId) {
       docId = `doc-${ID}-${Date.now()}`
       storageState.index.slotDocIds[ID - 1] = docId
+      storageController.addDocument(docId)
     }
 
     const previous = storageState.docsById[docId]
@@ -957,6 +982,7 @@ function createDocument(name, content) {
 
   storageState.docsById[docId] = doc
   localStorage.setItem(getDocStorageKey(docId), JSON.stringify(doc))
+  storageController.addDocument(docId)
   storageState.index.openTabs.push(docId)
   persistStorageIndex()
   refreshDocumentsMenu()
@@ -1001,6 +1027,7 @@ function deleteDocument(docId) {
 
   localStorage.removeItem(getDocStorageKey(docId))
   delete storageState.docsById[docId]
+  storageController.removeDocument(docId)
 
   storageState.index.slotDocIds = storageState.index.slotDocIds.map(id => id === docId ? null : id)
   syncOpenTabsFromSlots()

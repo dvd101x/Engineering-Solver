@@ -49,6 +49,20 @@ export function createStorageV2({
 
   function syncOpenTabsFromSlots() {
     state.index.openTabs = state.index.slotDocIds.filter(id => id !== null)
+    state.index.documentIds = [...new Set([
+      ...(Array.isArray(state.index.documentIds) ? state.index.documentIds : []),
+      ...state.index.slotDocIds.filter(Boolean)
+    ])]
+  }
+
+  function addDocument(docId) {
+    if (!state.index.documentIds.includes(docId)) {
+      state.index.documentIds.push(docId)
+    }
+  }
+
+  function removeDocument(docId) {
+    state.index.documentIds = state.index.documentIds.filter(id => id !== docId)
   }
 
   function getOpenSlots() {
@@ -114,6 +128,7 @@ export function createStorageV2({
     state.docsById[docId] = doc
     localStorage.setItem(getDocStorageKey(docId), JSON.stringify(doc))
     state.index.slotDocIds[slot - 1] = docId
+    addDocument(docId)
     state.index.activeSlot = slot
     state.index.activeTabId = docId
     syncOpenTabsFromSlots()
@@ -126,20 +141,38 @@ export function createStorageV2({
       index = migrateLegacyStorage(slotCount)
     }
 
-    const docsById = {}
-    index.slotDocIds.forEach((docId) => {
-      if (!docId) {
-        return
+    const storedDocIds = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key?.startsWith(STORAGE_V2_DOC_PREFIX)) {
+        storedDocIds.push(key.slice(STORAGE_V2_DOC_PREFIX.length))
       }
+    }
 
+    const documentIds = [...new Set([
+      ...(Array.isArray(index.documentIds) ? index.documentIds : []),
+      ...index.slotDocIds,
+      ...storedDocIds
+    ].filter(docId => typeof docId === 'string' && docId))]
+    const docsById = {}
+    const openDocIds = new Set(index.slotDocIds.filter(Boolean))
+    documentIds.forEach((docId) => {
       const doc = safeParseJSON(localStorage.getItem(getDocStorageKey(docId)))
       if (doc && typeof doc.content === 'string') {
+        if (!openDocIds.has(docId) && doc.content.trim() === '') {
+          localStorage.removeItem(getDocStorageKey(docId))
+          return
+        }
         docsById[docId] = doc
       }
     })
 
-    index.slotDocIds = Array.from({ length: slotCount }, (_, i) => index.slotDocIds[i] || null)
-    index.openTabs = Array.isArray(index.openTabs) ? index.openTabs.filter(id => docsById[id]) : []
+    index.documentIds = documentIds.filter(docId => docsById[docId])
+    index.slotDocIds = Array.from({ length: slotCount }, (_, i) => {
+      const docId = index.slotDocIds[i]
+      return docId && docsById[docId] ? docId : null
+    })
+    index.openTabs = index.slotDocIds.filter(Boolean)
 
     const openSlots = listOfSessions.filter(ID => index.slotDocIds[ID - 1] !== null)
     const activeSlot = Number.parseInt(index.activeSlot, 10)
@@ -196,6 +229,7 @@ export function createStorageV2({
       version: 2,
       slotDocIds,
       openTabs,
+      documentIds: openTabs.slice(),
       activeSlot,
       activeTabId: slotDocIds[activeSlot - 1] || null,
       updatedAt: Date.now(),
@@ -245,6 +279,8 @@ export function createStorageV2({
     getSessionText,
     generateDefaultDocumentName,
     generateUniqueDocumentName,
+    addDocument,
+    removeDocument,
     ensureAtLeastOneOpenTab
   }
 }
