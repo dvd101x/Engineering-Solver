@@ -1,9 +1,8 @@
-importScripts(
-    "math.js",
-    "coolprop.js",
-    "fluidProperties.js",
-    "molecularMass.js"
-)
+import Module from 'coolprop-wasm/coolprop'
+import { math } from './mathInstance.js'
+import { createFluidFunctions } from './fluidProperties.js'
+import { MM } from './molecularMass.js'
+
 const parser = math.parser()
 
 function createNewHelp() {
@@ -117,7 +116,9 @@ const functionsToVectorize =
         "asinh", "acosh", "atanh", "acsch", "asech", "acoth"
     ]
 
-math.import(
+function registerFunctions(CoolProp) {
+    const { props, HAprops, phase } = createFluidFunctions(math, CoolProp)
+    math.import(
     {
         props, HAprops, phase, MM,
         plot: math.typed('plot',{
@@ -132,6 +133,7 @@ math.import(
         })
     }
     , { override: false })
+}
 
 math.createUnit('TR', '12e3 BTU/h')
 
@@ -150,9 +152,19 @@ const firstResponse = {
     outputs: [{ type: "markdown", text: intro }]
 }
 
-postMessage(JSON.stringify(firstResponse));
+// Vite's development pre-bundling changes the default relative WASM location.
+const wasmUrl = new URL('./node_modules/coolprop-wasm/coolprop.wasm', import.meta.url).href
+const ready = Module({ locateFile: () => wasmUrl }).then(CoolProp => {
+    registerFunctions(CoolProp)
+    postMessage(JSON.stringify(firstResponse))
+    return true
+}).catch(error => {
+    postMessage(JSON.stringify({ error: `Failed to initialize CoolProp: ${error.message}` }))
+    return false
+})
 
-onmessage = (oEvent) => {
+self.onmessage = async (oEvent) => {
+    if (!await ready) return
     const inputs = JSON.parse(oEvent.data);
     const response = {
         outputs: makeDoc(inputs.expr),
@@ -400,4 +412,3 @@ function calc(expression) {
 function plot(data, layout, config) {
     return { isPlot: true, data, layout, config }
 }
-

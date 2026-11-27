@@ -253,59 +253,61 @@ function calcPropUnits(prop) {
   }
 }
 
-// This is created only bacuse math.number(value,'') is not valid as '' can't be the unit
-const toValue = (v, u) => u ? math.number(v, u) : math.number(v)
-// This is crate only becous math.unit(value,'') is not valid as '' can't be the unit
-const toUnit = (v, u) => u ? math.unit(v, u) : math.unit(v)
+export function createFluidFunctions(math, CoolProp) {
+  const toValue = (v, u) => u ? math.number(v, u) : math.number(v)
+  const toUnit = (v, u) => u ? math.unit(v, u) : math.unit(v)
 
-function props(desiredProperty, fluidName, fluidProperties) {
-  const calcPropUnit = calcPropUnits(desiredProperty)
-  let prop  = Object.keys(fluidProperties).slice(0,2)
-  let value = Object.values(fluidProperties).slice(0,2)
-  
-  if (prop.length > 0) {
-    const units = [propUnit[subProp(prop[0])], propUnit[subProp(prop[1])]]
-    value = [toValue(value[0], units[0]), toValue(value[1], units[1])]
+  function props(desiredProperty, fluidName, fluidProperties) {
+    const calcPropUnit = calcPropUnits(desiredProperty)
+    let prop  = Object.keys(fluidProperties).slice(0,2)
+    let value = Object.values(fluidProperties).slice(0,2)
+
+    if (prop.length > 0) {
+      const units = [propUnit[subProp(prop[0])], propUnit[subProp(prop[1])]]
+      value = [toValue(value[0], units[0]), toValue(value[1], units[1])]
+    }
+    else {
+      prop = ["", ""]
+      value = [0, 0]
+    }
+
+    const calcValue = CoolProp.PropsSI(desiredProperty,
+      prop[0], value[0],
+      prop[1], value[1],
+      fluidName)
+
+    return toUnit(calcValue, calcPropUnit)
   }
-  else {
-    prop = ["", ""]
-    value = [0, 0]
+
+  function HAprops(calcProp, fluidProperties) {
+    const calcPropUnit = HApropUnit[calcProp]
+    const arrayProperties = Object.entries(fluidProperties)
+
+    const prop = [arrayProperties[0][0],
+    arrayProperties[1][0],
+    arrayProperties[2][0]]
+
+    const units = [HApropUnit[prop[0]],
+    HApropUnit[prop[1]],
+    HApropUnit[prop[2]]]
+
+    const value = [toValue(arrayProperties[0][1], units[0]),
+    toValue(arrayProperties[1][1], units[1]),
+    toValue(arrayProperties[2][1], units[2])]
+
+    const calcValue = CoolProp.HAPropsSI(calcProp,
+      prop[0], value[0],
+      prop[1], value[1],
+      prop[2], value[2])
+
+    return toUnit(calcValue, calcPropUnit)
   }
 
-  const calcValue = Module.PropsSI(desiredProperty,
-    prop[0], value[0],
-    prop[1], value[1],
-    fluidName)
+  function phase(fluid, fluidProperties) {
+    return phases[props('Phase',
+      fluid,
+      fluidProperties)]
+  }
 
-  return toUnit(calcValue, calcPropUnit)
-}
-
-function HAprops(calcProp, fluidProperties) {
-  const calcPropUnit = HApropUnit[calcProp]
-  const arrayProperties = Object.entries(fluidProperties)
-
-  const prop = [arrayProperties[0][0],
-  arrayProperties[1][0],
-  arrayProperties[2][0]]
-
-  const units = [HApropUnit[prop[0]],
-  HApropUnit[prop[1]],
-  HApropUnit[prop[2]]]
-
-  const value = [toValue(arrayProperties[0][1], units[0]),
-  toValue(arrayProperties[1][1], units[1]),
-  toValue(arrayProperties[2][1], units[2])]
-
-  const calcValue = Module.HAPropsSI(calcProp,
-    prop[0], value[0],
-    prop[1], value[1],
-    prop[2], value[2])
-
-  return toUnit(calcValue, calcPropUnit)
-}
-
-function phase(fluid, fluidProperties) {
-  return phases[props('Phase',
-    fluid,
-    fluidProperties)]
+  return { props, HAprops, phase }
 }

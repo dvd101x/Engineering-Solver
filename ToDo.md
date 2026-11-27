@@ -8,7 +8,7 @@ ToDo
   - [ ] Rename variables
     - [ ] Sessions to Editor States
 - [x] Match inputs and outputs
-- [x] ~~Change worker to modules~~ (tried several attempts can't make it work wit coolprop.wasm and vite)
+- [x] Change worker to modules
 
 # Plots
 - [x] Import plotly

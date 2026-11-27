@@ -42,6 +42,10 @@ const tabsField = document.getElementById("tabs")
 const insertButton = document.getElementById('exampleInsert')
 const exampleSelect = document.getElementById('exampleSelector')
 const outputs = document.getElementById("OUTPUT")
+const mathWorker = new Worker(new URL('./mathWorker.js', import.meta.url), { type: 'module' })
+mathWorker.onerror = (event) => {
+  outputs.textContent = `Math worker failed: ${event.message}`
+}
 const shareLinkButton = document.getElementById("shareLink")
 const numberOfSessions = 20
 const listOfSessions = Array.from({ length: numberOfSessions }, (_, i) => i + 1)
@@ -179,6 +183,10 @@ const waitToSave = 1000;
 
 mathWorker.onmessage = function (oEvent) {
   const results = JSON.parse(oEvent.data)
+  if (results.error) {
+    outputs.textContent = results.error
+    return
+  }
   const tabToSave = tabIDs.value;
   outputs.innerHTML = "";
   results.outputs.forEach(out => {

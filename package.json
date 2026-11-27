@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test"
   },
   "devDependencies": {
     "@lezer/generator": "^1.8.0",
@@ -17,6 +18,7 @@
     "@lezer/lr": "^1.4.10",
     "alpinejs": "^3.14.9",
     "codemirror": "^6.0.1",
+    "coolprop-wasm": "^6.6.0",
     "github-markdown-css": "^5.8.1",
     "katex": "^0.16.22",
     "markdown-it": "^14.1.0",

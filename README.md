@@ -28,10 +28,14 @@ Clone this repository and run the following command to install dependencies.
 ```
 npm install
 ```
-To test
+To run locally
 ```
 npm run dev
 ````
+To run the automated tests
+```
+npm test
+```
 To build 
 ````
 npm run build
@@ -93,7 +97,7 @@ Out:
 
 ## [CoolProp](http://www.coolprop.org/coolprop/HighLevelAPI.html#propssi-function)
 
-Used for calling PropsSI and HAPropsSI but the unit handling is done with MathJS, thus the functions are not exactly the same as in CoolProp.
+Uses the `coolprop-wasm` package to call PropsSI and HAPropsSI in a browser worker. Unit handling is done with MathJS, so the functions are not exactly the same as in CoolProp.
 
 ### Fluid Properties: props()
 
