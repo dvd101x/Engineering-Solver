@@ -224,8 +224,27 @@ main > .markdown-body {
 	padding: 1em;
 }
 
-main > .markdown-body .highlight {
+#OUTPUT .block-header.output-selected {
+	outline: 2px solid #0098ff;
+}
+
+#OUTPUT pre.output-block.output-selected {
+	box-shadow: inset 3px 0 #0098ff;
+}
+
+#OUTPUT pre.output-block > code.output-expression {
+	display: block;
+	white-space: pre-wrap;
+}
+
+#OUTPUT pre.output-block > code.output-expression[hidden] {
+	display: none;
+}
+
+#OUTPUT .output-expression.output-selected,
+#OUTPUT .output-markdown.output-selected {
 	background-color: yellowgreen;
+	color: #1f2a33;
 }
 
 #INPUT {

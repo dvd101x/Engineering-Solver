@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { findBlockIndexForLine, splitIntoBlocks, sumExecutionTimesByBlock } from '../ext/blockExecution.js'
+import { findBlockIndexForLine, mergeBlocksForExpressions, splitIntoBlocks, sumExecutionTimesByBlock } from '../ext/blockExecution.js'
 
 test('splits source into non-empty blocks with zero-based line ranges', () => {
   const result = splitIntoBlocks('a = 1\nb = 2\n\n# note\n\nc = 3')
@@ -36,4 +36,17 @@ test('sums expression execution times into their source blocks', () => {
     { from: 1, to: 1, executionTime: 8.5 },
     { from: 3, to: 3, executionTime: 0.4 }
   ]), [8.7, 0.4])
+})
+
+test('keeps multiline expressions containing blank lines in one block', () => {
+  const code = 'a = [1,\n\n  2]\nb = 3\n\nc = 4'
+  const { blockLineRanges } = splitIntoBlocks(code)
+  assert.deepEqual(mergeBlocksForExpressions(code, blockLineRanges, [
+    { from: 0, to: 2 },
+    { from: 3, to: 3 },
+    { from: 5, to: 5 }
+  ]), {
+    blocks: ['a = [1,\n\n  2]\nb = 3', 'c = 4'],
+    blockLineRanges: [{ start: 0, end: 3 }, { start: 5, end: 5 }]
+  })
 })

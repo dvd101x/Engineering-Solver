@@ -1,7 +1,7 @@
 import './style.css'
 
 import initialState from './ext/initialState.js'
-import { findBlockIndexForLine, splitIntoBlocks, sumExecutionTimesByBlock } from './ext/blockExecution.js'
+import { findBlockIndexForLine, mergeBlocksForExpressions, splitIntoBlocks, sumExecutionTimesByBlock } from './ext/blockExecution.js'
 import { createExecutionState, getDocumentActivationState } from './ext/executionState.js'
 
 import { Compartment, EditorState } from '@codemirror/state'
@@ -358,6 +358,13 @@ mathWorker.onmessage = function (oEvent) {
 
   if (blockExecutionData) {
     const expressions = results.outputs.flatMap(out => out.type === 'math' ? out.text : [])
+    const merged = mergeBlocksForExpressions(
+      blockExecutionData.source,
+      blockExecutionData.blockLineRanges,
+      expressions
+    )
+    blockExecutionData.blocks = merged.blocks
+    blockExecutionData.blockLineRanges = merged.blockLineRanges
     blockExecutionData.blockTimes = sumExecutionTimesByBlock(
       blockExecutionData.blockLineRanges,
       expressions
@@ -366,12 +373,15 @@ mathWorker.onmessage = function (oEvent) {
 
   // Match each rendered item to its source block.
   let lastDisplayedBlockIndex = -1
+  let currentPre = null
   const displayBlockForLine = (line) => {
     const blockIndex = findBlockIndexForLine(blockExecutionData?.blockLineRanges || [], line)
     if (blockIndex !== -1 && blockIndex !== lastDisplayedBlockIndex) {
       lastDisplayedBlockIndex = blockIndex
+      currentPre = null
       displayBlockHeader(blockIndex)
     }
+    return blockIndex
   }
 
   results.outputs.forEach((out) => {
@@ -379,30 +389,37 @@ mathWorker.onmessage = function (oEvent) {
     switch (out.type) {
       case 'math':
         out.text.forEach(e => {
-          displayBlockForLine(e.to ?? e.from ?? 0)
-          const pre = document.createElement('pre')
-          pre.setAttribute('data-from-line', e.from)
-          pre.setAttribute('data-to-line', e.to)
+          const blockIndex = displayBlockForLine(e.to ?? e.from ?? 0)
+          if (!currentPre) {
+            currentPre = document.createElement('pre')
+            currentPre.className = 'output-block'
+            const range = blockExecutionData?.blockLineRanges[blockIndex]
+            if (range) {
+              currentPre.dataset.fromLine = range.start
+              currentPre.dataset.toLine = range.end
+            }
+            outputs.appendChild(currentPre)
+          }
+          const code = document.createElement('code')
+          code.className = 'output-expression'
+          code.dataset.fromLine = e.from
+          code.dataset.toLine = e.to
+          code.dataset.fromOffset = e.fromOffset
+          code.dataset.toOffset = e.toOffset
           if (e.visible) {
             const type = e.type
             const value = e.result
             let div
             switch (type) {
               case 'string':
-                div = document.createElement('code')
-                div.innerHTML = value
-                pre.appendChild(div)
+                code.innerHTML = value
                 break
               case 'any':
-                div = document.createElement('div')
-                div.textContent = value
-                pre.appendChild(div)
+                code.textContent = value
                 break
               case 'error':
-                div = document.createElement('div')
-                div.style.color = 'red'
-                div.innerHTML = value
-                pre.appendChild(div)
+                code.style.color = 'red'
+                code.innerHTML = value
                 break
               case 'plot':
                 div = document.createElement('div')
@@ -422,18 +439,20 @@ mathWorker.onmessage = function (oEvent) {
                 } catch (error) {
                   div.innerHTML = 'myError:' + error.toString()
                 }
-                pre.appendChild(div)
+                code.appendChild(div)
                 break
             }
           } else {
-            pre.style.display = 'none'
+            code.hidden = true
           }
-          outputs.appendChild(pre)
+          currentPre.appendChild(code)
         })
         break
       case 'markdown': {
         displayBlockForLine(out.to ?? out.from ?? 0)
+        currentPre = null
         const div = document.createElement('div')
+        div.className = 'output-markdown'
         div.setAttribute('data-from-line', out.from)
         div.setAttribute('data-to-line', out.to)
         div.innerHTML = md.render(out.text)
@@ -470,6 +489,8 @@ function displayBlockHeader(blockIndex) {
   const block = blockExecutionData.blocks[blockIndex]
   const header = document.createElement('div')
   header.className = 'block-header'
+  header.dataset.fromLine = blockExecutionData.blockLineRanges[blockIndex].start
+  header.dataset.toLine = blockExecutionData.blockLineRanges[blockIndex].end
   header.style.cssText = `
     margin: 12px 0 6px 0;
     padding: 6px 8px;
@@ -536,29 +557,35 @@ function createState(ID) {
 }
 
 function updateSelection() {
+  const selection = editor.state.selection.ranges[editor.state.selection.mainIndex]
   const selectedFrom = editor.state.doc.lineAt(
-    editor.state.selection.ranges[editor.state.selection.mainIndex].from
+    selection.from
   ).number - 1
 
   const selectedTo = editor.state.doc.lineAt(
-    editor.state.selection.ranges[editor.state.selection.mainIndex].to
+    selection.to
   ).number - 1
 
-  const outputNodes = document.querySelector('#OUTPUT').childNodes
-
-  outputNodes.forEach(code => {
-    const thisNode = code
-    if (thisNode.getAttribute) {
-      const fromLine = Number.parseInt(thisNode.getAttribute('data-from-line'), 10)
-      const toLine = Number.parseInt(thisNode.getAttribute('data-to-line'), 10)
-      if ((fromLine <= selectedTo) && (toLine >= selectedFrom)) {
-        code.classList.add('highlight')
-        code.scrollIntoView({ block: 'nearest', inline: 'start' })
-      } else {
-        code.classList.remove('highlight')
+  let scrollTarget = null
+  outputs.querySelectorAll('.block-header, .output-block, .output-expression, .output-markdown')
+    .forEach(node => {
+      const fromLine = Number.parseInt(node.dataset.fromLine, 10)
+      const toLine = Number.parseInt(node.dataset.toLine, 10)
+      let selected = fromLine <= selectedTo && toLine >= selectedFrom
+      if (node.classList.contains('output-expression')) {
+        const from = Number.parseInt(node.dataset.fromOffset, 10)
+        const to = Number.parseInt(node.dataset.toOffset, 10)
+        selected = selection.empty
+          ? selection.from >= from && selection.from <= to
+          : selection.from < to && selection.to > from
       }
-    }
-  })
+      node.classList.toggle('output-selected', selected)
+      if (selected && !node.hidden &&
+          (node.classList.contains('output-expression') || node.classList.contains('output-markdown'))) {
+        scrollTarget ||= node
+      }
+    })
+  scrollTarget?.scrollIntoView({ block: 'nearest', inline: 'start' })
 }
 
 function renderTabs() {
@@ -788,6 +815,7 @@ function sendWorkToMathWorker(mathExpressions) {
 
     // Initialize block execution data with line ranges
     blockExecutionData = {
+      source: expressions,
       blocks: blocks,
       blockLineRanges: blockLineRanges,
       blockTimes: new Array(blocks.length).fill(0),

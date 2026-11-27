@@ -47,6 +47,8 @@ The interface includes a document manager, an editor and output panel, plus a ta
 
 When switching documents, the output is cleared. With auto-run enabled, the active document runs automatically; with auto-run disabled, use **Run now** or Cmd/Ctrl+Enter to run it.
 
+Output expressions are grouped by block, with separate highlighting for the current block and expression. Markdown between expressions remains in its original order, so it can split a block's output into multiple groups.
+
 In the example selector you can find:
 
 * Numbers
