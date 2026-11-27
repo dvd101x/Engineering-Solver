@@ -301,6 +301,14 @@ mathWorker.onmessage = function (oEvent) {
   const tabToSave = lastTab
   outputs.innerHTML = ''
 
+  // Calculate execution time for blocks
+  if (blockExecutionData && blockExecutionData.startTime) {
+    const totalTime = Date.now() - blockExecutionData.startTime
+    const blockCount = blockExecutionData.totalBlocks || 1
+    const avgTimePerBlock = Math.round(totalTime / blockCount)
+    blockExecutionData.blockTimes = new Array(blockCount).fill(avgTimePerBlock)
+  }
+
   // Determine which block each output belongs to
   let currentBlockIndex = 0
   let lastDisplayedBlockIndex = -1
