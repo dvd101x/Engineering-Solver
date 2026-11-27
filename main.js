@@ -1,6 +1,7 @@
 import './style.css'
 
 import initialState from './ext/initialState.js'
+import { findBlockIndexForLine, splitIntoBlocks } from './ext/blockExecution.js'
 
 import { Compartment, EditorState } from '@codemirror/state'
 import { EditorView, basicSetup } from 'codemirror'
@@ -335,36 +336,22 @@ mathWorker.onmessage = function (oEvent) {
     blockExecutionData.blockTimes = new Array(blockCount).fill(avgTimePerBlock)
   }
 
-  // Determine which block each output belongs to
-  let currentBlockIndex = 0
+  // Match each rendered item to its source block.
   let lastDisplayedBlockIndex = -1
-
-  results.outputs.forEach((out, outputIndex) => {
-    // Get the ending line of this output (that's where the actual code is)
-    const outputLine = out.to || out.from || 0
-
-    // If we have block data, figure out which block this line belongs to
-    if (blockExecutionData && blockExecutionData.blockLineRanges) {
-      // Find which block this output belongs to based on where the output ends
-      for (let i = 0; i < blockExecutionData.blockLineRanges.length; i++) {
-        const range = blockExecutionData.blockLineRanges[i]
-        // Check if the output's ending line falls within this block's range
-        if (outputLine >= range.start && outputLine <= range.end) {
-          currentBlockIndex = i
-          break
-        }
-      }
-
-      // Display block header if entering a new block
-      if (currentBlockIndex !== lastDisplayedBlockIndex) {
-        lastDisplayedBlockIndex = currentBlockIndex
-        displayBlockHeader(currentBlockIndex)
-      }
+  const displayBlockForLine = (line) => {
+    const blockIndex = findBlockIndexForLine(blockExecutionData?.blockLineRanges || [], line)
+    if (blockIndex !== -1 && blockIndex !== lastDisplayedBlockIndex) {
+      lastDisplayedBlockIndex = blockIndex
+      displayBlockHeader(blockIndex)
     }
+  }
+
+  results.outputs.forEach((out) => {
     // Display the output
     switch (out.type) {
       case 'math':
         out.text.forEach(e => {
+          displayBlockForLine(e.to ?? e.from ?? 0)
           const pre = document.createElement('pre')
           pre.setAttribute('data-from-line', e.from)
           pre.setAttribute('data-to-line', e.to)
@@ -417,6 +404,7 @@ mathWorker.onmessage = function (oEvent) {
         })
         break
       case 'markdown': {
+        displayBlockForLine(out.to ?? out.from ?? 0)
         const div = document.createElement('div')
         div.setAttribute('data-from-line', out.from)
         div.setAttribute('data-to-line', out.to)
@@ -732,39 +720,7 @@ function sendWorkToMathWorker(mathExpressions) {
 
   if (mathExpressions !== '') {
     const expressions = mathExpressions.replace(/\r?\n/g, '\n')
-
-    // Parse blocks separated by empty lines
-    const lines = expressions.split('\n')
-    const blocks = []
-    const blockLineRanges = []
-
-    let currentBlock = []
-    let currentBlockStartLine = 0
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim()
-
-      if (line === '') {
-        // Empty line: end current block if it has content
-        if (currentBlock.length > 0) {
-          blocks.push(currentBlock.join('\n'))
-          blockLineRanges.push({ start: currentBlockStartLine, end: i - 1 })
-          currentBlock = []
-        }
-      } else {
-        // Non-empty line: add to current block
-        if (currentBlock.length === 0) {
-          currentBlockStartLine = i
-        }
-        currentBlock.push(lines[i])
-      }
-    }
-
-    // Don't forget the last block
-    if (currentBlock.length > 0) {
-      blocks.push(currentBlock.join('\n'))
-      blockLineRanges.push({ start: currentBlockStartLine, end: lines.length - 1 })
-    }
+    const { blocks, blockLineRanges } = splitIntoBlocks(expressions)
 
     // Initialize block execution data with line ranges
     blockExecutionData = {
