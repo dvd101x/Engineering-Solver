@@ -1,44 +1,25 @@
+# TODO
 
-ToDo
-====
-- [ ] Update syntax to resemble ["the light format"](https://jupytext.readthedocs.io/en/latest/formats-scripts.html#the-light-format)
-- [ ] Details
-  - [x] Cleanup
-  - [x] JS docs
-  - [ ] Rename variables
-    - [ ] Sessions to Editor States
-- [x] Match inputs and outputs
-- [x] Change worker to modules
+## Pending
 
-# Plots
-- [x] Import plotly
-- [x] Return objects
-  - [x] plot types
-  - [ ] doc types
-  - [x] result type
-- [x] Document plots
-  - [x] Add plotly
-  - [x] More tests
-  - [ ] Format plot output
-  
-## Extra 
-- [ ] Include dates (to work with multiple tabs) 
-- [ ] Variables in scope
-- [ ] Help files
-- [x] Eval expressions vs blocks
-- [x] Custom help
-- [x] Keep sidebar close button accessible on narrow windows
-- [ ] Function finder
-- [ ] Variable finder
-- [x] Drag and Drop documents
-- [ ] Download text
-- [ ] Format help
+- [ ] Update notebook syntax to resemble [Jupytext's light format](https://jupytext.readthedocs.io/en/latest/formats-scripts.html#the-light-format) or an equivalent cell-based format.
+- [ ] Rename internal `sessions` terminology to editor states where it improves clarity.
+- [ ] Support documentation (`doc`) types in plot output.
+- [ ] Improve plot output formatting.
+- [ ] Show document creation/update dates in the document UI (the storage layer already records them).
+- [ ] Add function and variable finders.
+- [ ] Add help files and improve help formatting.
 
-## Decisions
-- [ ] GUI with Alpinejs
-  - [ ] Tabs
-  - [ ] Examples
-  - [ ] IO
-- [ ] New syntax like iodide
-- [ ] File names
-- [ ] Dropdown or tabs
+## Completed
+
+- [x] Match editor inputs and outputs.
+- [x] Use module workers.
+- [x] Cleanup and document JavaScript.
+- [x] Import Plotly, return plot/result objects, and add plot documentation and tests.
+- [x] Evaluate expressions and code blocks.
+- [x] Add custom help.
+- [x] Keep the sidebar close control accessible on narrow windows.
+- [x] Support dragging and dropping text documents into the editor.
+- [x] Build the Alpine.js interface: tabs, examples, editor/output panels, execution controls, document manager, and theme controls.
+- [x] Support named documents and tab-based navigation.
+- [x] Download the active document as a text file.

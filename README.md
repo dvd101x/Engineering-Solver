@@ -43,7 +43,7 @@ npm run build
 
 ## Interface
 
-There are two main areas, the input on the left and output on the right. A top navigation bar with 20 tabs and an example selector.
+The interface includes a document manager, an editor and output panel, plus a tab for each open document. Documents are saved automatically; use **Download text** to export the active document as a `.txt` file. The sidebar also includes an example selector, execution settings, and view/theme controls.
 
 In the example selector you can find:
 
@@ -55,7 +55,7 @@ In the example selector you can find:
 * Thermodynamic properties
 * Psychrometric properties
 
-You can work on any of the 20 tabs and your progress will be saved automatically after a few seconds of inactivity.
+You can work with up to 20 open documents, and your progress will be saved automatically after a few seconds of inactivity.
 
 ## [MathJS](https://mathjs.org/)
 

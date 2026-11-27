@@ -54,6 +54,7 @@ const docOpenButton = document.getElementById('docOpen')
 const docNewButton = document.getElementById('docNew')
 const docRenameButton = document.getElementById('docRename')
 const docDeleteButton = document.getElementById('docDelete')
+const docDownloadButton = document.getElementById('docDownload')
 
 const numberOfSessions = 20
 const listOfSessions = Array.from({ length: numberOfSessions }, (_, i) => i + 1)
@@ -276,6 +277,23 @@ docDeleteButton.addEventListener('click', () => {
   }
 
   deleteDocument(docId)
+})
+
+docDownloadButton.addEventListener('click', () => {
+  const activeDocId = storageState.index.slotDocIds[Number.parseInt(lastTab, 10) - 1]
+  const activeDoc = activeDocId ? storageState.docsById[activeDocId] : null
+  const baseName = (activeDoc?.name || sessionNames[lastTab] || `Notebook ${lastTab}`)
+    .trim()
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, '_')
+    .replace(/^\.+|\.+$/g, '') || 'notebook'
+  const downloadUrl = URL.createObjectURL(new Blob([editor.state.doc.toString()], {
+    type: 'text/plain;charset=utf-8'
+  }))
+  const link = document.createElement('a')
+  link.href = downloadUrl
+  link.download = `${baseName}.txt`
+  link.click()
+  setTimeout(() => URL.revokeObjectURL(downloadUrl), 0)
 })
 
 shareLinkButton.addEventListener('click', () => {
