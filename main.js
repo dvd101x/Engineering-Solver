@@ -2,6 +2,7 @@ import './style.css'
 
 import initialState from './ext/initialState.js'
 import { findBlockIndexForLine, splitIntoBlocks, sumExecutionTimesByBlock } from './ext/blockExecution.js'
+import { createExecutionState, getDocumentActivationState } from './ext/executionState.js'
 
 import { Compartment, EditorState } from '@codemirror/state'
 import { EditorView, basicSetup } from 'codemirror'
@@ -69,12 +70,15 @@ let workerState = initialState
 let parserState = {}
 let isAutoRunEnabled = localStorage.getItem(AUTO_RUN_STORAGE_KEY) !== '0'
 let hasPendingChanges = false
+let outputNeedsRun = false
 let themeMode = localStorage.getItem(THEME_MODE_STORAGE_KEY) || 'auto'
 const themeCompartment = new Compartment()
 const colorSchemeMedia = window.matchMedia('(prefers-color-scheme: dark)')
 let plotResizeTimer
 const tabUnsavedChanges = new Map() // Track unsaved changes per tab
 let blockExecutionData = null // Track blocks and execution timing
+const executionState = createExecutionState()
+let initialWelcomeRequestId = null
 
 const storageController = createStorageV2({
   maxSlots: numberOfSessions,
@@ -143,6 +147,7 @@ tabsField.addEventListener('change', () => {
 
   // Restore unsaved state for the new tab
   hasPendingChanges = tabUnsavedChanges.get(ID) || false
+  refreshOutputForActiveDocument()
   updateRunButtonState()
 
   renderTabs()
@@ -176,7 +181,7 @@ document.body.addEventListener('solver-ui-autorun-changed', (event) => {
   localStorage.setItem(AUTO_RUN_STORAGE_KEY, isAutoRunEnabled ? '1' : '0')
   updateRunButtonState()
 
-  if (isAutoRunEnabled && hasPendingChanges) {
+  if (isAutoRunEnabled && (hasPendingChanges || outputNeedsRun)) {
     runCurrentDocument()
   }
 })
@@ -227,11 +232,23 @@ docOpenButton.addEventListener('click', () => {
   // Check if document is already open in another tab
   const existingSlot = listOfSessions.find(ID => storageState.index.slotDocIds[ID - 1] === docId)
   if (existingSlot) {
+    if (existingSlot === Number.parseInt(lastTab, 10)) {
+      return
+    }
     // Switch to existing tab
+    sessions[lastTab] = editor.state
+    tabUnsavedChanges.set(lastTab, hasPendingChanges)
+    if (editor.state.doc.toString().trim()) {
+      saveSession(lastTab)
+    }
+    if (!sessions[existingSlot]) {
+      sessions[existingSlot] = createState(existingSlot)
+    }
     setActiveSlot(existingSlot)
     lastTab = existingSlot
     editor.setState(sessions[existingSlot])
     editor.focus()
+    refreshOutputForActiveDocument()
     renderTabs()
     refreshDocumentsMenu()
     return
@@ -321,6 +338,17 @@ insertButton.addEventListener('click', () => {
 
 mathWorker.onmessage = function (oEvent) {
   const results = JSON.parse(oEvent.data)
+  if (results.requestId === undefined && !results.error) {
+    if (initialWelcomeRequestId !== null && executionState.isCurrent(initialWelcomeRequestId)) {
+      const welcome = document.createElement('div')
+      welcome.innerHTML = md.render(results.outputs[0].text)
+      outputs.replaceChildren(welcome)
+    }
+    return
+  }
+  if (results.requestId !== undefined && !executionState.isCurrent(results.requestId)) {
+    return
+  }
   if (results.error) {
     outputs.textContent = results.error
     return
@@ -476,6 +504,8 @@ function createState(ID) {
           const text = update.state.doc.toString()
           const slotAtChange = Number.parseInt(lastTab, 10)
           const docIdAtChange = storageState.index.slotDocIds[slotAtChange - 1]
+          executionState.invalidate()
+          sessions[slotAtChange] = update.state
           clearTimeout(timerSave)
           timerSave = setTimeout(() => {
             if (storageState.index.slotDocIds[slotAtChange - 1] !== docIdAtChange) {
@@ -612,6 +642,7 @@ function closeTab(slot) {
   storageState.index.slotDocIds[slot - 1] = null
   sessions[slot] = null
   sessionNames[slot] = null
+  tabUnsavedChanges.delete(slot)
   syncOpenTabsFromSlots()
 
   let openSlots = getOpenSlots()
@@ -635,6 +666,10 @@ function closeTab(slot) {
     }
     editor.setState(sessions[nextSlot])
     editor.focus()
+    refreshOutputForActiveDocument()
+    if (isAutoRunEnabled && editor.state.doc.toString().trim() === '') {
+      initialWelcomeRequestId = executionState.invalidate()
+    }
   }
 
   persistStorageIndex()
@@ -741,11 +776,13 @@ function setActiveSlot(ID) {
 
 function sendWorkToMathWorker(mathExpressions) {
   hasPendingChanges = false
+  outputNeedsRun = false
   tabUnsavedChanges.set(lastTab, false)
   updateRunButtonState()
   renderTabs()
 
-  if (mathExpressions !== '') {
+  const requestId = executionState.invalidate()
+  if (mathExpressions.trim() !== '') {
     const expressions = mathExpressions.replace(/\r?\n/g, '\n')
     const { blocks, blockLineRanges } = splitIntoBlocks(expressions)
 
@@ -758,8 +795,27 @@ function sendWorkToMathWorker(mathExpressions) {
       totalBlocks: blocks.length
     }
 
-    const request = { expr: expressions }
+    const request = { expr: expressions, requestId }
     mathWorker.postMessage(JSON.stringify(request))
+  } else {
+    blockExecutionData = null
+    outputs.textContent = 'Enter an expression to see results.'
+  }
+}
+
+function refreshOutputForActiveDocument() {
+  clearTimeout(timer)
+  executionState.invalidate()
+  blockExecutionData = null
+  parserState = {}
+  const state = getDocumentActivationState(isAutoRunEnabled, editor.state.doc.toString())
+  outputs.textContent = state.message
+  hasPendingChanges = tabUnsavedChanges.get(Number.parseInt(lastTab, 10)) || false
+  outputNeedsRun = state.hasPendingChanges
+  if (state.shouldRun) {
+    runCurrentDocument()
+  } else {
+    updateRunButtonState()
   }
 }
 
@@ -778,8 +834,8 @@ function updateRunButtonState() {
     return
   }
 
-  runNowButton.textContent = hasPendingChanges ? 'Run now *' : 'Run now'
-  runNowButton.title = hasPendingChanges
+  runNowButton.textContent = hasPendingChanges || outputNeedsRun ? 'Run now *' : 'Run now'
+  runNowButton.title = hasPendingChanges || outputNeedsRun
     ? 'Run pending changes (Cmd/Ctrl+Enter)'
     : 'Run now (Cmd/Ctrl+Enter)'
 }
@@ -864,19 +920,28 @@ function bindPlotResizeHandlers() {
 }
 
 onFragmentChange((code) => {
+  sessions[lastTab] = editor.state
+  tabUnsavedChanges.set(lastTab, hasPendingChanges)
+  if (editor.state.doc.toString().trim()) {
+    saveSession(lastTab)
+  }
   const targetSlot = findEmptySession() || lastTab
   setSessionText(targetSlot, code)
   setActiveSlot(targetSlot)
   lastTab = targetSlot
   sessions[targetSlot] = createState(targetSlot)
+  tabUnsavedChanges.delete(targetSlot)
   editor.setState(sessions[targetSlot])
+  refreshOutputForActiveDocument()
   renderTabs()
   clearFragment()
 })
 
+refreshOutputForActiveDocument()
+
 function findEmptySession() {
   for (let ID of listOfSessions) {
-    const text = getSessionText(ID)
+    const text = sessions[ID]?.doc.toString() ?? getSessionText(ID)
     if (text.trim() === '') {
       return ID
     }
@@ -922,15 +987,23 @@ function openDocumentInSlot(docId, slot) {
   const existingSlot = listOfSessions.find(ID => storageState.index.slotDocIds[ID - 1] === docId)
   const targetSlot = existingSlot || Math.max(1, Math.min(numberOfSessions, slot))
 
+  sessions[lastTab] = editor.state
+  tabUnsavedChanges.set(lastTab, hasPendingChanges)
+  if (targetSlot !== Number.parseInt(lastTab, 10) && editor.state.doc.toString().trim()) {
+    saveSession(lastTab)
+  }
   storageState.index.slotDocIds[targetSlot - 1] = docId
   syncOpenTabsFromSlots()
 
   persistStorageIndex()
   sessionNames[targetSlot] = setSessionName(targetSlot)
   sessions[targetSlot] = createState(targetSlot)
+  tabUnsavedChanges.delete(targetSlot)
   lastTab = targetSlot
+  setActiveSlot(targetSlot)
   editor.setState(sessions[targetSlot])
   editor.focus()
+  refreshOutputForActiveDocument()
   renderTabs()
   refreshDocumentsMenu()
 }
@@ -1027,6 +1100,13 @@ function deleteDocument(docId) {
     return
   }
 
+  const previousSlot = Number.parseInt(lastTab, 10)
+  const previousDocId = storageState.index.slotDocIds[previousSlot - 1]
+  sessions[lastTab] = editor.state
+  tabUnsavedChanges.set(lastTab, hasPendingChanges)
+  if (previousDocId !== docId && editor.state.doc.toString().trim()) {
+    saveSession(lastTab)
+  }
   localStorage.removeItem(getDocStorageKey(docId))
   delete storageState.docsById[docId]
   storageController.removeDocument(docId)
@@ -1038,6 +1118,7 @@ function deleteDocument(docId) {
     sessionNames[slot] = setSessionName(slot)
     if (storageState.index.slotDocIds[slot - 1] === null) {
       sessions[slot] = null
+      tabUnsavedChanges.delete(slot)
     }
   })
 
@@ -1058,6 +1139,9 @@ function deleteDocument(docId) {
     editor.setState(sessions[lastTab])
   }
 
+  if (Number.parseInt(lastTab, 10) !== previousSlot || previousDocId === docId) {
+    refreshOutputForActiveDocument()
+  }
   persistStorageIndex()
   renderTabs()
   refreshDocumentsMenu()

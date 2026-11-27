@@ -167,6 +167,7 @@ self.onmessage = async (oEvent) => {
     if (!await ready) return
     const inputs = JSON.parse(oEvent.data);
     const response = {
+        requestId: inputs.requestId,
         outputs: makeDoc(inputs.expr),
         mathState: getMathState(),
         parserState: parser.getAll()

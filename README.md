@@ -45,6 +45,8 @@ npm run build
 
 The interface includes a document manager, an editor and output panel, plus a tab for each open document. Documents are saved automatically; use **Download text** to export the active document as a `.txt` file. The sidebar also includes an example selector, execution settings, and view/theme controls.
 
+When switching documents, the output is cleared. With auto-run enabled, the active document runs automatically; with auto-run disabled, use **Run now** or Cmd/Ctrl+Enter to run it.
+
 In the example selector you can find:
 
 * Numbers
